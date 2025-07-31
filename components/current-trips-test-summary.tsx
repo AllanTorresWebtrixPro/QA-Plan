@@ -1,38 +1,72 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-import { CheckCircle, AlertTriangle, Clock, MapPin, Search, Table, Settings } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import {
+  CheckCircle,
+  AlertTriangle,
+  Clock,
+  MapPin,
+  Search,
+  Table,
+  Settings,
+} from "lucide-react";
 
 interface CurrentTripsTestSummaryProps {
   tests: Array<{
-    id: string
-    title: string
-    category: string
-    priority: "High" | "Medium" | "Low"
-    completed: boolean
-  }>
-  currentUser: {
-    name: string
-  }
+    id: string;
+    title: string;
+    category: string;
+    priority: "High" | "Medium" | "Low";
+    completed: boolean;
+  }>;
+  currentUser?: {
+    name: string;
+  };
 }
 
-export function CurrentTripsTestSummary({ tests, currentUser }: CurrentTripsTestSummaryProps) {
-  const currentTripsTests = tests.filter((test) => test.category === "Current Trips")
-  const completedCurrentTripsTests = currentTripsTests.filter((test) => test.completed)
-  const highPriorityCurrentTripsTests = currentTripsTests.filter((test) => test.priority === "High")
-  const completedHighPriority = highPriorityCurrentTripsTests.filter((test) => test.completed)
+export function CurrentTripsTestSummary({
+  tests,
+  currentUser,
+}: CurrentTripsTestSummaryProps) {
+  // Safety check for currentUser
+  if (!currentUser) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-600">Loading user data...</p>
+      </div>
+    );
+  }
+
+  const currentTripsTests = tests.filter(
+    (test) => test.category === "Current Trips"
+  );
+  const completedCurrentTripsTests = currentTripsTests.filter(
+    (test) => test.completed
+  );
+  const highPriorityCurrentTripsTests = currentTripsTests.filter(
+    (test) => test.priority === "High"
+  );
+  const completedHighPriority = highPriorityCurrentTripsTests.filter(
+    (test) => test.completed
+  );
 
   const currentTripsProgress =
-    currentTripsTests.length > 0 ? (completedCurrentTripsTests.length / currentTripsTests.length) * 100 : 0
+    currentTripsTests.length > 0
+      ? (completedCurrentTripsTests.length / currentTripsTests.length) * 100
+      : 0;
 
   const currentTripsCategories = [
     {
       name: "Dashboard & Display",
-      tests: currentTripsTests.filter((t) => t.id.startsWith("ct-00") && Number.parseInt(t.id.split("-")[1]) <= 4),
+      tests: currentTripsTests.filter(
+        (t) =>
+          t.id.startsWith("ct-00") && Number.parseInt(t.id.split("-")[1]) <= 4
+      ),
       icon: Table,
-      description: "Dashboard display, search, table columns, and row expansion",
+      description:
+        "Dashboard display, search, table columns, and row expansion",
     },
     {
       name: "Trip Actions",
@@ -40,10 +74,11 @@ export function CurrentTripsTestSummary({ tests, currentUser }: CurrentTripsTest
         (t) =>
           t.id.startsWith("ct-00") &&
           Number.parseInt(t.id.split("-")[1]) >= 5 &&
-          Number.parseInt(t.id.split("-")[1]) <= 9,
+          Number.parseInt(t.id.split("-")[1]) <= 9
       ),
       icon: Settings,
-      description: "Trip actions, invoice creation, date formatting, and status badges",
+      description:
+        "Trip actions, invoice creation, date formatting, and status badges",
     },
     {
       name: "Table Functionality",
@@ -51,7 +86,7 @@ export function CurrentTripsTestSummary({ tests, currentUser }: CurrentTripsTest
         (t) =>
           t.id.startsWith("ct-0") &&
           Number.parseInt(t.id.split("-")[1]) >= 10 &&
-          Number.parseInt(t.id.split("-")[1]) <= 15,
+          Number.parseInt(t.id.split("-")[1]) <= 15
       ),
       icon: Search,
       description: "Sorting, pagination, data refresh, and information display",
@@ -62,10 +97,11 @@ export function CurrentTripsTestSummary({ tests, currentUser }: CurrentTripsTest
         (t) =>
           t.id.startsWith("ct-0") &&
           Number.parseInt(t.id.split("-")[1]) >= 16 &&
-          Number.parseInt(t.id.split("-")[1]) <= 20,
+          Number.parseInt(t.id.split("-")[1]) <= 20
       ),
       icon: CheckCircle,
-      description: "Export, bulk actions, mobile responsiveness, and error handling",
+      description:
+        "Export, bulk actions, mobile responsiveness, and error handling",
     },
     {
       name: "Integration",
@@ -73,18 +109,22 @@ export function CurrentTripsTestSummary({ tests, currentUser }: CurrentTripsTest
         (t) =>
           t.id.startsWith("ct-0") &&
           Number.parseInt(t.id.split("-")[1]) >= 21 &&
-          Number.parseInt(t.id.split("-")[1]) <= 25,
+          Number.parseInt(t.id.split("-")[1]) <= 25
       ),
       icon: MapPin,
       description: "Pre-trip, invoice, survey, and client profile integration",
     },
     {
       name: "Advanced Features",
-      tests: currentTripsTests.filter((t) => t.id.startsWith("ct-0") && Number.parseInt(t.id.split("-")[1]) >= 26),
+      tests: currentTripsTests.filter(
+        (t) =>
+          t.id.startsWith("ct-0") && Number.parseInt(t.id.split("-")[1]) >= 26
+      ),
       icon: AlertTriangle,
-      description: "Advanced search, favorites, print, audit trail, and validation",
+      description:
+        "Advanced search, favorites, print, audit trail, and validation",
     },
-  ]
+  ];
 
   return (
     <div className="space-y-6">
@@ -99,7 +139,9 @@ export function CurrentTripsTestSummary({ tests, currentUser }: CurrentTripsTest
         <CardContent>
           <div className="grid md:grid-cols-3 gap-4 mb-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">{completedCurrentTripsTests.length}</div>
+              <div className="text-2xl font-bold text-blue-600">
+                {completedCurrentTripsTests.length}
+              </div>
               <div className="text-sm text-gray-600">Completed</div>
             </div>
             <div className="text-center">
@@ -109,17 +151,21 @@ export function CurrentTripsTestSummary({ tests, currentUser }: CurrentTripsTest
               <div className="text-sm text-gray-600">Remaining</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">{Math.round(currentTripsProgress)}%</div>
+              <div className="text-2xl font-bold text-green-600">
+                {Math.round(currentTripsProgress)}%
+              </div>
               <div className="text-sm text-gray-600">Progress</div>
             </div>
           </div>
           <Progress value={currentTripsProgress} className="h-3" />
           <div className="mt-4 flex items-center justify-between text-sm">
             <span>
-              Current Trips Tests: {completedCurrentTripsTests.length}/{currentTripsTests.length}
+              Current Trips Tests: {completedCurrentTripsTests.length}/
+              {currentTripsTests.length}
             </span>
             <span>
-              High Priority: {completedHighPriority.length}/{highPriorityCurrentTripsTests.length}
+              High Priority: {completedHighPriority.length}/
+              {highPriorityCurrentTripsTests.length}
             </span>
           </div>
         </CardContent>
@@ -128,9 +174,9 @@ export function CurrentTripsTestSummary({ tests, currentUser }: CurrentTripsTest
       {/* Current Trips Test Categories */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
         {currentTripsCategories.map((category) => {
-          const completed = category.tests.filter((t) => t.completed).length
-          const total = category.tests.length
-          const progress = total > 0 ? (completed / total) * 100 : 0
+          const completed = category.tests.filter((t) => t.completed).length;
+          const total = category.tests.length;
+          const progress = total > 0 ? (completed / total) * 100 : 0;
 
           return (
             <Card key={category.name}>
@@ -139,24 +185,35 @@ export function CurrentTripsTestSummary({ tests, currentUser }: CurrentTripsTest
                   <category.icon className="h-4 w-4" />
                   {category.name}
                 </CardTitle>
-                <p className="text-xs text-gray-600 mt-1">{category.description}</p>
+                <p className="text-xs text-gray-600 mt-1">
+                  {category.description}
+                </p>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium">
                     {completed}/{total}
                   </span>
-                  <Badge variant={progress === 100 ? "default" : progress > 0 ? "secondary" : "outline"}>
+                  <Badge
+                    variant={
+                      progress === 100
+                        ? "default"
+                        : progress > 0
+                        ? "secondary"
+                        : "outline"
+                    }
+                  >
                     {Math.round(progress)}%
                   </Badge>
                 </div>
                 <Progress value={progress} className="h-2" />
                 <div className="mt-2 text-xs text-gray-600">
-                  {category.tests.filter((t) => t.priority === "High").length} high priority
+                  {category.tests.filter((t) => t.priority === "High").length}{" "}
+                  high priority
                 </div>
               </CardContent>
             </Card>
-          )
+          );
         })}
       </div>
 
@@ -168,16 +225,29 @@ export function CurrentTripsTestSummary({ tests, currentUser }: CurrentTripsTest
         <CardContent>
           <div className="space-y-3">
             {["High", "Medium", "Low"].map((priority) => {
-              const priorityTests = currentTripsTests.filter((t) => t.priority === priority)
-              const priorityCompleted = priorityTests.filter((t) => t.completed).length
-              const priorityProgress = priorityTests.length > 0 ? (priorityCompleted / priorityTests.length) * 100 : 0
+              const priorityTests = currentTripsTests.filter(
+                (t) => t.priority === priority
+              );
+              const priorityCompleted = priorityTests.filter(
+                (t) => t.completed
+              ).length;
+              const priorityProgress =
+                priorityTests.length > 0
+                  ? (priorityCompleted / priorityTests.length) * 100
+                  : 0;
 
               return (
                 <div key={priority}>
                   <div className="flex justify-between text-sm mb-1">
                     <span className="flex items-center gap-2">
                       <Badge
-                        variant={priority === "High" ? "destructive" : priority === "Medium" ? "default" : "secondary"}
+                        variant={
+                          priority === "High"
+                            ? "destructive"
+                            : priority === "Medium"
+                            ? "default"
+                            : "secondary"
+                        }
                       >
                         {priority}
                       </Badge>
@@ -189,7 +259,7 @@ export function CurrentTripsTestSummary({ tests, currentUser }: CurrentTripsTest
                   </div>
                   <Progress value={priorityProgress} className="h-2" />
                 </div>
-              )
+              );
             })}
           </div>
         </CardContent>
@@ -214,7 +284,9 @@ export function CurrentTripsTestSummary({ tests, currentUser }: CurrentTripsTest
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold text-sm mb-2">Integration & Advanced</h4>
+              <h4 className="font-semibold text-sm mb-2">
+                Integration & Advanced
+              </h4>
               <ul className="text-sm space-y-1 text-gray-600">
                 <li>• Pre-trip integration</li>
                 <li>• Invoice creation workflow</li>
@@ -281,5 +353,5 @@ export function CurrentTripsTestSummary({ tests, currentUser }: CurrentTripsTest
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

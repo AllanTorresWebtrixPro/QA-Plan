@@ -6,7 +6,9 @@
     "build": "next build",
     "dev": "next dev",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start",
+    "test:db": "node scripts/test-database-connection.js",
+    "check:schema": "node scripts/check-database-schema.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
@@ -38,11 +40,14 @@
     "@radix-ui/react-toggle-group": "latest",
     "@radix-ui/react-tooltip": "latest",
     "@supabase/supabase-js": "latest",
+    "@tanstack/react-query": "^5.83.1",
+    "@tanstack/react-query-devtools": "^5.83.1",
     "autoprefixer": "^10.4.20",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "latest",
     "date-fns": "4.1.0",
+    "dotenv": "^16.6.1",
     "embla-carousel-react": "latest",
     "geist": "latest",
     "input-otp": "latest",

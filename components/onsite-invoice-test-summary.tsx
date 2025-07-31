@@ -1,36 +1,69 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-import { CheckCircle, AlertTriangle, Clock, CreditCard, FileText, Settings, Shield } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import {
+  CheckCircle,
+  AlertTriangle,
+  Clock,
+  CreditCard,
+  FileText,
+  Settings,
+  Shield,
+} from "lucide-react";
 
 interface OnsiteInvoiceTestSummaryProps {
   tests: Array<{
-    id: string
-    title: string
-    category: string
-    priority: "High" | "Medium" | "Low"
-    completed: boolean
-  }>
-  currentUser: {
-    name: string
-  }
+    id: string;
+    title: string;
+    category: string;
+    priority: "High" | "Medium" | "Low";
+    completed: boolean;
+  }>;
+  currentUser?: {
+    name: string;
+  };
 }
 
-export function OnsiteInvoiceTestSummary({ tests, currentUser }: OnsiteInvoiceTestSummaryProps) {
-  const onsiteInvoiceTests = tests.filter((test) => test.category === "On-Site Invoices")
-  const completedOnsiteInvoiceTests = onsiteInvoiceTests.filter((test) => test.completed)
-  const highPriorityOnsiteInvoiceTests = onsiteInvoiceTests.filter((test) => test.priority === "High")
-  const completedHighPriority = highPriorityOnsiteInvoiceTests.filter((test) => test.completed)
+export function OnsiteInvoiceTestSummary({
+  tests,
+  currentUser,
+}: OnsiteInvoiceTestSummaryProps) {
+  // Safety check for currentUser
+  if (!currentUser) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-600">Loading user data...</p>
+      </div>
+    );
+  }
+
+  const onsiteInvoiceTests = tests.filter(
+    (test) => test.category === "On-Site Invoices"
+  );
+  const completedOnsiteInvoiceTests = onsiteInvoiceTests.filter(
+    (test) => test.completed
+  );
+  const highPriorityOnsiteInvoiceTests = onsiteInvoiceTests.filter(
+    (test) => test.priority === "High"
+  );
+  const completedHighPriority = highPriorityOnsiteInvoiceTests.filter(
+    (test) => test.completed
+  );
 
   const onsiteInvoiceProgress =
-    onsiteInvoiceTests.length > 0 ? (completedOnsiteInvoiceTests.length / onsiteInvoiceTests.length) * 100 : 0
+    onsiteInvoiceTests.length > 0
+      ? (completedOnsiteInvoiceTests.length / onsiteInvoiceTests.length) * 100
+      : 0;
 
   const onsiteInvoiceCategories = [
     {
       name: "Dashboard & Display",
-      tests: onsiteInvoiceTests.filter((t) => t.id.startsWith("osi-00") && Number.parseInt(t.id.split("-")[1]) <= 7),
+      tests: onsiteInvoiceTests.filter(
+        (t) =>
+          t.id.startsWith("osi-00") && Number.parseInt(t.id.split("-")[1]) <= 7
+      ),
       icon: FileText,
       description: "Dashboard KPIs, table display, and status badges",
     },
@@ -40,7 +73,7 @@ export function OnsiteInvoiceTestSummary({ tests, currentUser }: OnsiteInvoiceTe
         (t) =>
           t.id.startsWith("osi-0") &&
           Number.parseInt(t.id.split("-")[1]) >= 8 &&
-          Number.parseInt(t.id.split("-")[1]) <= 14,
+          Number.parseInt(t.id.split("-")[1]) <= 14
       ),
       icon: Settings,
       description: "Viewing, editing, and item management",
@@ -51,7 +84,7 @@ export function OnsiteInvoiceTestSummary({ tests, currentUser }: OnsiteInvoiceTe
         (t) =>
           t.id.startsWith("osi-0") &&
           Number.parseInt(t.id.split("-")[1]) >= 15 &&
-          Number.parseInt(t.id.split("-")[1]) <= 20,
+          Number.parseInt(t.id.split("-")[1]) <= 20
       ),
       icon: CreditCard,
       description: "QR codes, payment links, and gateway integration",
@@ -62,7 +95,7 @@ export function OnsiteInvoiceTestSummary({ tests, currentUser }: OnsiteInvoiceTe
         (t) =>
           t.id.startsWith("osi-0") &&
           Number.parseInt(t.id.split("-")[1]) >= 21 &&
-          Number.parseInt(t.id.split("-")[1]) <= 23,
+          Number.parseInt(t.id.split("-")[1]) <= 23
       ),
       icon: CheckCircle,
       description: "Individual invoice pages and deletion workflow",
@@ -73,7 +106,7 @@ export function OnsiteInvoiceTestSummary({ tests, currentUser }: OnsiteInvoiceTe
         (t) =>
           t.id.startsWith("osi-0") &&
           Number.parseInt(t.id.split("-")[1]) >= 24 &&
-          Number.parseInt(t.id.split("-")[1]) <= 26,
+          Number.parseInt(t.id.split("-")[1]) <= 26
       ),
       icon: AlertTriangle,
       description: "Status workflow and data consistency",
@@ -84,18 +117,21 @@ export function OnsiteInvoiceTestSummary({ tests, currentUser }: OnsiteInvoiceTe
         (t) =>
           t.id.startsWith("osi-0") &&
           Number.parseInt(t.id.split("-")[1]) >= 27 &&
-          Number.parseInt(t.id.split("-")[1]) <= 30,
+          Number.parseInt(t.id.split("-")[1]) <= 30
       ),
       icon: Clock,
       description: "Search, bulk operations, email, and print",
     },
     {
       name: "Performance & Security",
-      tests: onsiteInvoiceTests.filter((t) => t.id.startsWith("osi-0") && Number.parseInt(t.id.split("-")[1]) >= 31),
+      tests: onsiteInvoiceTests.filter(
+        (t) =>
+          t.id.startsWith("osi-0") && Number.parseInt(t.id.split("-")[1]) >= 31
+      ),
       icon: Shield,
       description: "Performance testing and security validation",
     },
-  ]
+  ];
 
   return (
     <div className="space-y-6">
@@ -110,7 +146,9 @@ export function OnsiteInvoiceTestSummary({ tests, currentUser }: OnsiteInvoiceTe
         <CardContent>
           <div className="grid md:grid-cols-3 gap-4 mb-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">{completedOnsiteInvoiceTests.length}</div>
+              <div className="text-2xl font-bold text-blue-600">
+                {completedOnsiteInvoiceTests.length}
+              </div>
               <div className="text-sm text-gray-600">Completed</div>
             </div>
             <div className="text-center">
@@ -120,17 +158,21 @@ export function OnsiteInvoiceTestSummary({ tests, currentUser }: OnsiteInvoiceTe
               <div className="text-sm text-gray-600">Remaining</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">{Math.round(onsiteInvoiceProgress)}%</div>
+              <div className="text-2xl font-bold text-green-600">
+                {Math.round(onsiteInvoiceProgress)}%
+              </div>
               <div className="text-sm text-gray-600">Progress</div>
             </div>
           </div>
           <Progress value={onsiteInvoiceProgress} className="h-3" />
           <div className="mt-4 flex items-center justify-between text-sm">
             <span>
-              On-Site Invoice Tests: {completedOnsiteInvoiceTests.length}/{onsiteInvoiceTests.length}
+              On-Site Invoice Tests: {completedOnsiteInvoiceTests.length}/
+              {onsiteInvoiceTests.length}
             </span>
             <span>
-              High Priority: {completedHighPriority.length}/{highPriorityOnsiteInvoiceTests.length}
+              High Priority: {completedHighPriority.length}/
+              {highPriorityOnsiteInvoiceTests.length}
             </span>
           </div>
         </CardContent>
@@ -139,9 +181,9 @@ export function OnsiteInvoiceTestSummary({ tests, currentUser }: OnsiteInvoiceTe
       {/* On-Site Invoice Test Categories */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
         {onsiteInvoiceCategories.map((category) => {
-          const completed = category.tests.filter((t) => t.completed).length
-          const total = category.tests.length
-          const progress = total > 0 ? (completed / total) * 100 : 0
+          const completed = category.tests.filter((t) => t.completed).length;
+          const total = category.tests.length;
+          const progress = total > 0 ? (completed / total) * 100 : 0;
 
           return (
             <Card key={category.name}>
@@ -150,24 +192,35 @@ export function OnsiteInvoiceTestSummary({ tests, currentUser }: OnsiteInvoiceTe
                   <category.icon className="h-4 w-4" />
                   {category.name}
                 </CardTitle>
-                <p className="text-xs text-gray-600 mt-1">{category.description}</p>
+                <p className="text-xs text-gray-600 mt-1">
+                  {category.description}
+                </p>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium">
                     {completed}/{total}
                   </span>
-                  <Badge variant={progress === 100 ? "default" : progress > 0 ? "secondary" : "outline"}>
+                  <Badge
+                    variant={
+                      progress === 100
+                        ? "default"
+                        : progress > 0
+                        ? "secondary"
+                        : "outline"
+                    }
+                  >
                     {Math.round(progress)}%
                   </Badge>
                 </div>
                 <Progress value={progress} className="h-2" />
                 <div className="mt-2 text-xs text-gray-600">
-                  {category.tests.filter((t) => t.priority === "High").length} high priority
+                  {category.tests.filter((t) => t.priority === "High").length}{" "}
+                  high priority
                 </div>
               </CardContent>
             </Card>
-          )
+          );
         })}
       </div>
 
@@ -179,16 +232,29 @@ export function OnsiteInvoiceTestSummary({ tests, currentUser }: OnsiteInvoiceTe
         <CardContent>
           <div className="space-y-3">
             {["High", "Medium", "Low"].map((priority) => {
-              const priorityTests = onsiteInvoiceTests.filter((t) => t.priority === priority)
-              const priorityCompleted = priorityTests.filter((t) => t.completed).length
-              const priorityProgress = priorityTests.length > 0 ? (priorityCompleted / priorityTests.length) * 100 : 0
+              const priorityTests = onsiteInvoiceTests.filter(
+                (t) => t.priority === priority
+              );
+              const priorityCompleted = priorityTests.filter(
+                (t) => t.completed
+              ).length;
+              const priorityProgress =
+                priorityTests.length > 0
+                  ? (priorityCompleted / priorityTests.length) * 100
+                  : 0;
 
               return (
                 <div key={priority}>
                   <div className="flex justify-between text-sm mb-1">
                     <span className="flex items-center gap-2">
                       <Badge
-                        variant={priority === "High" ? "destructive" : priority === "Medium" ? "default" : "secondary"}
+                        variant={
+                          priority === "High"
+                            ? "destructive"
+                            : priority === "Medium"
+                            ? "default"
+                            : "secondary"
+                        }
                       >
                         {priority}
                       </Badge>
@@ -200,7 +266,7 @@ export function OnsiteInvoiceTestSummary({ tests, currentUser }: OnsiteInvoiceTe
                   </div>
                   <Progress value={priorityProgress} className="h-2" />
                 </div>
-              )
+              );
             })}
           </div>
         </CardContent>
@@ -214,7 +280,9 @@ export function OnsiteInvoiceTestSummary({ tests, currentUser }: OnsiteInvoiceTe
         <CardContent>
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <h4 className="font-semibold text-sm mb-2">Critical Functionality</h4>
+              <h4 className="font-semibold text-sm mb-2">
+                Critical Functionality
+              </h4>
               <ul className="text-sm space-y-1 text-gray-600">
                 <li>• Dashboard KPIs and metrics accuracy</li>
                 <li>• Invoice table display and sorting</li>
@@ -237,5 +305,5 @@ export function OnsiteInvoiceTestSummary({ tests, currentUser }: OnsiteInvoiceTe
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
