@@ -64,9 +64,9 @@ export async function saveBasecampTokens(
     return { success: true, token: data };
   } catch (error) {
     console.error("Error in saveBasecampTokens:", error);
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : "Unknown error" 
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
     };
   }
 }
@@ -78,7 +78,7 @@ export async function getActiveBasecampToken(
   userId: string
 ): Promise<{ success: boolean; error?: string; token?: BasecampToken }> {
   try {
-    const { data, error } = await supabase
+    let { data: basecamp_oauth_tokens, error } = await supabase
       .from("basecamp_oauth_tokens")
       .select("*")
       .eq("user_id", userId)
@@ -94,12 +94,12 @@ export async function getActiveBasecampToken(
       return { success: false, error: error.message };
     }
 
-    return { success: true, token: data };
+    return { success: true, token: basecamp_oauth_tokens };
   } catch (error) {
     console.error("Error in getActiveBasecampToken:", error);
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : "Unknown error" 
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
     };
   }
 }
@@ -109,10 +109,10 @@ export async function getActiveBasecampToken(
  */
 export function isTokenExpired(token: BasecampToken): boolean {
   if (!token.expires_at) return false;
-  
+
   const expiresAt = new Date(token.expires_at);
   const now = new Date();
-  
+
   return expiresAt <= now;
 }
 
@@ -124,31 +124,34 @@ export async function refreshBasecampToken(
   refreshToken: string
 ): Promise<{ success: boolean; error?: string; token?: BasecampToken }> {
   try {
-    const response = await fetch('https://launchpad.37signals.com/authorization/token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        type: 'web_server',
-        client_id: process.env.BASECAMP_CLIENT_ID,
-        client_secret: process.env.BASECAMP_CLIENT_SECRET,
-        redirect_uri: process.env.BASECAMP_REDIRECT_URI,
-        refresh_token: refreshToken
-      }),
-    });
+    const response = await fetch(
+      "https://launchpad.37signals.com/authorization/token",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          type: "web_server",
+          client_id: process.env.BASECAMP_CLIENT_ID,
+          client_secret: process.env.BASECAMP_CLIENT_SECRET,
+          redirect_uri: process.env.BASECAMP_REDIRECT_URI,
+          refresh_token: refreshToken,
+        }),
+      }
+    );
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Token refresh failed:', errorText);
-      return { 
-        success: false, 
-        error: `Token refresh failed: ${response.status} ${response.statusText}` 
+      console.error("Token refresh failed:", errorText);
+      return {
+        success: false,
+        error: `Token refresh failed: ${response.status} ${response.statusText}`,
       };
     }
 
     const tokenData = await response.json();
-    
+
     // Save the new tokens
     return await saveBasecampTokens(userId, {
       access_token: tokenData.access_token,
@@ -157,12 +160,11 @@ export async function refreshBasecampToken(
       token_type: tokenData.token_type,
       scope: tokenData.scope,
     });
-
   } catch (error) {
     console.error("Error in refreshBasecampToken:", error);
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : "Unknown error" 
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
     };
   }
 }
@@ -188,9 +190,9 @@ export async function deactivateBasecampTokens(
     return { success: true };
   } catch (error) {
     console.error("Error in deactivateBasecampTokens:", error);
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : "Unknown error" 
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
     };
   }
 }
@@ -203,7 +205,7 @@ export async function getValidBasecampToken(
 ): Promise<{ success: boolean; error?: string; accessToken?: string }> {
   try {
     const tokenResult = await getActiveBasecampToken(userId);
-    
+
     if (!tokenResult.success || !tokenResult.token) {
       return { success: false, error: "No active token found" };
     }
@@ -213,12 +215,18 @@ export async function getValidBasecampToken(
     // Check if token is expired
     if (isTokenExpired(token)) {
       if (!token.refresh_token) {
-        return { success: false, error: "Token expired and no refresh token available" };
+        return {
+          success: false,
+          error: "Token expired and no refresh token available",
+        };
       }
 
       // Try to refresh the token
-      const refreshResult = await refreshBasecampToken(userId, token.refresh_token);
-      
+      const refreshResult = await refreshBasecampToken(
+        userId,
+        token.refresh_token
+      );
+
       if (!refreshResult.success) {
         return { success: false, error: refreshResult.error };
       }
@@ -229,9 +237,9 @@ export async function getValidBasecampToken(
     return { success: true, accessToken: token.access_token };
   } catch (error) {
     console.error("Error in getValidBasecampToken:", error);
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : "Unknown error" 
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
     };
   }
-} 
+}
