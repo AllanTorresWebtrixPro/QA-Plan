@@ -11,7 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Search, Filter, Download, CheckCircle, AlertCircle, Clock, Users, User, FileDown, Loader2 } from "lucide-react"
-import { useQAStorage } from "./hooks/use-qa-storage"
+import { useQAStorage } from "../hooks/use-qa-storage"
 
 export default function QAPlan() {
   const {
