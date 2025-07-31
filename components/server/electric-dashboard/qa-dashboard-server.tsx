@@ -7,7 +7,7 @@
 
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { QADashboardClient } from "@/components/client/electric-dashboard/qa-dashboard-client";
+import { QADashboardClient } from "@/components/client/dashboard/qa-dashboard-client";
 
 /**
  * Loading skeleton for the dashboard
