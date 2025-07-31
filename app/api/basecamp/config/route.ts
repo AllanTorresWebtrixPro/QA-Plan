@@ -7,7 +7,7 @@ import { createBasecampService } from "@/services/basecamp-service";
  */
 export async function GET() {
   try {
-    const basecampService = createBasecampService('default_user');
+    const basecampService = createBasecampService("default_user");
 
     // Test connection
     const connectionTest = await basecampService.testConnection();
@@ -97,7 +97,7 @@ export async function GET() {
  */
 export async function POST() {
   try {
-    const basecampService = createBasecampService('default_user');
+    const basecampService = createBasecampService("default_user");
 
     // Create a test card
     const testResponse = await basecampService.createTestCard(

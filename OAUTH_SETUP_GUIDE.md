@@ -43,6 +43,7 @@ npm run migrate:basecamp
 This will show you the SQL commands to run. Execute them in your database:
 
 **For Supabase:**
+
 1. Go to your Supabase dashboard
 2. Navigate to SQL Editor
 3. Paste and execute the SQL commands
