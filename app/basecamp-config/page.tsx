@@ -18,6 +18,7 @@ import { CheckCircle, XCircle, AlertCircle, ExternalLink } from "lucide-react";
 
 interface BasecampConfig {
   accountId: string;
+  accessToken: string;
   projectId: string;
   cardTableId: string;
   defaultColumnId: string;
@@ -45,6 +46,7 @@ interface BasecampColumn {
 export default function BasecampConfigPage() {
   const [config, setConfig] = useState<BasecampConfig>({
     accountId: "",
+    accessToken: "",
     projectId: "",
     cardTableId: "",
     defaultColumnId: "",
@@ -56,10 +58,34 @@ export default function BasecampConfigPage() {
   const [projects, setProjects] = useState<BasecampProject[]>([]);
   const [cardTables, setCardTables] = useState<BasecampCardTable[]>([]);
   const [columns, setColumns] = useState<BasecampColumn[]>([]);
+  const [oauthStatus, setOauthStatus] = useState<string>('');
 
   useEffect(() => {
     // Load current configuration from environment (if available)
     loadCurrentConfig();
+    
+    // Check for OAuth callback parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const success = urlParams.get('success');
+    const error = urlParams.get('error');
+    const accessToken = urlParams.get('access_token');
+    
+    if (success === 'true' && accessToken) {
+      setOauthStatus('success');
+      // Auto-fill the access token
+      setConfig(prev => ({ ...prev, accessToken }));
+      // Clear URL parameters
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (error) {
+      setOauthStatus('error');
+      setTestResult({
+        success: false,
+        error: 'OAuth Error',
+        details: error
+      });
+      // Clear URL parameters
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
   }, []);
 
   const loadCurrentConfig = async () => {
@@ -70,6 +96,7 @@ export default function BasecampConfigPage() {
       if (data.success && data.currentConfig) {
         setConfig({
           accountId: data.currentConfig.accountId || "",
+          accessToken: data.currentConfig.accessToken || "",
           projectId: data.currentConfig.projectId || "",
           cardTableId: data.currentConfig.cardTableId || "",
           defaultColumnId: data.currentConfig.defaultColumnId || "",
@@ -137,11 +164,16 @@ export default function BasecampConfigPage() {
   const generateEnvFile = () => {
     const envContent = `# Basecamp API Configuration
 BASECAMP_ACCOUNT_ID=${config.accountId}
-BASECAMP_ACCESS_TOKEN=your_access_token_here
+BASECAMP_ACCESS_TOKEN=${config.accessToken || 'your_access_token_here'}
 BASECAMP_USER_AGENT=${config.userAgent}
 BASECAMP_PROJECT_ID=${config.projectId}
 BASECAMP_CARD_TABLE_ID=${config.cardTableId}
 BASECAMP_DEFAULT_COLUMN_ID=${config.defaultColumnId}
+
+# OAuth Configuration (for getting access tokens)
+BASECAMP_CLIENT_ID=your_client_id_here
+BASECAMP_CLIENT_SECRET=your_client_secret_here
+BASECAMP_REDIRECT_URI=${window.location.origin}/api/auth/basecamp/callback
 `;
 
     const blob = new Blob([envContent], { type: "text/plain" });
@@ -204,6 +236,31 @@ BASECAMP_DEFAULT_COLUMN_ID=${config.defaultColumnId}
                 }
                 placeholder="Your app name (yourname@example.com)"
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="accessToken">Access Token</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="accessToken"
+                  type="password"
+                  value={config.accessToken}
+                  onChange={(e) =>
+                    setConfig({ ...config, accessToken: e.target.value })
+                  }
+                  placeholder="Your Basecamp access token"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => window.open('/api/auth/basecamp/authorize', '_blank')}
+                >
+                  Get Token
+                </Button>
+              </div>
+              {oauthStatus === 'success' && (
+                <p className="text-sm text-green-600">✅ OAuth authorization successful!</p>
+              )}
             </div>
 
             <div className="space-y-2">
