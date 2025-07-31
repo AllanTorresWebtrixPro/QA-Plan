@@ -36,6 +36,7 @@ import {
   LogOut,
   Bell,
   Search,
+  ExternalLink,
 } from "lucide-react";
 
 interface MainNavigationProps {
@@ -107,6 +108,12 @@ export function MainNavigation({
       href: "/settings",
       icon: Settings,
       description: "Application settings and configuration",
+    },
+    {
+      title: "Basecamp Config",
+      href: "/basecamp-config",
+      icon: ExternalLink,
+      description: "Configure Basecamp integration",
     },
   ];
 

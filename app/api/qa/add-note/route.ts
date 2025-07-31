@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { createBasecampService } from "@/services/basecamp-service";
+import { getTestById, getUserById } from "@/services/qa-service";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -8,7 +10,7 @@ const supabase = createClient(
 
 /**
  * POST /api/qa/add-note
- * Add or update test notes for a user
+ * Add or update test notes for a user and create Basecamp card
  */
 export async function POST(request: Request) {
   try {
@@ -31,6 +33,51 @@ export async function POST(request: Request) {
 
     if (checkError && checkError.code !== "PGRST116") {
       return NextResponse.json({ error: checkError.message }, { status: 500 });
+    }
+
+    let basecampCardCreated = false;
+    let basecampError = null;
+
+    // Try to create Basecamp card if environment variables are configured
+    try {
+      const basecampService = createBasecampService(userId);
+
+      // Get additional information for the card
+      const [testInfo, userInfo] = await Promise.all([
+        getTestById(testId),
+        getUserById(userId),
+      ]);
+
+      const testTitle = testInfo?.title || testId;
+      const userName = userInfo?.name || userId;
+
+      // Create Basecamp card
+      const basecampResponse = await basecampService.createTestCard(
+        userId,
+        testId,
+        notes,
+        testTitle
+      );
+
+      if (basecampResponse.success) {
+        basecampCardCreated = true;
+        console.log(
+          "Basecamp card created successfully:",
+          basecampResponse.data
+        );
+      } else {
+        basecampError = basecampResponse.error;
+        console.error(
+          "Failed to create Basecamp card:",
+          basecampResponse.error
+        );
+      }
+    } catch (basecampConfigError) {
+      console.warn(
+        "Basecamp integration not configured or failed:",
+        basecampConfigError
+      );
+      // Continue with the note saving even if Basecamp fails
     }
 
     if (existingProgress) {
@@ -70,7 +117,11 @@ export async function POST(request: Request) {
       }
     }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({
+      success: true,
+      basecampCardCreated,
+      basecampError: basecampError ? basecampError : undefined,
+    });
   } catch (error) {
     console.error("Error adding test note:", error);
     return NextResponse.json(
