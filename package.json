@@ -9,7 +9,8 @@
     "start": "next start",
     "test:db": "node scripts/test-database-connection.js",
     "check:schema": "node scripts/check-database-schema.js",
-    "setup:basecamp": "node scripts/setup-basecamp.js"
+    "setup:basecamp": "node scripts/setup-basecamp.js",
+    "migrate:basecamp": "node scripts/run-basecamp-migration.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

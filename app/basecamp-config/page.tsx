@@ -58,30 +58,30 @@ export default function BasecampConfigPage() {
   const [projects, setProjects] = useState<BasecampProject[]>([]);
   const [cardTables, setCardTables] = useState<BasecampCardTable[]>([]);
   const [columns, setColumns] = useState<BasecampColumn[]>([]);
-  const [oauthStatus, setOauthStatus] = useState<string>('');
+  const [oauthStatus, setOauthStatus] = useState<string>("");
 
   useEffect(() => {
     // Load current configuration from environment (if available)
     loadCurrentConfig();
-    
+
     // Check for OAuth callback parameters
     const urlParams = new URLSearchParams(window.location.search);
-    const success = urlParams.get('success');
-    const error = urlParams.get('error');
-    const accessToken = urlParams.get('access_token');
-    
-    if (success === 'true' && accessToken) {
-      setOauthStatus('success');
+    const success = urlParams.get("success");
+    const error = urlParams.get("error");
+    const accessToken = urlParams.get("access_token");
+
+    if (success === "true" && accessToken) {
+      setOauthStatus("success");
       // Auto-fill the access token
-      setConfig(prev => ({ ...prev, accessToken }));
+      setConfig((prev) => ({ ...prev, accessToken }));
       // Clear URL parameters
       window.history.replaceState({}, document.title, window.location.pathname);
     } else if (error) {
-      setOauthStatus('error');
+      setOauthStatus("error");
       setTestResult({
         success: false,
-        error: 'OAuth Error',
-        details: error
+        error: "OAuth Error",
+        details: error,
       });
       // Clear URL parameters
       window.history.replaceState({}, document.title, window.location.pathname);
@@ -164,7 +164,7 @@ export default function BasecampConfigPage() {
   const generateEnvFile = () => {
     const envContent = `# Basecamp API Configuration
 BASECAMP_ACCOUNT_ID=${config.accountId}
-BASECAMP_ACCESS_TOKEN=${config.accessToken || 'your_access_token_here'}
+BASECAMP_ACCESS_TOKEN=${config.accessToken || "your_access_token_here"}
 BASECAMP_USER_AGENT=${config.userAgent}
 BASECAMP_PROJECT_ID=${config.projectId}
 BASECAMP_CARD_TABLE_ID=${config.cardTableId}
@@ -253,13 +253,17 @@ BASECAMP_REDIRECT_URI=${window.location.origin}/api/auth/basecamp/callback
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => window.open('/api/auth/basecamp/authorize', '_blank')}
+                  onClick={() =>
+                    window.open("/api/auth/basecamp/authorize", "_blank")
+                  }
                 >
                   Get Token
                 </Button>
               </div>
-              {oauthStatus === 'success' && (
-                <p className="text-sm text-green-600">✅ OAuth authorization successful!</p>
+              {oauthStatus === "success" && (
+                <p className="text-sm text-green-600">
+                  ✅ OAuth authorization successful!
+                </p>
               )}
             </div>
 

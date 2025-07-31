@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { saveBasecampTokens } from "@/services/basecamp-token-service";
 
 /**
  * OAuth callback handler for Basecamp integration
@@ -9,6 +10,7 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get('code');
   const error = searchParams.get('error');
   const state = searchParams.get('state');
+  const userId = searchParams.get('state') || 'default_user'; // Use state as userId for now
 
   // Handle OAuth errors
   if (error) {
@@ -49,15 +51,31 @@ export async function GET(request: NextRequest) {
     }
 
     const tokenData = await tokenResponse.json();
-    const { access_token, refresh_token, expires_at } = tokenData;
+    const { access_token, refresh_token, expires_at, token_type, scope } = tokenData;
 
-    // Store the tokens securely (in production, use a database)
-    // For now, we'll redirect with the token for easy setup
+    // Save tokens to database
+    const saveResult = await saveBasecampTokens(userId, {
+      access_token,
+      refresh_token,
+      expires_at,
+      token_type,
+      scope,
+    });
+
+    if (!saveResult.success) {
+      console.error('Failed to save tokens to database:', saveResult.error);
+      return NextResponse.redirect(
+        new URL(`/basecamp-config?error=${encodeURIComponent('Failed to save tokens')}`, request.url)
+      );
+    }
+
+    console.log('Tokens saved successfully for user:', userId);
+
+    // Redirect back to config page with success
     const successUrl = new URL('/basecamp-config', request.url);
     successUrl.searchParams.set('success', 'true');
-    successUrl.searchParams.set('access_token', access_token);
-    successUrl.searchParams.set('refresh_token', refresh_token || '');
-    successUrl.searchParams.set('expires_at', expires_at || '');
+    successUrl.searchParams.set('user_id', userId);
+    successUrl.searchParams.set('token_saved', 'true');
 
     return NextResponse.redirect(successUrl);
 

@@ -5,9 +5,10 @@
  * card creation, project management, and column operations.
  */
 
+import { getValidBasecampToken } from "./basecamp-token-service";
+
 interface BasecampConfig {
   accountId: string;
-  accessToken: string;
   userAgent: string;
   projectId: string;
   cardTableId: string;
@@ -30,18 +31,26 @@ interface BasecampResponse {
 class BasecampService {
   private config: BasecampConfig;
   private baseUrl: string;
+  private userId: string;
 
-  constructor(config: BasecampConfig) {
+  constructor(config: BasecampConfig, userId: string) {
     this.config = config;
+    this.userId = userId;
     this.baseUrl = `https://3.basecampapi.com/${config.accountId}`;
   }
 
   /**
    * Get authentication headers for Basecamp API requests
    */
-  private getAuthHeaders(): Record<string, string> {
+  private async getAuthHeaders(): Promise<Record<string, string>> {
+    const tokenResult = await getValidBasecampToken(this.userId);
+    
+    if (!tokenResult.success || !tokenResult.accessToken) {
+      throw new Error(tokenResult.error || 'Failed to get valid access token');
+    }
+
     return {
-      Authorization: `Bearer ${this.config.accessToken}`,
+      Authorization: `Bearer ${tokenResult.accessToken}`,
       "User-Agent": this.config.userAgent,
       "Content-Type": "application/json",
     };
@@ -56,7 +65,7 @@ class BasecampService {
   ): Promise<BasecampResponse> {
     try {
       const url = `${this.baseUrl}${endpoint}`;
-      const headers = this.getAuthHeaders();
+      const headers = await this.getAuthHeaders();
 
       const response = await fetch(url, {
         ...options,
@@ -242,10 +251,9 @@ class BasecampService {
 /**
  * Create and configure Basecamp service instance
  */
-export function createBasecampService(): BasecampService {
+export function createBasecampService(userId: string = 'default_user'): BasecampService {
   const config: BasecampConfig = {
     accountId: process.env.BASECAMP_ACCOUNT_ID!,
-    accessToken: process.env.BASECAMP_ACCESS_TOKEN!,
     userAgent:
       process.env.BASECAMP_USER_AGENT ||
       "QA-Plan (atorres@jokertechnologies.com)",
@@ -257,7 +265,6 @@ export function createBasecampService(): BasecampService {
   // Validate required environment variables
   const requiredVars = [
     "accountId",
-    "accessToken",
     "projectId",
     "cardTableId",
     "defaultColumnId",
@@ -274,7 +281,7 @@ export function createBasecampService(): BasecampService {
     );
   }
 
-  return new BasecampService(config);
+  return new BasecampService(config, userId);
 }
 
 export { BasecampService };

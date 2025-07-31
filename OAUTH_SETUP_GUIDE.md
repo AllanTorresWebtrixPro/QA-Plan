@@ -5,10 +5,12 @@ This guide will help you set up OAuth 2.0 authentication with Basecamp to get ac
 ## 🔐 Step 1: Register Your Application
 
 1. **Go to Basecamp Launchpad:**
+
    - Visit: https://launchpad.37signals.com/
    - Sign in with your Basecamp account
 
 2. **Create a New Application:**
+
    - Click "New Application"
    - Fill in the application details:
      - **Name:** `AQ-APP`
@@ -17,10 +19,12 @@ This guide will help you set up OAuth 2.0 authentication with Basecamp to get ac
    - Upload an icon (optional)
 
 3. **Select Products:**
+
    - ✅ Check "Basecamp 4" (this is what we need)
    - You can uncheck the others
 
 4. **Set Redirect URI:**
+
    - **For Development:** `http://localhost:3000/api/auth/basecamp/callback`
    - **For Production:** `https://yourdomain.com/api/auth/basecamp/callback`
 
@@ -28,7 +32,22 @@ This guide will help you set up OAuth 2.0 authentication with Basecamp to get ac
    - Click "Register this app"
    - **Save your Client ID and Client Secret!**
 
-## 🔑 Step 2: Configure Environment Variables
+## 🔑 Step 2: Create Database Table
+
+First, create the database table to store OAuth tokens:
+
+```bash
+npm run migrate:basecamp
+```
+
+This will show you the SQL commands to run. Execute them in your database:
+
+**For Supabase:**
+1. Go to your Supabase dashboard
+2. Navigate to SQL Editor
+3. Paste and execute the SQL commands
+
+## 🔑 Step 3: Configure Environment Variables
 
 Create or update your `.env.local` file:
 
@@ -47,16 +66,18 @@ BASECAMP_CLIENT_SECRET=your_client_secret_from_launchpad
 BASECAMP_REDIRECT_URI=http://localhost:3000/api/auth/basecamp/callback
 ```
 
-## 🚀 Step 3: Get Your Access Token
+## 🚀 Step 4: Get Your Access Token
 
 ### Method A: Using the OAuth Flow (Recommended)
 
 1. **Start your development server:**
+
    ```bash
    npm run dev
    ```
 
 2. **Visit the configuration page:**
+
    - Go to: `http://localhost:3000/basecamp-config`
 
 3. **Click "Get Token":**
@@ -67,6 +88,7 @@ BASECAMP_REDIRECT_URI=http://localhost:3000/api/auth/basecamp/callback
 ### Method B: Using the Setup Script
 
 1. **Run the setup script:**
+
    ```bash
    npm run setup:basecamp
    ```
@@ -75,9 +97,10 @@ BASECAMP_REDIRECT_URI=http://localhost:3000/api/auth/basecamp/callback
    - Enter your Client ID and Client Secret from Basecamp Launchpad
    - The script will generate your `.env.local` file
 
-## 🔍 Step 4: Find Your Account ID
+## 🔍 Step 5: Find Your Account ID
 
 1. **Go to your Basecamp account:**
+
    - Visit: https://3.basecamp.com/
    - Log in
 
@@ -85,13 +108,15 @@ BASECAMP_REDIRECT_URI=http://localhost:3000/api/auth/basecamp/callback
    - It will look like: `https://3.basecamp.com/123456789/`
    - The number (`123456789`) is your Account ID
 
-## 🧪 Step 5: Test the Integration
+## 🧪 Step 6: Test the Integration
 
 1. **Test the connection:**
+
    - Go to `/basecamp-config`
    - Click "Test Connection"
 
 2. **Create a test card:**
+
    - Click "Create Test Card"
    - Check your Basecamp project for the new card
 
@@ -104,14 +129,17 @@ BASECAMP_REDIRECT_URI=http://localhost:3000/api/auth/basecamp/callback
 ### Common Issues:
 
 1. **"Invalid redirect URI"**
+
    - Make sure the redirect URI in Basecamp Launchpad matches exactly
    - For development: `http://localhost:3000/api/auth/basecamp/callback`
 
 2. **"Client ID not found"**
+
    - Verify your `BASECAMP_CLIENT_ID` is correct
    - Check that you copied it from Basecamp Launchpad
 
 3. **"Access denied"**
+
    - Make sure you authorized the application in Basecamp
    - Check that your account has the necessary permissions
 
@@ -122,6 +150,7 @@ BASECAMP_REDIRECT_URI=http://localhost:3000/api/auth/basecamp/callback
 ### Debug Mode:
 
 Enable debug logging by adding to your `.env.local`:
+
 ```env
 DEBUG_BASECAMP=true
 ```
@@ -156,4 +185,4 @@ If you encounter issues:
 1. Check the troubleshooting section above
 2. Review Basecamp's OAuth documentation
 3. Check your server logs for detailed error messages
-4. Verify your configuration using the `/basecamp-config` page 
+4. Verify your configuration using the `/basecamp-config` page
