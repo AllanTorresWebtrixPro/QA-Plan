@@ -188,12 +188,25 @@ export function useCurrentUserStats(userId: string) {
  */
 export function useAllUsersStats() {
   const { data: users = [] } = useUsers();
+  const { data: tests = [] } = useTests();
   const { data: userProgress = [] } = useUserProgress();
 
   const allUsersStats = users.map((user) => {
-    const userTests = userProgress.filter((p) => p.user_id === user.id);
-    const completed = userTests.filter((t) => t.completed).length;
-    const total = userTests.length;
+    // Get all tests with progress for this user (same logic as useTestsWithProgress)
+    const userTestsWithProgress = tests.map((test) => {
+      const progress = userProgress.find(
+        (p) => p.user_id === user.id && p.test_id === test.id
+      );
+      return {
+        ...test,
+        completed: progress?.completed || false,
+        completedAt: progress?.completed_at,
+        notes: progress?.notes,
+      };
+    });
+
+    const completed = userTestsWithProgress.filter((t) => t.completed).length;
+    const total = userTestsWithProgress.length; // This should be the same as total tests
 
     return {
       user,
