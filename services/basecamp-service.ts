@@ -44,9 +44,9 @@ class BasecampService {
    */
   private async getAuthHeaders(): Promise<Record<string, string>> {
     const tokenResult = await getValidBasecampToken(this.userId);
-    
+
     if (!tokenResult.success || !tokenResult.accessToken) {
-      throw new Error(tokenResult.error || 'Failed to get valid access token');
+      throw new Error(tokenResult.error || "Failed to get valid access token");
     }
 
     return {
@@ -81,6 +81,15 @@ class BasecampService {
           `Basecamp API Error: ${response.status} ${response.statusText}`,
           errorText
         );
+
+        // Special handling for 401 errors
+        if (response.status === 401) {
+          return {
+            success: false,
+            error: `HTTP 401: Unauthorized - Token may not have access to this account. Please check account permissions.`,
+          };
+        }
+
         return {
           success: false,
           error: `HTTP ${response.status}: ${response.statusText}`,
@@ -246,12 +255,30 @@ class BasecampService {
   async testConnection(): Promise<BasecampResponse> {
     return this.makeRequest("/projects.json");
   }
+
+  /**
+   * Check account authorization and get available accounts
+   */
+  async checkAccountAuthorization(): Promise<BasecampResponse> {
+    return this.makeRequest(
+      "https://launchpad.37signals.com/authorization.xml"
+    );
+  }
+
+  /**
+   * Get account information
+   */
+  async getAccountInfo(): Promise<BasecampResponse> {
+    return this.makeRequest("/authorization.json");
+  }
 }
 
 /**
  * Create and configure Basecamp service instance
  */
-export function createBasecampService(userId: string = 'default_user'): BasecampService {
+export function createBasecampService(
+  userId: string = "default_user"
+): BasecampService {
   const config: BasecampConfig = {
     accountId: process.env.BASECAMP_ACCOUNT_ID!,
     userAgent:
