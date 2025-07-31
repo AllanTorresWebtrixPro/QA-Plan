@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
     const tokenData = await tokenResponse.json();
     const { access_token, refresh_token, expires_at, token_type, scope } =
       tokenData;
-
+    console.log("Token data:", tokenData);
     // Save tokens to database
     const saveResult = await saveBasecampTokens(userId, {
       access_token,
