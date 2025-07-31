@@ -8,7 +8,8 @@
     "lint": "next lint",
     "start": "next start",
     "test:db": "node scripts/test-database-connection.js",
-    "check:schema": "node scripts/check-database-schema.js"
+    "check:schema": "node scripts/check-database-schema.js",
+    "setup:basecamp": "node scripts/setup-basecamp.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

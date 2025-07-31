@@ -6,6 +6,81 @@
  */
 
 import { apiGet, apiPost, apiPut, apiDelete } from "./api-client";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
+/**
+ * Get test information by test ID
+ */
+export async function getTestById(testId: string) {
+  try {
+    const { data, error } = await supabase
+      .from("qa_tests")
+      .select("*")
+      .eq("id", testId)
+      .single();
+
+    if (error) {
+      console.error("Error fetching test:", error);
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error in getTestById:", error);
+    return null;
+  }
+}
+
+/**
+ * Get user information by user ID
+ */
+export async function getUserById(userId: string) {
+  try {
+    const { data, error } = await supabase
+      .from("qa_users")
+      .select("*")
+      .eq("id", userId)
+      .single();
+
+    if (error) {
+      console.error("Error fetching user:", error);
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error in getUserById:", error);
+    return null;
+  }
+}
+
+/**
+ * Get test category information
+ */
+export async function getTestCategoryById(categoryId: string) {
+  try {
+    const { data, error } = await supabase
+      .from("qa_test_categories")
+      .select("*")
+      .eq("id", categoryId)
+      .single();
+
+    if (error) {
+      console.error("Error fetching test category:", error);
+      return null;
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error in getTestCategoryById:", error);
+    return null;
+  }
+}
 
 // Types
 export interface User {
