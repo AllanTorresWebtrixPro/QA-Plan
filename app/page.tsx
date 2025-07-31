@@ -1,5 +1,7 @@
-import QAPlanWithDB from "@/components/qa-plan-with-db"
+"use client"
 
-export default function Home() {
+import QAPlanWithDB from "../qa-plan-with-db"
+
+export default function Page() {
   return <QAPlanWithDB />
 }

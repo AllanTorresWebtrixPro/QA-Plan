@@ -8,10 +8,10 @@ import { Progress } from "@/components/ui/progress"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Textarea } from "@/components/ui/textarea"
 import { Download, CheckCircle, AlertCircle, Clock, Loader2 } from "lucide-react"
-import { useQAStorage } from "../hooks/use-qa-storage"
+import { useQAStorage } from "./hooks/use-qa-storage"
 
 export default function QAPlanWithDatabase() {
-  const { tests, loading, error, toggleTestCompletion, addTestNote, exportUserResults } = useQAStorage()
+  const { tests, loading, error, toggleTestCompletion, addTestNote, exportTests } = useQAStorage()
 
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("All")
@@ -99,18 +99,14 @@ export default function QAPlanWithDatabase() {
                 {completedTests} of {totalTests} tests completed ({Math.round(progressPercentage)}%)
               </p>
             </div>
-            <Button
-              onClick={() => exportUserResults()}
-              variant="outline"
-              className="flex items-center gap-2 bg-transparent"
-            >
+            <Button onClick={exportTests} variant="outline" className="flex items-center gap-2 bg-transparent">
               <Download className="h-4 w-4" />
               Export Results
             </Button>
           </div>
         </div>
 
-        {/* Test Cases */}
+        {/* Rest of the component remains the same, but with enhanced test cards that include notes */}
         <div className="space-y-4">
           {filteredTests.map((test) => (
             <Card key={test.id} className={`transition-all ${test.completed ? "bg-green-50 border-green-200" : ""}`}>
@@ -144,6 +140,7 @@ export default function QAPlanWithDatabase() {
                       {test.completedAt && (
                         <p className="text-xs text-gray-500 mt-1">
                           Completed on {new Date(test.completedAt).toLocaleDateString()}
+                          {test.completedBy && ` by ${test.completedBy}`}
                         </p>
                       )}
                     </div>
