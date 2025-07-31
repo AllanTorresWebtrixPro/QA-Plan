@@ -121,12 +121,12 @@ export function MainNavigation({
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
         {/* Logo and Brand */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 ml-6">
           <Link href="/" className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
               <BarChart3 className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="font-bold text-lg">QA Plan</span>
+            <span className="font-bold text-lg">MTP QA Plan</span>
           </Link>
         </div>
 
@@ -158,106 +158,20 @@ export function MainNavigation({
         {/* Right Side Actions */}
         <div className="flex items-center gap-4">
           {/* Search */}
-          <Button variant="ghost" size="sm" className="hidden md:flex">
+          {/* <Button variant="ghost" size="sm" className="hidden md:flex">
             <Search className="h-4 w-4" />
-          </Button>
+          </Button> */}
 
           {/* Notifications */}
-          <Button variant="ghost" size="sm" className="hidden md:flex">
+          {/* <Button variant="ghost" size="sm" className="hidden md:flex">
             <Bell className="h-4 w-4" />
             <Badge className="ml-1 h-5 w-5 rounded-full p-0 text-xs">3</Badge>
-          </Button>
+          </Button> */}
 
           {/* User Menu */}
-          {displayCurrentUser && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center gap-2">
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback className="text-xs">
-                      {displayCurrentUser.avatar}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="hidden lg:block">
-                    {displayCurrentUser.name}
-                  </span>
-                  <ChevronDown className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <div className="flex items-center gap-2 p-2">
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback className="text-xs">
-                      {displayCurrentUser.avatar}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium">
-                      {displayCurrentUser.name}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {displayCurrentUser.role}
-                    </span>
-                  </div>
-                </div>
-                <div className="border-t" />
-
-                {/* User Switcher */}
-                {displayUsers.length > 1 && (
-                  <>
-                    <div className="p-2">
-                      <span className="text-xs font-medium text-muted-foreground">
-                        Switch User
-                      </span>
-                    </div>
-                    {displayUsers.map((user) => (
-                      <DropdownMenuItem
-                        key={user.id}
-                        onClick={() => onUserSwitch?.(user.id)}
-                        className={cn(
-                          "flex items-center gap-2",
-                          displayCurrentUser.id === user.id && "bg-accent"
-                        )}
-                      >
-                        <Avatar className="h-6 w-6">
-                          <AvatarFallback className="text-xs">
-                            {user.avatar}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="text-sm">{user.name}</span>
-                        {displayCurrentUser.id === user.id && (
-                          <Badge
-                            variant="secondary"
-                            className="ml-auto text-xs"
-                          >
-                            Current
-                          </Badge>
-                        )}
-                      </DropdownMenuItem>
-                    ))}
-                    <div className="border-t" />
-                  </>
-                )}
-
-                <DropdownMenuItem>
-                  <User className="mr-2 h-4 w-4" />
-                  <span>Profile</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
-                </DropdownMenuItem>
-                <div className="border-t" />
-                <DropdownMenuItem>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
 
           {/* Mobile Menu Button */}
-          <Button
+          {/* <Button
             variant="ghost"
             size="sm"
             className="md:hidden"
@@ -268,7 +182,7 @@ export function MainNavigation({
             ) : (
               <Menu className="h-4 w-4" />
             )}
-          </Button>
+          </Button> */}
         </div>
       </div>
 
