@@ -188,11 +188,11 @@ class BasecampService {
     const userName = await getUserById(userId);
 
     console.log("userName", userName);
-    const cardTitle = `${testTitle || testId} (User: ${userName.name})`;
+    const cardTitle = `${testTitle || testId} (User: ${userName?.name})`;
     const cardContent = `
       <strong>Information:</strong><br>
-      <strong>User:</strong> ${userName.name}<br>
-      <strong>Email:</strong> ${userName.email}<br>
+      <strong>User:</strong> ${userName?.name}<br>
+      <strong>Email:</strong> ${userName?.email}<br>
       <strong>ID:</strong> ${testId}<br>
       <strong>Title:</strong> ${testTitle || "N/A"}<br>
       <strong>Notes:</strong><br>
