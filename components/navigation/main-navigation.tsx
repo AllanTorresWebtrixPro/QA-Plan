@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/components/providers/auth-provider";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -60,6 +61,8 @@ export function MainNavigation({
   onUserSwitch,
   users = [],
 }: MainNavigationProps) {
+  const { user, signOut } = useAuth();
+  
   // Default users if none provided
   const defaultUsers = [
     { id: "user-1", name: "John Doe", avatar: "JD", role: "QA Tester" },
@@ -164,21 +167,44 @@ export function MainNavigation({
 
         {/* Right Side Actions */}
         <div className="flex items-center gap-4">
-          {/* Search */}
-          {/* <Button variant="ghost" size="sm" className="hidden md:flex">
-            <Search className="h-4 w-4" />
-          </Button> */}
-
-          {/* Notifications */}
-          {/* <Button variant="ghost" size="sm" className="hidden md:flex">
-            <Bell className="h-4 w-4" />
-            <Badge className="ml-1 h-5 w-5 rounded-full p-0 text-xs">3</Badge>
-          </Button> */}
-
           {/* User Menu */}
+          {user && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="flex items-center gap-2">
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback>
+                      {user.user_metadata?.avatar || user.email?.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="hidden md:block">
+                    {user.user_metadata?.name || user.email}
+                  </span>
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem className="flex items-center gap-2">
+                  <Settings className="h-4 w-4" />
+                  Settings
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="flex items-center gap-2 text-red-600"
+                  onClick={() => signOut()}
+                >
+                  <LogOut className="h-4 w-4" />
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
 
           {/* Mobile Menu Button */}
-          {/* <Button
+          <Button
             variant="ghost"
             size="sm"
             className="md:hidden"
@@ -189,7 +215,7 @@ export function MainNavigation({
             ) : (
               <Menu className="h-4 w-4" />
             )}
-          </Button> */}
+          </Button>
         </div>
       </div>
 

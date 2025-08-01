@@ -41,18 +41,36 @@ export async function getTestById(testId: string) {
  */
 export async function getUserById(userId: string) {
   try {
-    const { data, error } = await supabase
-      .from("qa_users")
+    // First try to get from user_profiles table
+    const { data: profileData, error: profileError } = await supabase
+      .from("user_profiles")
       .select("*")
       .eq("id", userId)
       .single();
 
-    if (error) {
-      console.error("Error fetching user:", error);
-      return null;
+    if (profileError) {
+      // Fallback to auth.users if profile doesn't exist
+      const { data: authData, error: authError } = await supabase.auth.admin.getUserById(userId);
+      
+      if (authError) {
+        console.error("Error fetching user:", authError);
+        return null;
+      }
+
+      return {
+        id: authData.user.id,
+        name: authData.user.user_metadata?.name || authData.user.email,
+        email: authData.user.email,
+        avatar: authData.user.user_metadata?.avatar || authData.user.email?.charAt(0).toUpperCase()
+      };
     }
 
-    return data;
+    return {
+      id: profileData.id,
+      name: profileData.name,
+      email: profileData.email || userId,
+      avatar: profileData.avatar
+    };
   } catch (error) {
     console.error("Error in getUserById:", error);
     return null;

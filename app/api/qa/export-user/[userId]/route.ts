@@ -19,7 +19,7 @@ export async function GET(
 
     // Fetch user data
     const { data: user, error: userError } = await supabase
-      .from("qa_users")
+      .from("user_profiles")
       .select("*")
       .eq("id", userId)
       .single();
