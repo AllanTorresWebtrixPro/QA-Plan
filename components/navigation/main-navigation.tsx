@@ -60,7 +60,7 @@ export function MainNavigation({
   onUserSwitch,
   users = [],
 }: MainNavigationProps) {
-  const { user, signOut } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const router = useRouter();
   
   // Default users if none provided
@@ -172,9 +172,16 @@ export function MainNavigation({
                       {user.user_metadata?.avatar || user.email?.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
-                  <span className="hidden md:block">
-                    {user.user_metadata?.name || user.email}
-                  </span>
+                  <div className="hidden md:block text-left">
+                    <div className="font-medium">
+                      {profile?.name || user.user_metadata?.name || user.email}
+                    </div>
+                    {profile?.role && (
+                      <div className="text-xs text-muted-foreground capitalize">
+                        {profile.role}
+                      </div>
+                    )}
+                  </div>
                   <ChevronDown className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>

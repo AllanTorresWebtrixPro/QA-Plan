@@ -4,6 +4,15 @@ import { createContext, useContext, useEffect, useState } from "react"
 import { createClient } from "@supabase/supabase-js"
 import { User, Session } from "@supabase/supabase-js"
 
+interface UserProfile {
+  id: string
+  name: string
+  avatar?: string
+  role: 'admin' | 'tester'
+  created_at: string
+  updated_at: string
+}
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -12,9 +21,10 @@ const supabase = createClient(
 interface AuthContextType {
   user: User | null
   session: Session | null
+  profile: UserProfile | null
   loading: boolean
   signIn: (email: string, password: string) => Promise<{ error: any }>
-  signUp: (email: string, password: string, name: string) => Promise<{ error: any }>
+  signUp: (email: string, password: string, name: string, role?: 'admin' | 'tester') => Promise<{ error: any }>
   signOut: () => Promise<void>
   resetPassword: (email: string) => Promise<{ error: any }>
 }
@@ -24,7 +34,29 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
+  const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
+
+  // Function to fetch user profile
+  const fetchUserProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('id', userId)
+        .single()
+      
+      if (error) {
+        console.error('Error fetching user profile:', error)
+        return null
+      }
+      
+      return data
+    } catch (error) {
+      console.error('Error in fetchUserProfile:', error)
+      return null
+    }
+  }
 
   useEffect(() => {
     // Get initial session
@@ -32,6 +64,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { data: { session } } = await supabase.auth.getSession()
       setSession(session)
       setUser(session?.user ?? null)
+      
+      if (session?.user) {
+        const userProfile = await fetchUserProfile(session.user.id)
+        setProfile(userProfile)
+      }
+      
       setLoading(false)
     }
 
@@ -42,6 +80,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       async (event, session) => {
         setSession(session)
         setUser(session?.user ?? null)
+        
+        if (session?.user) {
+          const userProfile = await fetchUserProfile(session.user.id)
+          setProfile(userProfile)
+        } else {
+          setProfile(null)
+        }
+        
         setLoading(false)
       }
     )
@@ -57,14 +103,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error }
   }
 
-  const signUp = async (email: string, password: string, name: string) => {
+  const signUp = async (email: string, password: string, name: string, role: 'admin' | 'tester' = 'tester') => {
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
           name,
-          avatar: name.split(' ').map(n => n[0]).join('').toUpperCase()
+          avatar: name.split(' ').map(n => n[0]).join('').toUpperCase(),
+          role
         }
       }
     })
@@ -85,6 +132,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value = {
     user,
     session,
+    profile,
     loading,
     signIn,
     signUp,

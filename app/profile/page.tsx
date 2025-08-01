@@ -9,7 +9,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Separator } from "@/components/ui/separator"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Loader2, Eye, EyeOff, User, Mail, Lock, Save, CheckCircle } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Badge } from "@/components/ui/badge"
+import { Loader2, Eye, EyeOff, User, Mail, Lock, Save, CheckCircle, Crown, TestTube } from "lucide-react"
 import { createClient } from "@supabase/supabase-js"
 
 const supabase = createClient(
@@ -18,7 +20,7 @@ const supabase = createClient(
 )
 
 export default function ProfilePage() {
-  const { user, signOut } = useAuth()
+  const { user, profile, signOut } = useAuth()
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState("")
   const [error, setError] = useState("")
@@ -26,6 +28,7 @@ export default function ProfilePage() {
   // Profile form state
   const [name, setName] = useState("")
   const [avatar, setAvatar] = useState("")
+  const [role, setRole] = useState<'admin' | 'tester'>('tester')
   
   // Initialize form with user data when user is available
   useEffect(() => {
@@ -33,7 +36,12 @@ export default function ProfilePage() {
       setName(user.user_metadata?.name || "")
       setAvatar(user.user_metadata?.avatar || "")
     }
-  }, [user])
+    if (profile) {
+      setName(profile.name || "")
+      setAvatar(profile.avatar || "")
+      setRole(profile.role || 'tester')
+    }
+  }, [user, profile])
   
   // Password form state
   const [currentPassword, setCurrentPassword] = useState("")
@@ -77,7 +85,8 @@ export default function ProfilePage() {
         .from('user_profiles')
         .update({
           name,
-          avatar: avatar || name.split(' ').map(n => n[0]).join('').toUpperCase()
+          avatar: avatar || name.split(' ').map(n => n[0]).join('').toUpperCase(),
+          role
         })
         .eq('id', user.id)
 
@@ -217,6 +226,37 @@ export default function ProfilePage() {
                   />
                   <p className="text-xs text-muted-foreground">
                     Leave empty to use initials from your name
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="role">Role</Label>
+                  <div className="flex items-center gap-2">
+                    <Select value={role} onValueChange={(value: 'admin' | 'tester') => setRole(value)}>
+                      <SelectTrigger className="flex-1">
+                        <SelectValue placeholder="Select your role" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="tester">
+                          <div className="flex items-center gap-2">
+                            <TestTube className="h-4 w-4" />
+                            Tester
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="admin">
+                          <div className="flex items-center gap-2">
+                            <Crown className="h-4 w-4" />
+                            Admin
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Badge variant={role === 'admin' ? 'default' : 'secondary'}>
+                      {role === 'admin' ? '👑 Admin' : '🧪 Tester'}
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Your role determines your permissions in the system
                   </p>
                 </div>
 

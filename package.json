@@ -15,7 +15,9 @@
     "update:passwords": "node scripts/update-user-passwords.js",
     "run:sql-migration": "node scripts/run-sql-migration.js",
     "clean-migration": "node scripts/clean-migration.js",
-    "create:users": "node scripts/create-user.js"
+    "create:users": "node scripts/create-user.js",
+    "add:roles": "node scripts/assign-user-roles.js",
+    "migrate:roles": "node scripts/run-role-migration.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
