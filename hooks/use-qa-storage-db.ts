@@ -22,6 +22,7 @@ export interface UserTestProgress {
   completed: boolean
   completed_at?: string
   notes?: string
+  basecamp_card_ids?: string[]
   created_at: string
   updated_at: string
 }

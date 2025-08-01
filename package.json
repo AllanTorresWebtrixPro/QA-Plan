@@ -15,7 +15,15 @@
     "update:passwords": "node scripts/update-user-passwords.js",
     "run:sql-migration": "node scripts/run-sql-migration.js",
     "clean-migration": "node scripts/clean-migration.js",
-    "create:users": "node scripts/create-user.js"
+    "create:users": "node scripts/create-user.js",
+    "add:roles": "node scripts/assign-user-roles.js",
+    "fix:profiles": "node scripts/fix-user-profiles.js",
+    "migrate:roles": "node scripts/run-role-migration.js",
+    "migrate:test-assignment": "node scripts/run-test-assignment-migration.js",
+    "migrate:all": "node scripts/run-comprehensive-migration.js",
+    "fix:rls": "node scripts/run-rls-fix.js",
+    "disable:rls": "node scripts/disable-rls-temp.js",
+    "create:basecamp-cards": "node scripts/run-basecamp-cards-migration.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

@@ -13,7 +13,7 @@ const supabase = createClient(
 export async function GET() {
   try {
     const { data: testsData, error: testsError } = await supabase
-      .from("qa_tests")
+      .from("test_assignments")
       .select("*")
       .order("category", { ascending: true });
 
@@ -23,7 +23,7 @@ export async function GET() {
 
     // Transform database data to match our interface
     const transformedTests = testsData.map((test) => ({
-      id: test.id,
+      id: test.test_id,
       title: test.title,
       category: test.category,
       priority: test.priority,
@@ -34,6 +34,17 @@ export async function GET() {
       edgeCases: Array.isArray(test.edge_cases)
         ? test.edge_cases
         : JSON.parse(test.edge_cases || "[]"),
+      // Assignment information
+      assignedTo: test.assigned_to,
+      assignedAt: test.assigned_at,
+      assignedBy: test.assigned_by,
+      assignedUserName: test.assigned_user_name,
+      assignedUserAvatar: test.assigned_user_avatar,
+      assignedUserRole: test.assigned_user_role,
+      assignedByName: test.assigned_by_name,
+      completed: test.completed || false,
+      completedAt: test.completed_at,
+      notes: test.notes,
     }));
 
     return NextResponse.json(transformedTests);
