@@ -185,33 +185,51 @@ class BasecampService {
     notes: string,
     testTitle?: string
   ): Promise<BasecampResponse> {
-    const userName = await getUserById(userId);
+    try {
+      console.log(`Creating test card for userId: ${userId}, testId: ${testId}`);
+      
+      const userName = await getUserById(userId);
+      console.log("Retrieved user data:", userName);
 
-    console.log("userName", userName);
-    const cardTitle = `${testTitle || testId} (User: ${userName?.name})`;
-    const cardContent = `
-      <strong>Information:</strong><br>
-      <strong>User:</strong> ${userName?.name}<br>
-      <strong>Email:</strong> ${userName?.email}<br>
-      <strong>ID:</strong> ${testId}<br>
-      <strong>Title:</strong> ${testTitle || "N/A"}<br>
-      <strong>Notes:</strong><br>
-      ${notes.replace(/\n/g, "<br>")}<br>
-      <br>
-      <em>Created at: ${new Date().toISOString()}</em>
-    `;
+      // Ensure we have a valid user name
+      const displayName = userName?.name || `User ${userId.substring(0, 8)}`;
+      const userEmail = userName?.email || `${userId}@example.com`;
+      
+      console.log(`Using display name: ${displayName}, email: ${userEmail}`);
+      
+      const cardTitle = `${testTitle || testId} (User: ${displayName})`;
+      const cardContent = `
+        <strong>Information:</strong><br>
+        <strong>User:</strong> ${displayName}<br>
+        <strong>Email:</strong> ${userEmail}<br>
+        <strong>ID:</strong> ${testId}<br>
+        <strong>Title:</strong> ${testTitle || "N/A"}<br>
+        <strong>Notes:</strong><br>
+        ${notes.replace(/\n/g, "<br>")}<br>
+        <br>
+        <em>Created at: ${new Date().toISOString()}</em>
+      `;
 
-    const cardData: BasecampCard = {
-      title: cardTitle,
-      content: cardContent,
-      notify: false,
-    };
+      const cardData: BasecampCard = {
+        title: cardTitle,
+        content: cardContent,
+        notify: false,
+      };
 
-    return this.createCard(
-      this.config.projectId,
-      this.config.defaultColumnId,
-      cardData
-    );
+      console.log("Card data prepared:", cardData);
+
+      return this.createCard(
+        this.config.projectId,
+        this.config.defaultColumnId,
+        cardData
+      );
+    } catch (error) {
+      console.error("Error in createTestCard:", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error in createTestCard",
+      };
+    }
   }
 
   /**
@@ -261,6 +279,27 @@ class BasecampService {
   }
 
   /**
+   * Get all cards in a card table
+   */
+  async getAllCardsInTable(
+    projectId: string,
+    cardTableId: string
+  ): Promise<BasecampResponse> {
+    return this.makeRequest(
+      `/buckets/${this.projectId}/card_tables/${cardTableId}/cards.json`
+    );
+  }
+
+  /**
+   * Get a specific card by ID
+   */
+  async getCardById(cardId: string): Promise<BasecampResponse> {
+    return this.makeRequest(
+      `/buckets/${this.projectId}/card_tables/cards/${cardId}.json`
+    );
+  }
+
+  /**
    * Test the connection to Basecamp API
    */
   async testConnection(): Promise<BasecampResponse> {
@@ -281,6 +320,20 @@ class BasecampService {
    */
   async getAccountInfo(): Promise<BasecampResponse> {
     return this.makeRequest("/authorization.json");
+  }
+
+  /**
+   * Get project ID
+   */
+  getProjectId(): string {
+    return this.projectId;
+  }
+
+  /**
+   * Get card table ID
+   */
+  getCardTableId(): string {
+    return this.cardTableId;
   }
 }
 

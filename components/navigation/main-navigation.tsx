@@ -192,7 +192,14 @@ export function MainNavigation({
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   className="flex items-center gap-2 text-red-600"
-                  onClick={() => signOut()}
+                  onClick={async () => {
+                    try {
+                      await signOut()
+                      router.push('/auth/login')
+                    } catch (error) {
+                      console.error('Sign out failed:', error)
+                    }
+                  }}
                 >
                   <LogOut className="h-4 w-4" />
                   Sign Out

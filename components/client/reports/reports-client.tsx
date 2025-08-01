@@ -48,7 +48,7 @@ export function ReportsClient() {
 
   // Data fetching
   const allUsersStats = useAllUsersStats();
-  const testsWithProgress = useTestsWithProgress("user-1");
+  const { data: testsWithProgress = [], isLoading } = useTestsWithProgress("user-1");
   const exportAllUsersMutation = useExportAllUsersResults();
 
   // Filter data based on selected period and category
@@ -115,7 +115,7 @@ export function ReportsClient() {
     }
   };
 
-  if (allUsersStats.length === 0 || testsWithProgress.length === 0) {
+  if (isLoading || allUsersStats.length === 0 || testsWithProgress.length === 0) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="flex items-center gap-2">

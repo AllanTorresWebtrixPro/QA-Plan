@@ -20,7 +20,10 @@
     "fix:profiles": "node scripts/fix-user-profiles.js",
     "migrate:roles": "node scripts/run-role-migration.js",
     "migrate:test-assignment": "node scripts/run-test-assignment-migration.js",
-    "migrate:all": "node scripts/run-comprehensive-migration.js"
+    "migrate:all": "node scripts/run-comprehensive-migration.js",
+    "fix:rls": "node scripts/run-rls-fix.js",
+    "disable:rls": "node scripts/disable-rls-temp.js",
+    "create:basecamp-cards": "node scripts/run-basecamp-cards-migration.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

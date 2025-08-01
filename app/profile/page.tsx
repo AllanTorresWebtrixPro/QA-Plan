@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { useAuth } from "@/components/providers/auth-provider"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -21,6 +22,7 @@ const supabase = createClient(
 
 export default function ProfilePage() {
   const { user, profile, signOut } = useAuth()
+  const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState("")
   const [error, setError] = useState("")
@@ -356,7 +358,17 @@ export default function ProfilePage() {
                     Sign out of your current session
                   </p>
                 </div>
-                <Button variant="outline" onClick={() => signOut()}>
+                <Button 
+                  variant="outline" 
+                  onClick={async () => {
+                    try {
+                      await signOut()
+                      router.push('/auth/login')
+                    } catch (error) {
+                      console.error('Sign out failed:', error)
+                    }
+                  }}
+                >
                   Sign Out
                 </Button>
               </div>
