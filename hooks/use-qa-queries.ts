@@ -38,7 +38,7 @@ export function useTests() {
   return useQuery({
     queryKey: queryKeys.tests,
     queryFn: fetchTests,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 2 * 60 * 1000, // 2 minutes
   });
 }
 
@@ -93,7 +93,8 @@ export function useToggleTestCompletion() {
       completed: boolean;
     }) => toggleTestCompletion(userId, testId, completed),
     onSuccess: () => {
-      // Invalidate and refetch user progress
+      // Invalidate and refetch all related queries
+      queryClient.invalidateQueries({ queryKey: queryKeys.tests });
       queryClient.invalidateQueries({ queryKey: queryKeys.userProgress });
       queryClient.invalidateQueries({ queryKey: queryKeys.allUsersStats });
     },
@@ -116,9 +117,15 @@ export function useAddTestNote() {
       testId: string;
       notes: string;
     }) => addTestNote(userId, testId, notes),
-    onSuccess: () => {
-      // Invalidate and refetch user progress
+    onSuccess: (data, variables) => {
+      // Invalidate the specific queries that need to be updated
+      queryClient.invalidateQueries({ queryKey: queryKeys.tests });
       queryClient.invalidateQueries({ queryKey: queryKeys.userProgress });
+      
+      // Invalidate the specific test's Basecamp cards to show the newly created card
+      queryClient.invalidateQueries({ 
+        queryKey: ['test-cards', variables.testId] 
+      });
     },
   });
 }
@@ -145,22 +152,24 @@ export function useExportAllUsersResults() {
  * Hook to get tests with user progress
  */
 export function useTestsWithProgress(userId: string) {
-  const { data: tests = [] } = useTests();
-  const { data: userProgress = [] } = useUserProgress();
+  const { data: tests = [], isLoading, error, refetch } = useTests();
 
-  const testsWithProgress = tests.map((test) => {
-    const progress = userProgress.find(
-      (p) => p.user_id === userId && p.test_id === test.id
-    );
-    return {
-      ...test,
-      completed: progress?.completed || false,
-      completedAt: progress?.completed_at,
-      notes: progress?.notes,
-    };
-  });
+  // The tests now come from the test_assignments view which includes progress data
+  // So we don't need to merge with userProgress anymore
+  const testsWithProgress = tests.map((test) => ({
+    ...test,
+    // The API now returns completed, completedAt, notes directly from the view
+    completed: test.completed || false,
+    completedAt: test.completedAt,
+    notes: test.notes,
+  }));
 
-  return testsWithProgress;
+  return {
+    data: testsWithProgress,
+    isLoading,
+    error,
+    refetch,
+  };
 }
 
 /**
@@ -169,9 +178,9 @@ export function useTestsWithProgress(userId: string) {
 export function useCurrentUserStats(userId: string) {
   const testsWithProgress = useTestsWithProgress(userId);
 
-  const completed = testsWithProgress.filter((t) => t.completed).length;
-  const total = testsWithProgress.length;
-  const highPriorityRemaining = testsWithProgress.filter(
+  const completed = testsWithProgress.data.filter((t) => t.completed).length;
+  const total = testsWithProgress.data.length;
+  const highPriorityRemaining = testsWithProgress.data.filter(
     (t) => t.priority === "High" && !t.completed
   ).length;
 

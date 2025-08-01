@@ -7,7 +7,7 @@
  * This component maintains the existing UI design while using the new architecture.
  */
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,7 +29,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SurveyTestSummary } from "@/components/survey-test-summary";
 import { OnsiteInvoiceTestSummary } from "@/components/onsite-invoice-test-summary";
 import { CurrentTripsTestSummary } from "@/components/current-trips-test-summary";
+import { TestAssignmentButton } from "@/components/test-assignment-button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { BasecampCardsDisplay } from "./basecamp-cards-display";
+import { useAuth } from "@/components/providers/auth-provider";
 
 // Import separated components
 import { DatabaseStatusAlert } from "./dashboard-components/database-status-alert";
@@ -82,21 +85,36 @@ export function QADashboardClient() {
   const [noteInputs, setNoteInputs] = useState<Record<string, string>>({});
   const [currentUser, setCurrentUser] = useState<string>("");
   const [activeTab, setActiveTab] = useState("All");
+  const [pendingNoteTestId, setPendingNoteTestId] = useState<string | null>(null);
+
+  // Ref for BasecampCardsDisplay to refresh cards after adding notes
+  const basecampCardsRefs = useRef<Record<string, { refreshCards: () => void }>>({});
+
+  // Get authenticated user
+  const { user: authUser, profile: authProfile } = useAuth();
 
   // Data fetching hooks
   const { data: users = [], isLoading: usersLoading } = useUsers();
   const { data: dbStatus, isLoading: dbStatusLoading } = useDatabaseStatus();
 
-  // Set current user to first user if not set
+  // Set current user to authenticated user if available, otherwise first user
   if (users.length > 0 && !currentUser) {
-    setCurrentUser(users[0].id);
+    if (authUser && authProfile) {
+      // Use the authenticated user's ID
+      setCurrentUser(authUser.id);
+      console.log(`Using authenticated user: ${authProfile.name} (${authUser.id})`);
+    } else {
+      // Fallback to first user if no authenticated user
+      setCurrentUser(users[0].id);
+      console.log(`No authenticated user, using first user: ${users[0].name} (${users[0].id})`);
+    }
   }
 
   // Get current user object for components
   const currentUserObject =
     users.find((user) => user.id === currentUser) || users[0];
 
-  const testsWithProgress = useTestsWithProgress(currentUser);
+  const { data: testsWithProgress = [], isLoading: testsLoading, refetch } = useTestsWithProgress(currentUser);
   const currentUserStats = useCurrentUserStats(currentUser);
   const allUsersStats = useAllUsersStats();
 
@@ -159,6 +177,12 @@ export function QADashboardClient() {
   const handleAddNote = async (testId: string) => {
     if (!currentUser || !noteInputs[testId]?.trim()) return;
 
+    console.log(`Adding note for test: ${testId}`);
+    console.log(`Current user: ${currentUser}`);
+    console.log(`Note content: ${noteInputs[testId].trim()}`);
+
+    setPendingNoteTestId(testId);
+    
     try {
       await addNoteMutation.mutateAsync({
         userId: currentUser,
@@ -166,9 +190,27 @@ export function QADashboardClient() {
         notes: noteInputs[testId].trim(),
       });
       setNoteInputs((prev) => ({ ...prev, [testId]: "" }));
+      
+      // Refresh the Basecamp cards for this test to show the newly created card
+      const cardsRef = basecampCardsRefs.current[testId];
+      if (cardsRef) {
+        cardsRef.refreshCards();
+      }
     } catch (error) {
       console.error("Error adding note:", error);
+    } finally {
+      setPendingNoteTestId(null);
     }
+  };
+
+  const handleCardAction = async (cardId: string, action: 'accept' | 'reject' | 'delete') => {
+    console.log(`Handling ${action} for card ${cardId}`);
+    // TODO: Implement Basecamp card action logic
+    // This could involve:
+    // 1. Moving the card to a different column in Basecamp
+    // 2. Updating the card status
+    // 3. Adding a comment to the card
+    // 4. Notifying relevant team members
   };
 
   // Handle user switching
@@ -485,6 +527,17 @@ export function QADashboardClient() {
                               {test.expected}
                             </p>
                           </div>
+                          <div className="ml-4">
+                            <TestAssignmentButton
+                              testId={test.id}
+                              assignedTo={test.assignedTo}
+                              assignedUserName={test.assignedUserName}
+                              assignedUserAvatar={test.assignedUserAvatar}
+                              assignedUserRole={test.assignedUserRole}
+                              completed={test.completed}
+                              onAssignmentChange={() => refetch()}
+                            />
+                          </div>
                         </div>
 
                         {/* Test Steps */}
@@ -529,12 +582,12 @@ export function QADashboardClient() {
                             <Button
                               onClick={() => handleAddNote(test.id)}
                               disabled={
-                                addNoteMutation.isPending ||
+                                pendingNoteTestId === test.id ||
                                 !noteInputs[test.id]?.trim()
                               }
                               size="sm"
                             >
-                              {addNoteMutation.isPending ? (
+                              {pendingNoteTestId === test.id ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
                               ) : (
                                 "Add Note"
@@ -547,6 +600,21 @@ export function QADashboardClient() {
                             </div>
                           )}
                         </div>
+
+                        {/* Basecamp Cards */}
+                        <BasecampCardsDisplay 
+                          ref={(ref) => {
+                            if (ref) {
+                              basecampCardsRefs.current[test.id] = ref;
+                            }
+                          }}
+                          testId={test.id}
+                          userId={currentUser}
+                          onCardAction={handleCardAction}
+                          showOnlyIfCards={false}
+                        />
+
+
                       </div>
                     ))}
                   </div>
