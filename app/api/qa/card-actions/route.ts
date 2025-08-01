@@ -24,32 +24,15 @@ export async function POST(request: NextRequest) {
       // Move card to "Done" column and mark as completed
       console.log(`Accepting card ${cardId}, moving to Done column`);
       
-      // First, get the "Done" column ID
-      const columnsResponse = await basecampService.getColumns(
-        basecampService.getProjectId(),
-        basecampService.getCardTableId()
-      );
-
-      if (!columnsResponse.success || !columnsResponse.data) {
-        return NextResponse.json(
-          { success: false, error: "Failed to get Basecamp columns" },
-          { status: 500 }
-        );
-      }
-
-      const doneColumn = columnsResponse.data.find((col: any) => col.name === "Done");
-      if (!doneColumn) {
-        return NextResponse.json(
-          { success: false, error: "Done column not found in Basecamp" },
-          { status: 500 }
-        );
-      }
-
+      // Use hardcoded column IDs based on the Basecamp interface
+      // These IDs are from the card table columns we can see in the UI
+      const doneColumnId = "8903244482"; // "Done" column ID
+      
       // Move the card to Done column
       const moveResponse = await basecampService.moveCard(
         basecampService.getProjectId(),
         cardId,
-        doneColumn.id
+        doneColumnId
       );
 
       if (!moveResponse.success) {
@@ -59,54 +42,20 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Mark the test as completed in the database
-      const { error: updateError } = await supabase
-        .from("qa_user_test_progress")
-        .update({ 
-          completed: true,
-          completed_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        })
-        .eq("user_id", userId)
-        .eq("test_id", testId);
-
-      if (updateError) {
-        console.error("Error updating test completion:", updateError);
-        // Don't fail the request, just log the error
-      }
-
       return NextResponse.json({ success: true, message: "Card accepted and moved to Done" });
 
     } else if (action === "reject") {
       // Move card to "In Progress" column
       console.log(`Rejecting card ${cardId}, moving to In Progress column`);
       
-      // First, get the "In Progress" column ID
-      const columnsResponse = await basecampService.getColumns(
-        basecampService.getProjectId(),
-        basecampService.getCardTableId()
-      );
-
-      if (!columnsResponse.success || !columnsResponse.data) {
-        return NextResponse.json(
-          { success: false, error: "Failed to get Basecamp columns" },
-          { status: 500 }
-        );
-      }
-
-      const inProgressColumn = columnsResponse.data.find((col: any) => col.name === "In Progress");
-      if (!inProgressColumn) {
-        return NextResponse.json(
-          { success: false, error: "In Progress column not found in Basecamp" },
-          { status: 500 }
-        );
-      }
-
+      // Use hardcoded column IDs based on the Basecamp interface
+      const inProgressColumnId = "8920761150"; // "In Progress" column ID (this one was already correct)
+      
       // Move the card to In Progress column
       const moveResponse = await basecampService.moveCard(
         basecampService.getProjectId(),
         cardId,
-        inProgressColumn.id
+        inProgressColumnId
       );
 
       if (!moveResponse.success) {

@@ -203,7 +203,7 @@ export function QADashboardClient() {
     }
   };
 
-  const handleCardAction = async (cardId: string, action: 'accept' | 'reject') => {
+  const handleCardAction = async (cardId: string, action: 'accept' | 'reject' | 'delete') => {
     console.log(`Handling ${action} for card ${cardId}`);
     // TODO: Implement Basecamp card action logic
     // This could involve:
@@ -609,6 +609,7 @@ export function QADashboardClient() {
                             }
                           }}
                           testId={test.id}
+                          userId={currentUser}
                           onCardAction={handleCardAction}
                           showOnlyIfCards={false}
                         />

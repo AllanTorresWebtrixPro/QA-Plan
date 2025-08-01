@@ -18,12 +18,13 @@ export async function GET(
   try {
     const { testId } = await params;
 
-    // Check cache first
+    // Check cache first (temporarily disabled for testing Accept/Reject)
     const cacheKey = `test-cards-${testId}`;
     const cached = cache.get(cacheKey);
-    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-      return NextResponse.json(cached.data);
-    }
+    // Temporarily disable cache to see real-time updates for Accept/Reject
+    // if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+    //   return NextResponse.json(cached.data);
+    // }
 
     // Fetch progress records that have Basecamp card IDs for this test
     const { data: progressRecords, error } = await supabase

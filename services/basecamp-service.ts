@@ -103,7 +103,22 @@ class BasecampService {
         };
       }
 
-      const data = await response.json();
+      // Check if response has content before parsing JSON
+      const responseText = await response.text();
+      let data = null;
+      
+      if (responseText.trim()) {
+        try {
+          data = JSON.parse(responseText);
+        } catch (parseError) {
+          console.error("Error parsing JSON response:", parseError);
+          return {
+            success: false,
+            error: "Invalid JSON response from Basecamp API",
+          };
+        }
+      }
+      
       return { success: true, data };
     } catch (error) {
       console.error("Basecamp API request failed:", error);
@@ -300,6 +315,34 @@ class BasecampService {
   }
 
   /**
+   * Delete/Archive a card
+   */
+  async deleteCard(cardId: string): Promise<BasecampResponse> {
+    console.log(`Attempting to delete/archive card ${cardId} from project ${this.projectId}`);
+    
+    // Try the standard delete endpoint first
+    const response = await this.makeRequest(
+      `/buckets/${this.projectId}/card_tables/cards/${cardId}.json`,
+      {
+        method: "DELETE",
+      }
+    );
+    
+    // If that fails, try the recordings endpoint (Basecamp 3 uses recordings)
+    if (!response.success) {
+      console.log(`Standard delete failed, trying recordings endpoint for card ${cardId}`);
+      return this.makeRequest(
+        `/buckets/${this.projectId}/recordings/${cardId}.json`,
+        {
+          method: "DELETE",
+        }
+      );
+    }
+    
+    return response;
+  }
+
+  /**
    * Test the connection to Basecamp API
    */
   async testConnection(): Promise<BasecampResponse> {
@@ -377,3 +420,4 @@ export function createBasecampService(
 
 export { BasecampService };
 export type { BasecampCard, BasecampResponse, BasecampConfig };
+
