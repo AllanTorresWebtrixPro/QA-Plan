@@ -1,18 +1,65 @@
--- Add test assignment functionality
--- This adds assignment tracking to qa_tests table
+-- Comprehensive migration script for roles and test assignment
+-- This script handles both migrations in the correct order
 
--- Step 1: Add assignment fields to qa_tests table
+-- ========================================
+-- PART 1: ADD USER ROLES
+-- ========================================
+
+-- Step 1: Add role column to user_profiles table
+ALTER TABLE user_profiles 
+ADD COLUMN IF NOT EXISTS role TEXT DEFAULT 'tester' CHECK (role IN ('admin', 'tester'));
+
+-- Step 2: Create an enum type for roles (optional, but good practice)
+DO $$ BEGIN
+    CREATE TYPE user_role AS ENUM ('admin', 'tester');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+-- Step 3: Update existing users to have a default role
+-- Set the first user (or specific users) as admin, others as tester
+UPDATE user_profiles 
+SET role = 'admin' 
+WHERE id IN (
+    SELECT id FROM user_profiles 
+    ORDER BY created_at 
+    LIMIT 1
+);
+
+-- Step 4: Update the handle_new_user function to include role
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.user_profiles (id, name, avatar, role)
+  VALUES (
+    NEW.id,
+    COALESCE(NEW.raw_user_meta_data->>'name', NEW.email),
+    NEW.raw_user_meta_data->>'avatar',
+    COALESCE(NEW.raw_user_meta_data->>'role', 'tester')
+  );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Step 5: Create indexes for role-based queries
+CREATE INDEX IF NOT EXISTS idx_user_profiles_role ON user_profiles(role);
+
+-- ========================================
+-- PART 2: ADD TEST ASSIGNMENT
+-- ========================================
+
+-- Step 6: Add assignment fields to qa_tests table
 ALTER TABLE qa_tests 
 ADD COLUMN IF NOT EXISTS assigned_to UUID REFERENCES auth.users(id) ON DELETE SET NULL,
 ADD COLUMN IF NOT EXISTS assigned_at TIMESTAMP WITH TIME ZONE,
 ADD COLUMN IF NOT EXISTS assigned_by UUID REFERENCES auth.users(id) ON DELETE SET NULL;
 
--- Step 2: Create indexes for assignment queries
+-- Step 7: Create indexes for assignment queries
 CREATE INDEX IF NOT EXISTS idx_qa_tests_assigned_to ON qa_tests(assigned_to);
 CREATE INDEX IF NOT EXISTS idx_qa_tests_assigned_at ON qa_tests(assigned_at);
 CREATE INDEX IF NOT EXISTS idx_qa_tests_unassigned ON qa_tests(assigned_to) WHERE assigned_to IS NULL;
 
--- Step 3: Create a function to assign a test to a user
+-- Step 8: Create a function to assign a test to a user
 CREATE OR REPLACE FUNCTION assign_test_to_user(
   test_id TEXT,
   user_id UUID,
@@ -44,7 +91,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Step 4: Create a function to unassign a test
+-- Step 9: Create a function to unassign a test
 CREATE OR REPLACE FUNCTION unassign_test(
   test_id TEXT,
   user_id UUID
@@ -75,7 +122,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Step 5: Create a function to check if user can modify test progress
+-- Step 10: Create a function to check if user can modify test progress
 CREATE OR REPLACE FUNCTION can_modify_test_progress(
   test_id TEXT,
   user_id UUID
@@ -94,9 +141,27 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Step 6: Update RLS policies for qa_tests to include assignment logic
+-- Step 11: Create a function to get user role
+CREATE OR REPLACE FUNCTION get_user_role(user_id UUID)
+RETURNS TEXT AS $$
+BEGIN
+  RETURN (SELECT role FROM user_profiles WHERE id = user_id);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Policy: Users can view all tests
+-- Step 12: Create a function to check if user is admin
+CREATE OR REPLACE FUNCTION is_admin(user_id UUID)
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN (SELECT role = 'admin' FROM user_profiles WHERE id = user_id);
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- ========================================
+-- PART 3: UPDATE RLS POLICIES
+-- ========================================
+
+-- Step 13: Update RLS policies for qa_tests
 DROP POLICY IF EXISTS "Users can view all tests" ON qa_tests;
 CREATE POLICY "Users can view all tests" ON qa_tests
 FOR SELECT USING (auth.role() = 'authenticated');
@@ -108,14 +173,11 @@ FOR UPDATE USING (
   (assigned_to = auth.uid() OR assigned_to IS NULL)
 );
 
--- Step 7: Update RLS policies for qa_user_test_progress
-
--- Policy: Users can view all test progress (for collaboration)
+-- Step 14: Update RLS policies for qa_user_test_progress
 DROP POLICY IF EXISTS "Users can view all test progress" ON qa_user_test_progress;
 CREATE POLICY "Users can view all test progress" ON qa_user_test_progress
 FOR SELECT USING (auth.role() = 'authenticated');
 
--- Policy: Only assigned users can modify their own progress
 DROP POLICY IF EXISTS "Users can only modify their own progress" ON qa_user_test_progress;
 CREATE POLICY "Only assigned users can modify their own progress" ON qa_user_test_progress
 FOR ALL USING (
@@ -124,13 +186,33 @@ FOR ALL USING (
   can_modify_test_progress(test_id, auth.uid())
 );
 
--- Step 8: Create a view for test assignments with user info
+-- Step 15: Update RLS policies for user_profiles
+DROP POLICY IF EXISTS "Users can view all profiles" ON user_profiles;
+CREATE POLICY "Users can view all profiles" ON user_profiles
+FOR SELECT USING (auth.role() = 'authenticated');
+
+DROP POLICY IF EXISTS "Users can only update their own profile" ON user_profiles;
+CREATE POLICY "Users can only update their own profile" ON user_profiles
+FOR UPDATE USING (auth.uid() = id);
+
+DROP POLICY IF EXISTS "Users can insert their own profile" ON user_profiles;
+CREATE POLICY "Users can insert their own profile" ON user_profiles
+FOR INSERT WITH CHECK (auth.uid() = id);
+
+-- ========================================
+-- PART 4: CREATE VIEWS
+-- ========================================
+
+-- Step 16: Create a view for test assignments with user info
 CREATE OR REPLACE VIEW test_assignments AS
 SELECT 
   t.id as test_id,
   t.title,
   t.category,
   t.priority,
+  t.steps,
+  t.expected,
+  t.edge_cases,
   t.assigned_to,
   t.assigned_at,
   t.assigned_by,
@@ -146,11 +228,18 @@ LEFT JOIN user_profiles up ON t.assigned_to = up.id
 LEFT JOIN user_profiles ab ON t.assigned_by = ab.id
 LEFT JOIN qa_user_test_progress utp ON t.id = utp.test_id AND t.assigned_to = utp.user_id;
 
--- Step 9: Add comments for documentation
+-- ========================================
+-- PART 5: ADD COMMENTS AND DOCUMENTATION
+-- ========================================
+
+-- Step 17: Add comments for documentation
+COMMENT ON COLUMN user_profiles.role IS 'User role: admin or tester';
 COMMENT ON COLUMN qa_tests.assigned_to IS 'User ID of the tester assigned to this test';
 COMMENT ON COLUMN qa_tests.assigned_at IS 'Timestamp when the test was assigned';
 COMMENT ON COLUMN qa_tests.assigned_by IS 'User ID who assigned the test';
 COMMENT ON FUNCTION assign_test_to_user(TEXT, UUID, UUID) IS 'Assign a test to a user (only if unassigned)';
 COMMENT ON FUNCTION unassign_test(TEXT, UUID) IS 'Unassign a test (only by assigned user)';
 COMMENT ON FUNCTION can_modify_test_progress(TEXT, UUID) IS 'Check if user can modify test progress';
+COMMENT ON FUNCTION get_user_role(UUID) IS 'Get the role of a specific user';
+COMMENT ON FUNCTION is_admin(UUID) IS 'Check if a user has admin role';
 COMMENT ON VIEW test_assignments IS 'View showing test assignments with user information'; 
