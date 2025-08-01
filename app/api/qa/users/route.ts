@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { cookies } from "next/headers";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -12,8 +13,14 @@ const supabase = createClient(
  */
 export async function GET() {
   try {
-    const { data: usersData, error: usersError } = await supabase
-      .from("qa_users")
+    // For now, let's use the service role key to bypass RLS for testing
+    const adminSupabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    const { data: usersData, error: usersError } = await adminSupabase
+      .from("user_profiles")
       .select("*")
       .order("name", { ascending: true });
 

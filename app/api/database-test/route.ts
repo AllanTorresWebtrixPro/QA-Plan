@@ -16,7 +16,7 @@ export async function GET() {
     },
     connection: false,
     tables: {
-      qa_users: { exists: false, count: 0 },
+      user_profiles: { exists: false, count: 0 },
       qa_tests: { exists: false, count: 0 },
       qa_user_test_progress: { exists: false, count: 0 },
     },
@@ -27,7 +27,7 @@ export async function GET() {
   try {
     // Test basic connection
     const { data: connectionTest, error: connectionError } = await supabase
-      .from("qa_users")
+      .from("user_profiles")
       .select("count", { count: "exact", head: true });
 
     if (connectionError) {
@@ -37,7 +37,7 @@ export async function GET() {
     }
 
     // Test each table
-    const tables = ["qa_users", "qa_tests", "qa_user_test_progress"] as const;
+    const tables = ["user_profiles", "qa_tests", "qa_user_test_progress"] as const;
 
     for (const table of tables) {
       try {
@@ -64,12 +64,12 @@ export async function GET() {
       }
     }
 
-    // Test sample data fetch
-    try {
-      const { data: users, error: usersError } = await supabase
-        .from("qa_users")
-        .select("*")
-        .limit(5);
+          // Test sample data fetch
+      try {
+        const { data: users, error: usersError } = await supabase
+          .from("user_profiles")
+          .select("*")
+          .limit(5);
 
       if (usersError) {
         results.errors.push(`Sample data fetch failed: ${usersError.message}`);

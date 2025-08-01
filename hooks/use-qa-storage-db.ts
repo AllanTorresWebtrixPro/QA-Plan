@@ -319,7 +319,7 @@ export function useQAStorageDB() {
   // Verify database connection
   const verifyDatabaseConnection = async () => {
     try {
-      const { data, error } = await supabase.from("qa_users").select("count", { count: "exact" })
+      const { data, error } = await supabase.from("user_profiles").select("count", { count: "exact" })
       if (error) throw error
       return { success: true, userCount: data?.[0]?.count || 0 }
     } catch (err) {

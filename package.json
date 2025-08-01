@@ -10,7 +10,12 @@
     "test:db": "node scripts/test-database-connection.js",
     "check:schema": "node scripts/check-database-schema.js",
     "setup:basecamp": "node scripts/setup-basecamp.js",
-    "migrate:basecamp": "node scripts/run-basecamp-migration.js"
+    "migrate:basecamp": "node scripts/run-basecamp-migration.js",
+    "migrate:users": "node scripts/migrate-users-to-auth.js",
+    "update:passwords": "node scripts/update-user-passwords.js",
+    "run:sql-migration": "node scripts/run-sql-migration.js",
+    "clean-migration": "node scripts/clean-migration.js",
+    "create:users": "node scripts/create-user.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
