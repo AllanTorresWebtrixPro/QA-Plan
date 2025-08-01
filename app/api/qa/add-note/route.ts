@@ -40,7 +40,7 @@ export async function POST(request: Request) {
 
     // Try to create Basecamp card if environment variables are configured
     try {
-      const basecampService = createBasecampService(userId);
+      const basecampService = createBasecampService("default_user");
 
       // Get additional information for the card
       const [testInfo, userInfo] = await Promise.all([
@@ -50,7 +50,11 @@ export async function POST(request: Request) {
 
       const testTitle = testInfo?.title || testId;
       const userName = userInfo?.name || userId;
-
+      const cardData = {
+        title: testTitle,
+        content: notes,
+        due_on: new Date().toISOString(),
+      };
       // Create Basecamp card
       const basecampResponse = await basecampService.createTestCard(
         userId,

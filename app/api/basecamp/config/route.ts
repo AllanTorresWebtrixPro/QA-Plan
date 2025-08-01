@@ -101,7 +101,7 @@ export async function POST() {
 
     // Create a test card
     const testResponse = await basecampService.createTestCard(
-      "test-user",
+      "default_user",
       "test-test-id",
       "This is a test note to verify Basecamp integration is working correctly.",
       "Test Integration"

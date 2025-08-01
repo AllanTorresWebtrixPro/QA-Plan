@@ -6,6 +6,7 @@
  */
 
 import { getValidBasecampToken } from "./basecamp-token-service";
+import { getUserById } from "./qa-service";
 
 interface BasecampConfig {
   accountId: string;
@@ -32,11 +33,17 @@ class BasecampService {
   private config: BasecampConfig;
   private baseUrl: string;
   private userId: string;
+  private projectId: string;
+  private cardTableId: string;
+  private defaultColumnId: string;
 
   constructor(config: BasecampConfig, userId: string) {
     this.config = config;
     this.userId = userId;
     this.baseUrl = `https://3.basecampapi.com/${config.accountId}`;
+    this.projectId = config.projectId;
+    this.cardTableId = config.cardTableId;
+    this.defaultColumnId = config.defaultColumnId;
   }
 
   /**
@@ -118,14 +125,14 @@ class BasecampService {
    * Get a specific project
    */
   async getProject(projectId: string): Promise<BasecampResponse> {
-    return this.makeRequest(`/buckets/${projectId}.json`);
+    return this.makeRequest(`/buckets/${this.projectId}.json`);
   }
 
   /**
    * Get card tables in a project
    */
   async getCardTables(projectId: string): Promise<BasecampResponse> {
-    return this.makeRequest(`/buckets/${projectId}/card_tables.json`);
+    return this.makeRequest(`/buckets/${this.projectId}/card_tables.json`);
   }
 
   /**
@@ -136,7 +143,7 @@ class BasecampService {
     cardTableId: string
   ): Promise<BasecampResponse> {
     return this.makeRequest(
-      `/buckets/${projectId}/card_tables/${cardTableId}.json`
+      `/buckets/${this.projectId}/card_tables/${cardTableId}.json`
     );
   }
 
@@ -148,7 +155,7 @@ class BasecampService {
     cardTableId: string
   ): Promise<BasecampResponse> {
     return this.makeRequest(
-      `/buckets/${projectId}/card_tables/${cardTableId}/columns.json`
+      `/buckets/${this.projectId}/card_tables/${cardTableId}/columns.json`
     );
   }
 
@@ -161,7 +168,7 @@ class BasecampService {
     cardData: BasecampCard
   ): Promise<BasecampResponse> {
     return this.makeRequest(
-      `/buckets/${projectId}/card_tables/lists/${columnId}/cards.json`,
+      `/buckets/${this.projectId}/card_tables/lists/${this.defaultColumnId}/cards.json`,
       {
         method: "POST",
         body: JSON.stringify(cardData),
@@ -178,12 +185,16 @@ class BasecampService {
     notes: string,
     testTitle?: string
   ): Promise<BasecampResponse> {
-    const cardTitle = `Test Note: ${testTitle || testId} (User: ${userId})`;
+    const userName = await getUserById(userId);
+
+    console.log("userName", userName);
+    const cardTitle = `${testTitle || testId} (User: ${userName.name})`;
     const cardContent = `
-      <strong>Test Information:</strong><br>
-      <strong>User ID:</strong> ${userId}<br>
-      <strong>Test ID:</strong> ${testId}<br>
-      <strong>Test Title:</strong> ${testTitle || "N/A"}<br>
+      <strong>Information:</strong><br>
+      <strong>User:</strong> ${userName.name}<br>
+      <strong>Email:</strong> ${userName.email}<br>
+      <strong>ID:</strong> ${testId}<br>
+      <strong>Title:</strong> ${testTitle || "N/A"}<br>
       <strong>Notes:</strong><br>
       ${notes.replace(/\n/g, "<br>")}<br>
       <br>
@@ -212,7 +223,7 @@ class BasecampService {
     cardData: Partial<BasecampCard>
   ): Promise<BasecampResponse> {
     return this.makeRequest(
-      `/buckets/${projectId}/card_tables/cards/${cardId}.json`,
+      `/buckets/${this.projectId}/card_tables/cards/${cardId}.json`,
       {
         method: "PUT",
         body: JSON.stringify(cardData),
@@ -229,7 +240,7 @@ class BasecampService {
     columnId: string
   ): Promise<BasecampResponse> {
     return this.makeRequest(
-      `/buckets/${projectId}/card_tables/cards/${cardId}/moves.json`,
+      `/buckets/${this.projectId}/card_tables/cards/${cardId}/moves.json`,
       {
         method: "POST",
         body: JSON.stringify({ column_id: columnId }),
@@ -245,7 +256,7 @@ class BasecampService {
     columnId: string
   ): Promise<BasecampResponse> {
     return this.makeRequest(
-      `/buckets/${projectId}/card_tables/lists/${columnId}/cards.json`
+      `/buckets/${this.projectId}/card_tables/lists/${columnId}/cards.json`
     );
   }
 
@@ -283,7 +294,7 @@ export function createBasecampService(
     accountId: process.env.BASECAMP_ACCOUNT_ID!,
     userAgent:
       process.env.BASECAMP_USER_AGENT ||
-      "QA-Plan (atorres@jokertechnologies.com)",
+      "QA-PLAN (atorres@jokertechnologies.com)",
     projectId: process.env.BASECAMP_PROJECT_ID!,
     cardTableId: process.env.BASECAMP_CARD_TABLE_ID!,
     defaultColumnId: process.env.BASECAMP_DEFAULT_COLUMN_ID!,
