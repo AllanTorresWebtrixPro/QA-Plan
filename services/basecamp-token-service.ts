@@ -82,9 +82,11 @@ export async function getActiveBasecampToken(
       .from("basecamp_oauth_tokens")
       .select("*")
       .eq("user_id", userId)
-      .eq("is_active", true)
+      .order("id", { ascending: false })
+      .limit(1)
       .single();
-
+    console.log("userId Here", userId);
+    console.log("basecamp_oauth_tokens", basecamp_oauth_tokens);
     if (error) {
       if (error.code === "PGRST116") {
         // No token found
