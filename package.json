@@ -17,7 +17,8 @@
     "clean-migration": "node scripts/clean-migration.js",
     "create:users": "node scripts/create-user.js",
     "add:roles": "node scripts/assign-user-roles.js",
-    "migrate:roles": "node scripts/run-role-migration.js"
+    "migrate:roles": "node scripts/run-role-migration.js",
+    "migrate:test-assignment": "node scripts/run-test-assignment-migration.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

@@ -119,6 +119,14 @@ export interface TestItem {
   completed?: boolean;
   completedAt?: string;
   notes?: string;
+  // Assignment information
+  assignedTo?: string;
+  assignedAt?: string;
+  assignedBy?: string;
+  assignedUserName?: string;
+  assignedUserAvatar?: string;
+  assignedUserRole?: string;
+  assignedByName?: string;
 }
 
 export interface UserTestProgress {
@@ -255,4 +263,70 @@ export async function exportAllUsersResults(): Promise<string> {
     throw new Error(response.error || "Failed to export all users results");
   }
   return response.data.data;
+}
+
+// Test assignment functions
+export async function assignTestToUser(testId: string, userId: string) {
+  try {
+    const response = await fetch('/api/qa/assign-test', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ testId, userId }),
+    });
+
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to assign test');
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error assigning test:', error);
+    throw error;
+  }
+}
+
+export async function unassignTest(testId: string, userId: string) {
+  try {
+    const response = await fetch('/api/qa/assign-test', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ testId, userId }),
+    });
+
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to unassign test');
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error unassigning test:', error);
+    throw error;
+  }
+}
+
+export async function canUserModifyTest(testId: string, userId: string) {
+  try {
+    const { data, error } = await supabase.rpc('can_modify_test_progress', {
+      test_id: testId,
+      user_id: userId
+    });
+
+    if (error) {
+      console.error('Error checking test modification permission:', error);
+      return false;
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error in canUserModifyTest:', error);
+    return false;
+  }
 }

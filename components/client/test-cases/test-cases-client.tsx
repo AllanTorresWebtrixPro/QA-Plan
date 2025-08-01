@@ -41,17 +41,21 @@ import {
   useToggleTestCompletion,
   useAddTestNote,
 } from "@/hooks/use-qa-queries";
+import { TestAssignmentButton } from "@/components/test-assignment-button";
+import { useAuth } from "@/components/providers/auth-provider";
 
 export function TestCasesClient() {
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedPriority, setSelectedPriority] = useState("All");
   const [selectedStatus, setSelectedStatus] = useState("All");
+  const [selectedAssignment, setSelectedAssignment] = useState("All");
   const [noteInputs, setNoteInputs] = useState<Record<string, string>>({});
-  const [currentUser, setCurrentUser] = useState("user-1"); // Default user
+  const [currentUser, setCurrentUser] = useState(user?.id || "");
 
   // Data fetching
-  const { data: testsWithProgress = [], isLoading } =
+  const { data: testsWithProgress = [], isLoading, refetch } =
     useTestsWithProgress(currentUser);
   const toggleTestMutation = useToggleTestCompletion();
   const addNoteMutation = useAddTestNote();
@@ -70,8 +74,13 @@ export function TestCasesClient() {
       selectedStatus === "All" ||
       (selectedStatus === "Completed" && test.completed) ||
       (selectedStatus === "Pending" && !test.completed);
+    const matchesAssignment =
+      selectedAssignment === "All" ||
+      (selectedAssignment === "Assigned to Me" && test.assignedTo === user?.id) ||
+      (selectedAssignment === "Unassigned" && !test.assignedTo) ||
+      (selectedAssignment === "Assigned to Others" && test.assignedTo && test.assignedTo !== user?.id);
 
-    return matchesSearch && matchesCategory && matchesPriority && matchesStatus;
+    return matchesSearch && matchesCategory && matchesPriority && matchesStatus && matchesAssignment;
   });
 
   // Get unique categories and priorities
@@ -81,6 +90,7 @@ export function TestCasesClient() {
   ];
   const priorities = ["All", "High", "Medium", "Low"];
   const statuses = ["All", "Completed", "Pending"];
+  const assignments = ["All", "Assigned to Me", "Unassigned", "Assigned to Others"];
 
   // Statistics
   const totalTests = testsWithProgress.length;
@@ -280,6 +290,19 @@ export function TestCasesClient() {
               </SelectContent>
             </Select>
 
+            <Select value={selectedAssignment} onValueChange={setSelectedAssignment}>
+              <SelectTrigger>
+                <SelectValue placeholder="Assignment" />
+              </SelectTrigger>
+              <SelectContent>
+                {assignments.map((assignment) => (
+                  <SelectItem key={assignment} value={assignment}>
+                    {assignment}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
             <Button variant="outline" className="flex items-center gap-2">
               <Download className="h-4 w-4" />
               Export
@@ -399,6 +422,19 @@ export function TestCasesClient() {
               <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
                 {test.expected}
               </p>
+
+              {/* Assignment Section */}
+              <div className="mb-4">
+                <TestAssignmentButton
+                  testId={test.id}
+                  assignedTo={test.assignedTo}
+                  assignedUserName={test.assignedUserName}
+                  assignedUserAvatar={test.assignedUserAvatar}
+                  assignedUserRole={test.assignedUserRole}
+                  completed={test.completed}
+                  onAssignmentChange={refetch}
+                />
+              </div>
 
               <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <span>ID: {test.id}</span>
