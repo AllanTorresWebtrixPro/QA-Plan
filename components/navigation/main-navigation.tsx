@@ -27,7 +27,6 @@ import {
   BarChart3,
   FileText,
   Users,
-  Settings,
   Database,
   Home,
   ChevronDown,
@@ -107,12 +106,7 @@ export function MainNavigation({
       icon: Database,
       description: "Database connection and management",
     },
-    {
-      title: "Settings",
-      href: "/settings",
-      icon: Settings,
-      description: "Application settings and configuration",
-    },
+
     {
       title: "Basecamp Config",
       href: "/basecamp-config",
@@ -188,10 +182,6 @@ export function MainNavigation({
                 <DropdownMenuItem className="flex items-center gap-2" onClick={() => router.push('/profile')}>
                   <User className="h-4 w-4" />
                   Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem className="flex items-center gap-2">
-                  <Settings className="h-4 w-4" />
-                  Settings
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   className="flex items-center gap-2 text-red-600"
