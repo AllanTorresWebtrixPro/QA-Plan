@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/components/providers/auth-provider";
@@ -62,6 +62,7 @@ export function MainNavigation({
   users = [],
 }: MainNavigationProps) {
   const { user, signOut } = useAuth();
+  const router = useRouter();
   
   // Default users if none provided
   const defaultUsers = [
@@ -184,11 +185,9 @@ export function MainNavigation({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuItem className="flex items-center gap-2" asChild>
-                  <Link href="/profile">
-                    <User className="h-4 w-4" />
-                    Profile
-                  </Link>
+                <DropdownMenuItem className="flex items-center gap-2" onClick={() => router.push('/profile')}>
+                  <User className="h-4 w-4" />
+                  Profile
                 </DropdownMenuItem>
                 <DropdownMenuItem className="flex items-center gap-2">
                   <Settings className="h-4 w-4" />
