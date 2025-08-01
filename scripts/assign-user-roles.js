@@ -41,26 +41,39 @@ async function assignUserRoles() {
       const profile = profiles[i];
       const role = i === 0 ? 'admin' : 'tester';
       
-      updates.push({
-        id: profile.id,
-        role: role
-      });
+      // Only update if the profile has a valid name
+      if (profile.name) {
+        updates.push({
+          id: profile.id,
+          role: role
+        });
+      } else {
+        console.log(`   ⚠️  Skipping profile ${profile.id} (missing name)`);
+      }
     }
 
-    // Update all profiles with their roles
-    const { data: updatedProfiles, error: updateError } = await supabase
-      .from('user_profiles')
-      .upsert(updates, { onConflict: 'id' })
-      .select('id, name, role');
+    // Update each profile individually to avoid upsert issues
+    const updatedProfiles = [];
+    
+    for (const update of updates) {
+      try {
+        const { data, error } = await supabase
+          .from('user_profiles')
+          .update({ role: update.role })
+          .eq('id', update.id)
+          .select('id, name, role')
+          .single();
 
-    if (updateError) {
-      throw updateError;
+        if (error) {
+          console.log(`   ❌ Failed to update ${update.id}: ${error.message}`);
+        } else {
+          updatedProfiles.push(data);
+          console.log(`   ✅ ${data.name} (${data.id.slice(0, 8)}...) → ${data.role.toUpperCase()}`);
+        }
+      } catch (error) {
+        console.log(`   ❌ Error updating ${update.id}: ${error.message}`);
+      }
     }
-
-    console.log('✅ Successfully assigned roles:');
-    updatedProfiles.forEach(profile => {
-      console.log(`   👤 ${profile.name} (${profile.id.slice(0, 8)}...) → ${profile.role.toUpperCase()}`);
-    });
 
     // Summary
     const adminCount = updatedProfiles.filter(p => p.role === 'admin').length;
