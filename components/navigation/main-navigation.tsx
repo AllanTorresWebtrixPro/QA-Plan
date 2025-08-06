@@ -37,6 +37,7 @@ import {
   Bell,
   Search,
   ExternalLink,
+  Loader2,
 } from "lucide-react";
 
 interface MainNavigationProps {
@@ -46,6 +47,7 @@ interface MainNavigationProps {
 export function MainNavigation({}: MainNavigationProps) {
   const { user, profile, signOut } = useAuth();
   const router = useRouter();
+  const [isSigningOut, setIsSigningOut] = useState(false);
   
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -173,17 +175,30 @@ export function MainNavigation({}: MainNavigationProps) {
                 <div className="relative flex cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-red-50 focus:bg-red-50 focus:text-red-600">
                   <button
                     className="flex items-center gap-2 text-red-600 w-full text-left"
+                    disabled={isSigningOut}
                     onClick={async () => {
+                      if (isSigningOut) return;
+                      
                       try {
+                        setIsSigningOut(true);
+                        console.log('Sign out button clicked');
                         await signOut()
-                        router.push('/auth/login')
+                        // The signOut function now handles the redirect
                       } catch (error) {
                         console.error('Sign out failed:', error)
+                        // Show user-friendly error message
+                        alert('Sign out failed. Please try refreshing the page and signing out again.');
+                      } finally {
+                        setIsSigningOut(false);
                       }
                     }}
                   >
-                    <LogOut className="h-4 w-4" />
-                    Sign Out
+                    {isSigningOut ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <LogOut className="h-4 w-4" />
+                    )}
+                    {isSigningOut ? 'Signing Out...' : 'Sign Out'}
                   </button>
                 </div>
               </DropdownMenuContent>

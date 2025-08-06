@@ -61,16 +61,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Get initial session
     const getInitialSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      setSession(session)
-      setUser(session?.user ?? null)
-      
-      if (session?.user) {
-        const userProfile = await fetchUserProfile(session.user.id)
-        setProfile(userProfile)
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        setSession(session)
+        setUser(session?.user ?? null)
+        
+        if (session?.user) {
+          const userProfile = await fetchUserProfile(session.user.id)
+          setProfile(userProfile)
+        }
+        
+        setLoading(false)
+      } catch (error) {
+        console.error('Error getting initial session:', error)
+        setLoading(false)
       }
-      
-      setLoading(false)
     }
 
     getInitialSession()
@@ -78,6 +83,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state change:', event, session?.user?.email)
+        
         setSession(session)
         setUser(session?.user ?? null)
         
@@ -120,17 +127,58 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
-      const { error } = await supabase.auth.signOut()
-      if (error) {
-        console.error('Sign out error:', error)
-        throw error
-      }
-      // Clear local state
+      console.log('Starting sign out process...');
+      
+      // Clear local state first to provide immediate feedback
       setUser(null)
       setSession(null)
       setProfile(null)
+      
+      // Clear any cached data
+      if (typeof window !== 'undefined') {
+        // Clear localStorage
+        localStorage.clear();
+        
+        // Clear sessionStorage
+        sessionStorage.clear();
+        
+        // Clear any cookies (if using js-cookie or similar)
+        document.cookie.split(";").forEach(function(c) { 
+          document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+        });
+      }
+      
+      // Call Supabase sign out
+      const { error } = await supabase.auth.signOut()
+      if (error) {
+        console.error('Supabase sign out error:', error)
+        throw error
+      }
+      
+      console.log('Sign out successful');
+      
+      // Force a page reload to clear any remaining state
+      if (typeof window !== 'undefined') {
+        // Small delay to ensure state is cleared
+        setTimeout(() => {
+          window.location.href = '/auth/login';
+        }, 100);
+      }
+      
     } catch (error) {
       console.error('Sign out failed:', error)
+      
+      // Even if Supabase sign out fails, clear local state and redirect
+      setUser(null)
+      setSession(null)
+      setProfile(null)
+      
+      if (typeof window !== 'undefined') {
+        localStorage.clear();
+        sessionStorage.clear();
+        window.location.href = '/auth/login';
+      }
+      
       throw error
     }
   }
