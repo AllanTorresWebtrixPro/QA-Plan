@@ -186,24 +186,31 @@ export function MainNavigation({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuItem className="flex items-center gap-2" onClick={() => router.push('/profile')}>
-                  <User className="h-4 w-4" />
-                  Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  className="flex items-center gap-2 text-red-600"
-                  onClick={async () => {
-                    try {
-                      await signOut()
-                      router.push('/auth/login')
-                    } catch (error) {
-                      console.error('Sign out failed:', error)
-                    }
-                  }}
-                >
-                  <LogOut className="h-4 w-4" />
-                  Sign Out
-                </DropdownMenuItem>
+                <div className="relative flex cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent focus:bg-accent focus:text-accent-foreground">
+                  <button
+                    className="flex items-center gap-2 w-full text-left"
+                    onClick={() => router.push('/profile')}
+                  >
+                    <User className="h-4 w-4" />
+                    Profile
+                  </button>
+                </div>
+                <div className="relative flex cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-red-50 focus:bg-red-50 focus:text-red-600">
+                  <button
+                    className="flex items-center gap-2 text-red-600 w-full text-left"
+                    onClick={async () => {
+                      try {
+                        await signOut()
+                        router.push('/auth/login')
+                      } catch (error) {
+                        console.error('Sign out failed:', error)
+                      }
+                    }}
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Sign Out
+                  </button>
+                </div>
               </DropdownMenuContent>
             </DropdownMenu>
           )}
