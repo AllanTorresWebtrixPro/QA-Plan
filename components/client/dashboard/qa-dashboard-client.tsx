@@ -83,7 +83,6 @@ export function QADashboardClient() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedPriority, setSelectedPriority] = useState("All");
   const [noteInputs, setNoteInputs] = useState<Record<string, string>>({});
-  const [currentUser, setCurrentUser] = useState<string>("");
   const [activeTab, setActiveTab] = useState("All");
   const [pendingNoteTestId, setPendingNoteTestId] = useState<string | null>(null);
 
@@ -97,22 +96,18 @@ export function QADashboardClient() {
   const { data: users = [], isLoading: usersLoading } = useUsers();
   const { data: dbStatus, isLoading: dbStatusLoading } = useDatabaseStatus();
 
-  // Set current user to authenticated user if available, otherwise first user
-  if (users.length > 0 && !currentUser) {
-    if (authUser && authProfile) {
-      // Use the authenticated user's ID
-      setCurrentUser(authUser.id);
-      console.log(`Using authenticated user: ${authProfile.name} (${authUser.id})`);
-    } else {
-      // Fallback to first user if no authenticated user
-      setCurrentUser(users[0].id);
-      console.log(`No authenticated user, using first user: ${users[0].name} (${users[0].id})`);
-    }
-  }
+  // Use authenticated user ID for all operations
+  const currentUser = authUser?.id || "";
 
   // Get current user object for components
-  const currentUserObject =
-    users.find((user) => user.id === currentUser) || users[0];
+  const currentUserObject = authProfile || users.find((user) => user.id === currentUser) || users[0];
+
+  // Create a proper user object for components that expect the User interface
+  const displayUser = currentUserObject ? {
+    id: currentUserObject.id,
+    name: currentUserObject.name,
+    avatar: currentUserObject.avatar || currentUserObject.name?.charAt(0)?.toUpperCase() || "U"
+  } : undefined;
 
   const { data: testsWithProgress = [], isLoading: testsLoading, refetch } = useTestsWithProgress(currentUser);
   const currentUserStats = useCurrentUserStats(currentUser);
@@ -213,11 +208,6 @@ export function QADashboardClient() {
     // 4. Notifying relevant team members
   };
 
-  // Handle user switching
-  const switchUser = (userId: string) => {
-    setCurrentUser(userId);
-  };
-
   // Handle exports
   const handleExportUser = async () => {
     if (!currentUser) return;
@@ -300,15 +290,11 @@ export function QADashboardClient() {
         <DatabaseStatusAlert dbStatus={dbStatus} />
 
         {/* Header Section */}
-        <HeaderSection
-          users={users}
-          currentUser={currentUser}
-          onUserSwitch={switchUser}
-        />
+        <HeaderSection />
 
         {/* Progress Section */}
         <ProgressSection
-          currentUserObject={currentUserObject}
+          currentUserObject={displayUser}
           currentUserStats={currentUserStats}
         />
 
@@ -633,7 +619,7 @@ export function QADashboardClient() {
             <TestCategoriesSection
               activeTab={activeTab}
               filteredTests={filteredTests}
-              currentUserObject={currentUserObject}
+              currentUserObject={displayUser}
             />
           </div>
         )}

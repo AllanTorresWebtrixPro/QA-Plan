@@ -40,38 +40,13 @@ import {
 } from "lucide-react";
 
 interface MainNavigationProps {
-  currentUser?: {
-    id: string;
-    name: string;
-    avatar: string;
-    role: string;
-  };
-  onUserSwitch?: (userId: string) => void;
-  users?: Array<{
-    id: string;
-    name: string;
-    avatar: string;
-    role: string;
-  }>;
+  // Removed user switching functionality
 }
 
-export function MainNavigation({
-  currentUser,
-  onUserSwitch,
-  users = [],
-}: MainNavigationProps) {
+export function MainNavigation({}: MainNavigationProps) {
   const { user, profile, signOut } = useAuth();
   const router = useRouter();
   
-  // Default users if none provided
-  const defaultUsers = [
-    { id: "user-1", name: "John Doe", avatar: "JD", role: "QA Tester" },
-    { id: "user-2", name: "Jane Smith", avatar: "JS", role: "QA Lead" },
-    { id: "user-3", name: "Bob Johnson", avatar: "BJ", role: "QA Manager" },
-  ];
-
-  const displayUsers = users.length > 0 ? users : defaultUsers;
-  const displayCurrentUser = currentUser || displayUsers[0];
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
