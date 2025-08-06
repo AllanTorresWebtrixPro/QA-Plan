@@ -38,6 +38,7 @@ import {
 } from "lucide-react";
 import {
   useAllUsersStats,
+  useAllAuthUsersStats,
   useTestsWithProgress,
   useExportAllUsersResults,
 } from "@/hooks/use-qa-queries";
@@ -48,6 +49,7 @@ export function ReportsClient() {
 
   // Data fetching
   const allUsersStats = useAllUsersStats();
+  const allAuthUsersStats = useAllAuthUsersStats();
   const { data: testsWithProgress = [], isLoading } = useTestsWithProgress("user-1");
   const exportAllUsersMutation = useExportAllUsersResults();
 
@@ -95,7 +97,7 @@ export function ReportsClient() {
   }, {} as Record<string, { total: number; completed: number }>);
 
   // User performance ranking
-  const userRanking = [...allUsersStats]
+  const userRanking = [...allAuthUsersStats]
     .sort((a, b) => b.percentage - a.percentage)
     .slice(0, 5);
 
@@ -115,7 +117,7 @@ export function ReportsClient() {
     }
   };
 
-  if (isLoading || allUsersStats.length === 0 || testsWithProgress.length === 0) {
+  if (isLoading || allAuthUsersStats.length === 0 || testsWithProgress.length === 0) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="flex items-center gap-2">

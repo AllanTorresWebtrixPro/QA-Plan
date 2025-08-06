@@ -178,6 +178,7 @@ export interface User {
   name: string;
   email: string;
   avatar: string;
+  role?: string;
 }
 
 export interface TestItem {
@@ -251,6 +252,17 @@ export async function fetchUsers(): Promise<User[]> {
   const response = await apiGet<User[]>("/qa/users");
   if (!response.success || !response.data) {
     throw new Error(response.error || "Failed to fetch users");
+  }
+  return response.data;
+}
+
+/**
+ * Fetch all authenticated users from Supabase Auth
+ */
+export async function fetchAuthUsers(): Promise<User[]> {
+  const response = await apiGet<User[]>("/qa/auth-users");
+  if (!response.success || !response.data) {
+    throw new Error(response.error || "Failed to fetch auth users");
   }
   return response.data;
 }

@@ -46,9 +46,11 @@ import { SidebarSection } from "./dashboard-components/sidebar-section";
 // Custom hooks for data fetching
 import {
   useUsers,
+  useAuthUsers,
   useTestsWithProgress,
   useCurrentUserStats,
   useAllUsersStats,
+  useAllAuthUsersStats,
   useDatabaseStatus,
   useToggleTestCompletion,
   useAddTestNote,
@@ -95,6 +97,7 @@ export function QADashboardClient() {
 
   // Data fetching hooks
   const { data: users = [], isLoading: usersLoading } = useUsers();
+  const { data: authUsers = [], isLoading: authUsersLoading } = useAuthUsers();
   const { data: dbStatus, isLoading: dbStatusLoading } = useDatabaseStatus();
 
   // Use authenticated user ID for all operations
@@ -115,6 +118,7 @@ export function QADashboardClient() {
   const { data: testsWithProgress = [], isLoading: testsLoading, refetch } = useTestsWithProgress(currentUser);
   const currentUserStats = useCurrentUserStats(currentUser);
   const allUsersStats = useAllUsersStats();
+  const allAuthUsersStats = useAllAuthUsersStats();
 
   // Mutation hooks
   const toggleTestMutation = useToggleTestCompletion();
@@ -286,11 +290,11 @@ export function QADashboardClient() {
         <DatabaseStatusAlert dbStatus={dbStatus} />
 
         {/* Header Section */}
-        <HeaderSection
-          users={users}
-          selectedUserFilter={selectedUserFilter}
-          onUserFilterChange={handleUserFilterChange}
-        />
+                    <HeaderSection
+              users={authUsers}
+              selectedUserFilter={selectedUserFilter}
+              onUserFilterChange={handleUserFilterChange}
+            />
 
         {/* Progress Section */}
         <ProgressSection
@@ -356,7 +360,7 @@ export function QADashboardClient() {
         {activeTab === "Team" && (
           <div className="mb-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {allUsersStats.map((userStats) => (
+              {allAuthUsersStats.map((userStats) => (
                 <Card key={userStats.user.id}>
                   <CardContent className="pt-6">
                     <div className="flex items-center gap-3 mb-4">
@@ -611,7 +615,7 @@ export function QADashboardClient() {
             {/* Enhanced Sidebar */}
             <SidebarSection
               currentUserStats={currentUserStats}
-              allUsersStats={allUsersStats}
+              allUsersStats={allAuthUsersStats}
               allTests={testsWithProgress}
             />
 

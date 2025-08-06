@@ -9,6 +9,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   fetchTests,
   fetchUsers,
+  fetchAuthUsers,
   fetchUserProgress,
   toggleTestCompletion,
   addTestNote,
@@ -25,6 +26,7 @@ import {
 export const queryKeys = {
   tests: ["qa", "tests"] as const,
   users: ["qa", "users"] as const,
+  authUsers: ["qa", "auth-users"] as const,
   userProgress: ["qa", "user-progress"] as const,
   databaseStatus: ["qa", "database-status"] as const,
   userStats: (userId: string) => ["qa", "user-stats", userId] as const,
@@ -49,6 +51,17 @@ export function useUsers() {
   return useQuery({
     queryKey: queryKeys.users,
     queryFn: fetchUsers,
+    staleTime: 10 * 60 * 1000, // 10 minutes
+  });
+}
+
+/**
+ * Hook to fetch all authenticated users from Supabase Auth
+ */
+export function useAuthUsers() {
+  return useQuery({
+    queryKey: queryKeys.authUsers,
+    queryFn: fetchAuthUsers,
     staleTime: 10 * 60 * 1000, // 10 minutes
   });
 }
@@ -226,4 +239,40 @@ export function useAllUsersStats() {
   });
 
   return allUsersStats;
+}
+
+/**
+ * Hook to get all authenticated users statistics using Supabase Auth data
+ */
+export function useAllAuthUsersStats() {
+  const { data: authUsers = [] } = useAuthUsers();
+  const { data: tests = [] } = useTests();
+  const { data: userProgress = [] } = useUserProgress();
+
+  const allAuthUsersStats = authUsers.map((user) => {
+    // Get all tests with progress for this user (same logic as useTestsWithProgress)
+    const userTestsWithProgress = tests.map((test) => {
+      const progress = userProgress.find(
+        (p) => p.user_id === user.id && p.test_id === test.id
+      );
+      return {
+        ...test,
+        completed: progress?.completed || false,
+        completedAt: progress?.completed_at,
+        notes: progress?.notes,
+      };
+    });
+
+    const completed = userTestsWithProgress.filter((t) => t.completed).length;
+    const total = userTestsWithProgress.length; // This should be the same as total tests
+
+    return {
+      user,
+      completed,
+      total,
+      percentage: total > 0 ? (completed / total) * 100 : 0,
+    };
+  });
+
+  return allAuthUsersStats;
 }

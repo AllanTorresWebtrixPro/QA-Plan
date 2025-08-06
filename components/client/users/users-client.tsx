@@ -47,7 +47,9 @@ import {
 } from "lucide-react";
 import {
   useUsers,
+  useAuthUsers,
   useAllUsersStats,
+  useAllAuthUsersStats,
   useExportUserResults,
   useExportAllUsersResults,
 } from "@/hooks/use-qa-queries";
@@ -59,18 +61,20 @@ export function UsersClient() {
 
   // Data fetching
   const { data: users = [], isLoading: usersLoading } = useUsers();
-  const { data: allUsersStats = [], isLoading: statsLoading } =
-    useAllUsersStats();
+  const { data: authUsers = [], isLoading: authUsersLoading } = useAuthUsers();
+  const allUsersStats = useAllUsersStats();
+  const allAuthUsersStats = useAllAuthUsersStats();
+  const statsLoading = usersLoading || authUsersLoading;
   const exportUserMutation = useExportUserResults();
   const exportAllUsersMutation = useExportAllUsersResults();
 
   // Filter users
-  const filteredUsers = users.filter((user) => {
+  const filteredUsers = authUsers.filter((user) => {
     const matchesSearch = user.name
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
-    const matchesRole = selectedRole === "All" || user.role === selectedRole;
-    const userStats = allUsersStats.find((stats) => stats.user.id === user.id);
+    const matchesRole = selectedRole === "All" || (user.role || 'tester') === selectedRole;
+    const userStats = allAuthUsersStats.find((stats) => stats.user.id === user.id);
     const matchesStatus =
       selectedStatus === "All" ||
       (selectedStatus === "High Performer" &&
@@ -87,21 +91,21 @@ export function UsersClient() {
   });
 
   // Get unique roles
-  const roles = ["All", ...Array.from(new Set(users.map((u) => u.role)))];
+  const roles = ["All", ...Array.from(new Set(authUsers.map((u) => u.role || 'tester')))];
   const statuses = ["All", "High Performer", "Active", "Needs Attention"];
 
   // Overall statistics
-  const totalUsers = users.length;
-  const activeUsers = allUsersStats.filter(
+  const totalUsers = authUsers.length;
+  const activeUsers = allAuthUsersStats.filter(
     (stats) => stats.percentage > 0
   ).length;
-  const highPerformers = allUsersStats.filter(
+  const highPerformers = allAuthUsersStats.filter(
     (stats) => stats.percentage >= 80
   ).length;
   const averageProgress =
-    allUsersStats.length > 0
-      ? allUsersStats.reduce((sum, stats) => sum + stats.percentage, 0) /
-        allUsersStats.length
+    allAuthUsersStats.length > 0
+      ? allAuthUsersStats.reduce((sum, stats) => sum + stats.percentage, 0) /
+        allAuthUsersStats.length
       : 0;
 
   // Handle exports
