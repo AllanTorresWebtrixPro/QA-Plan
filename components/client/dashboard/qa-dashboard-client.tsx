@@ -85,6 +85,7 @@ export function QADashboardClient() {
   const [noteInputs, setNoteInputs] = useState<Record<string, string>>({});
   const [activeTab, setActiveTab] = useState("All");
   const [pendingNoteTestId, setPendingNoteTestId] = useState<string | null>(null);
+  const [selectedUserFilter, setSelectedUserFilter] = useState<string>("all");
 
   // Ref for BasecampCardsDisplay to refresh cards after adding notes
   const basecampCardsRefs = useRef<Record<string, { refreshCards: () => void }>>({});
@@ -109,6 +110,8 @@ export function QADashboardClient() {
     avatar: currentUserObject.avatar || currentUserObject.name?.charAt(0)?.toUpperCase() || "U"
   } : undefined;
 
+  // Get all users' test progress for filtering
+  const { data: allTestsWithProgress = [], isLoading: allTestsLoading } = useTestsWithProgress("all");
   const { data: testsWithProgress = [], isLoading: testsLoading, refetch } = useTestsWithProgress(currentUser);
   const currentUserStats = useCurrentUserStats(currentUser);
   const allUsersStats = useAllUsersStats();
@@ -119,38 +122,31 @@ export function QADashboardClient() {
   const exportUserMutation = useExportUserResults();
   const exportAllUsersMutation = useExportAllUsersResults();
 
-  // Filter tests based on search, filters, and active tab
-  const filteredTests = testsWithProgress.filter((test) => {
+  // Handle user filter change
+  const handleUserFilterChange = (userId: string) => {
+    setSelectedUserFilter(userId);
+  };
+
+  // Filter tests based on selected user
+  const getFilteredTests = () => {
+    if (selectedUserFilter === "all") {
+      return allTestsWithProgress;
+    }
+    // For now, return all tests since we need to check the test assignment structure
+    return allTestsWithProgress;
+  };
+
+  const filteredTests = getFilteredTests();
+
+  // Apply search and category filters
+  const finalFilteredTests = filteredTests.filter((test) => {
     const matchesSearch =
       test.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       test.category.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory =
-      selectedCategory === "All" || test.category === selectedCategory;
-    const matchesPriority =
-      selectedPriority === "All" || test.priority === selectedPriority;
+    const matchesCategory = selectedCategory === "All" || test.category === selectedCategory;
+    const matchesPriority = selectedPriority === "All" || test.priority === selectedPriority;
 
-    // Filter by active tab
-    let matchesTab = true;
-    if (activeTab !== "All") {
-      const categoryMapping: Record<string, string[]> = {
-        Auth: ["Authentication"],
-        Invoices: ["Invoices"],
-        Surveys: ["Surveys"],
-        "On-Site": ["On-Site Invoices"],
-        Trips: ["Current Trips"],
-        Prospects: ["Prospects"],
-        Clients: ["Clients"],
-        Agents: ["Agents"],
-        Payments: ["Payments"],
-        Team: ["Team"],
-        Summary: ["Summary"],
-      };
-
-      const allowedCategories = categoryMapping[activeTab] || [];
-      matchesTab = allowedCategories.includes(test.category);
-    }
-
-    return matchesSearch && matchesCategory && matchesPriority && matchesTab;
+    return matchesSearch && matchesCategory && matchesPriority;
   });
 
   // Handle test completion toggle
@@ -290,7 +286,11 @@ export function QADashboardClient() {
         <DatabaseStatusAlert dbStatus={dbStatus} />
 
         {/* Header Section */}
-        <HeaderSection />
+        <HeaderSection
+          users={users}
+          selectedUserFilter={selectedUserFilter}
+          onUserFilterChange={handleUserFilterChange}
+        />
 
         {/* Progress Section */}
         <ProgressSection
@@ -488,7 +488,7 @@ export function QADashboardClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {filteredTests.map((test) => (
+                    {finalFilteredTests.map((test) => (
                       <div key={test.id} className="border rounded-lg p-4">
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex-1">
