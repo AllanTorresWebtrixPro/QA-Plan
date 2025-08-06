@@ -22,8 +22,9 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [message, setMessage] = useState("")
+  const [isForgotPassword, setIsForgotPassword] = useState(false)
 
-  const { signIn, signUp } = useAuth()
+  const { signIn, signUp, resetPassword } = useAuth()
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -33,7 +34,14 @@ export default function LoginPage() {
     setMessage("")
 
     try {
-      if (isSignUp) {
+      if (isForgotPassword) {
+        const { error } = await resetPassword(email)
+        if (error) {
+          setError(error.message)
+        } else {
+          setMessage("Check your email for a password reset link!")
+        }
+      } else if (isSignUp) {
         const { error } = await signUp(email, password, name, role)
         if (error) {
           setError(error.message)
@@ -67,10 +75,14 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs value={isSignUp ? "signup" : "signin"} onValueChange={(value) => setIsSignUp(value === "signup")}>
-            <TabsList className="grid w-full grid-cols-2">
+          <Tabs value={isSignUp ? "signup" : isForgotPassword ? "forgot" : "signin"} onValueChange={(value) => {
+            setIsSignUp(value === "signup")
+            setIsForgotPassword(value === "forgot")
+          }}>
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="signin">Sign In</TabsTrigger>
               <TabsTrigger value="signup">Sign Up</TabsTrigger>
+              <TabsTrigger value="forgot">Forgot Password</TabsTrigger>
             </TabsList>
             
             <TabsContent value="signin">
@@ -185,6 +197,43 @@ export default function LoginPage() {
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Sign Up
                 </Button>
+              </form>
+            </TabsContent>
+
+            <TabsContent value="forgot">
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="forgot-email">Email</Label>
+                  <Input
+                    id="forgot-email"
+                    type="email"
+                    placeholder="Enter your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  Enter your email address and we'll send you a link to reset your password.
+                </div>
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Send Reset Link
+                </Button>
+                
+                <div className="text-center">
+                  <Button
+                    type="button"
+                    variant="link"
+                    onClick={() => {
+                      setIsForgotPassword(false)
+                      setIsSignUp(false)
+                    }}
+                    className="text-sm"
+                  >
+                    Back to Sign In
+                  </Button>
+                </div>
               </form>
             </TabsContent>
           </Tabs>
