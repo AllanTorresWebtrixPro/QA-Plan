@@ -136,8 +136,8 @@ export function QADashboardClient() {
     if (selectedUserFilter === "all") {
       return allTestsWithProgress;
     }
-    // For now, return all tests since we need to check the test assignment structure
-    return allTestsWithProgress;
+    // Filter tests assigned to the selected user
+    return allTestsWithProgress.filter((test) => test.assignedTo === selectedUserFilter);
   };
 
   const filteredTests = getFilteredTests();
@@ -298,8 +298,19 @@ export function QADashboardClient() {
 
         {/* Progress Section */}
         <ProgressSection
-          currentUserObject={displayUser}
-          currentUserStats={currentUserStats}
+          currentUserObject={selectedUserFilter === "all" ? displayUser : authUsers.find(u => u.id === selectedUserFilter) || displayUser}
+          currentUserStats={selectedUserFilter === "all" ? currentUserStats : (() => {
+            const authUserStats = allAuthUsersStats.find(stats => stats.user.id === selectedUserFilter);
+            if (authUserStats) {
+              return {
+                completed: authUserStats.completed,
+                total: authUserStats.total,
+                percentage: authUserStats.percentage,
+                highPriorityRemaining: 0 // We'll calculate this if needed
+              };
+            }
+            return currentUserStats;
+          })()}
         />
 
         {/* Export Buttons */}
