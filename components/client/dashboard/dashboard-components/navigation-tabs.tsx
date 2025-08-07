@@ -97,7 +97,7 @@ export function NavigationTabs({
 
   return (
     <div className="relative bg-gradient-to-r from-background via-background/95 to-background rounded-xl border border-border/50 shadow-lg shadow-black/5">
-      <div className="flex items-center justify-between p-1">
+      <div className="flex items-center justify-between p-2">
         {/* Scrollable tabs container */}
         <div className="main-tabs-scroll flex items-center space-x-0.5 overflow-x-auto overflow-y-hidden flex-1 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-transparent">
           {tabs.map(({ name, icon: Icon, color }) => (
@@ -107,7 +107,7 @@ export function NavigationTabs({
                 size="sm"
                 onClick={() => onTabChange(name)}
                 className={cn(
-                  "relative px-3 py-2 text-xs sm:text-sm font-medium transition-all duration-300 ease-in-out",
+                  "relative px-3 py-3 text-xs sm:text-sm font-medium transition-all duration-300 ease-in-out",
                   "hover:scale-105 hover:shadow-md rounded-lg",
                   "focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-1",
                   "flex items-center gap-1.5 sm:gap-2 min-w-fit",
@@ -145,7 +145,7 @@ export function NavigationTabs({
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+            className="h-10 w-10 p-0 text-muted-foreground hover:text-foreground"
             onClick={() => {
               const container = document.querySelector(".main-tabs-scroll");
               if (container) {
@@ -158,7 +158,7 @@ export function NavigationTabs({
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+            className="h-10 w-10 p-0 text-muted-foreground hover:text-foreground"
             onClick={() => {
               const container = document.querySelector(".main-tabs-scroll");
               if (container) {

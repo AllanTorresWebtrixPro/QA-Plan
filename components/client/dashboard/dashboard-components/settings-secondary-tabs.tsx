@@ -115,7 +115,7 @@ export function SettingsSecondaryTabs({
 
   return (
     <div className="relative bg-gradient-to-r from-muted/50 via-muted/30 to-muted/50 rounded-lg border border-border/30 shadow-sm">
-      <div className="flex items-center justify-between p-1">
+      <div className="flex items-center justify-between p-2">
         {/* Scrollable subsections container */}
         <div className="settings-tabs-scroll flex items-center space-x-0.5 overflow-x-auto overflow-y-hidden flex-1 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-transparent">
           {subsections.map(({ name, icon: Icon, color }) => (
@@ -125,7 +125,7 @@ export function SettingsSecondaryTabs({
                 size="sm"
                 onClick={() => onSubsectionChange(name)}
                 className={cn(
-                  "relative px-2 py-1.5 text-xs font-medium transition-all duration-200 ease-in-out",
+                  "relative px-2 py-2.5 text-xs font-medium transition-all duration-200 ease-in-out",
                   "hover:scale-102 hover:shadow-sm rounded-md",
                   "focus:outline-none focus:ring-1 focus:ring-primary/20",
                   "flex items-center gap-1.5 min-w-fit",
@@ -160,7 +160,7 @@ export function SettingsSecondaryTabs({
           <Button
             variant="ghost"
             size="sm"
-            className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
+            className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
             onClick={() => {
               const container = document.querySelector(".settings-tabs-scroll");
               if (container) {
@@ -173,7 +173,7 @@ export function SettingsSecondaryTabs({
           <Button
             variant="ghost"
             size="sm"
-            className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
+            className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
             onClick={() => {
               const container = document.querySelector(".settings-tabs-scroll");
               if (container) {
