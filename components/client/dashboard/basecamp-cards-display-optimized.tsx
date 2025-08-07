@@ -28,24 +28,30 @@ interface BasecampCard {
   url: string;
 }
 
-interface BasecampCardsDisplayProps {
+interface BasecampCardsDisplayOptimizedProps {
   testId: string;
   userId?: string;
   onCardAction?: (cardId: string, action: 'accept' | 'reject' | 'delete') => void;
   showOnlyIfCards?: boolean;
-  lazyLoad?: boolean; // New prop for lazy loading
+  lazyLoad?: boolean;
+  cards?: BasecampCard[]; // Pre-loaded cards from batch
+  isLoading?: boolean; // Loading state from batch
 }
 
-export const BasecampCardsDisplay = React.forwardRef<
+export const BasecampCardsDisplayOptimized = React.forwardRef<
   { refreshCards: () => void },
-  BasecampCardsDisplayProps
->(({ testId, userId, onCardAction, showOnlyIfCards = false, lazyLoad = true }, ref) => {
+  BasecampCardsDisplayOptimizedProps
+>(({ testId, userId, onCardAction, showOnlyIfCards = false, lazyLoad = true, cards: preloadedCards, isLoading: batchLoading }, ref) => {
   const [cards, setCards] = useState<BasecampCard[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasChecked, setHasChecked] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Use preloaded cards if available
+  const displayCards = preloadedCards || cards;
+  const displayLoading = batchLoading || loading;
 
   // Intersection Observer for lazy loading
   useEffect(() => {
@@ -71,8 +77,13 @@ export const BasecampCardsDisplay = React.forwardRef<
     return () => observer.disconnect();
   }, [lazyLoad]);
 
+  // Only fetch individually if no preloaded cards and visible
   useEffect(() => {
-    // Only fetch if visible and we haven't checked before
+    if (preloadedCards !== undefined) {
+      // Use preloaded cards, no need to fetch
+      return;
+    }
+
     if (isVisible && !hasChecked) {
       const fetchCards = async () => {
         try {
@@ -96,7 +107,7 @@ export const BasecampCardsDisplay = React.forwardRef<
 
       fetchCards();
     }
-  }, [testId, hasChecked, isVisible]);
+  }, [testId, hasChecked, isVisible, preloadedCards]);
 
   const handleAccept = async (cardId: string) => {
     try {
@@ -224,17 +235,17 @@ export const BasecampCardsDisplay = React.forwardRef<
   }));
 
   // Don't render anything if showOnlyIfCards is true and we haven't loaded cards yet
-  if (showOnlyIfCards && !hasChecked) {
+  if (showOnlyIfCards && !hasChecked && preloadedCards === undefined) {
     return null;
   }
 
   // Don't render anything if showOnlyIfCards is true and there are no cards
-  if (showOnlyIfCards && cards.length === 0) {
+  if (showOnlyIfCards && displayCards.length === 0) {
     return null;
   }
 
   // Show loading state
-  if (loading) {
+  if (displayLoading) {
     return (
       <div ref={containerRef} className="mt-3">
         <div className="text-sm text-muted-foreground">Loading Basecamp cards...</div>
@@ -252,7 +263,7 @@ export const BasecampCardsDisplay = React.forwardRef<
   }
 
   // Show empty state
-  if (cards.length === 0) {
+  if (displayCards.length === 0) {
     return (
       <div ref={containerRef} className="mt-3">
         <div className="text-sm text-muted-foreground">No Basecamp cards found for this test.</div>
@@ -264,7 +275,7 @@ export const BasecampCardsDisplay = React.forwardRef<
     <div ref={containerRef} className="mt-3">
       <h4 className="text-sm font-medium mb-2">Basecamp Cards:</h4>
       <div className="space-y-2">
-        {cards.map((card) => (
+        {displayCards.map((card) => (
           <Card key={card.id} className="border-l-4 border-l-blue-500">
             <CardContent className="p-3">
               <div className="flex items-start justify-between">
@@ -352,4 +363,4 @@ export const BasecampCardsDisplay = React.forwardRef<
   );
 });
 
-BasecampCardsDisplay.displayName = 'BasecampCardsDisplay';
+BasecampCardsDisplayOptimized.displayName = 'BasecampCardsDisplayOptimized';

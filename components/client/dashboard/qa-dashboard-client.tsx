@@ -31,7 +31,7 @@ import { OnsiteInvoiceTestSummary } from "@/components/onsite-invoice-test-summa
 import { CurrentTripsTestSummary } from "@/components/current-trips-test-summary";
 import { TestAssignmentButton } from "@/components/test-assignment-button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { BasecampCardsDisplay } from "./basecamp-cards-display";
+import { BasecampCardsDisplayOptimized } from "./basecamp-cards-display-optimized";
 import { useAuth } from "@/components/providers/auth-provider";
 
 // Import separated components
@@ -57,6 +57,7 @@ import {
   useAddTestNote,
   useExportUserResults,
   useExportAllUsersResults,
+  useBatchBasecampCards,
 } from "@/hooks/use-qa-queries";
 
 /**
@@ -91,7 +92,7 @@ export function QADashboardClient() {
   const [pendingNoteTestId, setPendingNoteTestId] = useState<string | null>(null);
   const [selectedUserFilter, setSelectedUserFilter] = useState<string>("all");
 
-  // Ref for BasecampCardsDisplay to refresh cards after adding notes
+  // Ref for BasecampCardsDisplayOptimized to refresh cards after adding notes
   const basecampCardsRefs = useRef<Record<string, { refreshCards: () => void }>>({});
 
   // Get authenticated user
@@ -201,6 +202,11 @@ export function QADashboardClient() {
 
     return matchesSearch && matchesCategory && matchesPriority;
   });
+
+  // Batch fetch Basecamp cards for visible tests
+  const visibleTestIds = finalFilteredTests.map(test => test.id);
+  const { data: batchCardsData = {}, isLoading: batchCardsLoading } = useBatchBasecampCards(visibleTestIds);
+  const typedBatchCardsData = batchCardsData as Record<string, any[]>;
 
   // Handle test completion toggle
   const handleToggleTest = async (testId: string, completed: boolean) => {
@@ -664,8 +670,8 @@ export function QADashboardClient() {
                           )}
                         </div>
 
-                        {/* Basecamp Cards */}
-                        <BasecampCardsDisplay 
+                        {/* Basecamp Cards - Lazy Loaded */}
+                        <BasecampCardsDisplayOptimized 
                           ref={(ref) => {
                             if (ref) {
                               basecampCardsRefs.current[test.id] = ref;
@@ -674,7 +680,10 @@ export function QADashboardClient() {
                           testId={test.id}
                           userId={currentUser}
                           onCardAction={handleCardAction}
-                          showOnlyIfCards={false}
+                          showOnlyIfCards={true}
+                          lazyLoad={true}
+                          cards={typedBatchCardsData[test.id] || []}
+                          isLoading={batchCardsLoading}
                         />
 
 
