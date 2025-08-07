@@ -39,6 +39,11 @@ export function NavigationTabs({
       color: "from-red-500/20 to-orange-500/20",
     },
     {
+      name: "Settings",
+      icon: Settings,
+      color: "from-slate-500/20 to-gray-500/20",
+    },
+    {
       name: "Invoices",
       icon: FileText,
       color: "from-green-500/20 to-emerald-500/20",
@@ -88,18 +93,13 @@ export function NavigationTabs({
       icon: PieChart,
       color: "from-amber-500/20 to-yellow-500/20",
     },
-    {
-      name: "Settings",
-      icon: Settings,
-      color: "from-slate-500/20 to-gray-500/20",
-    },
   ];
 
   return (
     <div className="relative bg-gradient-to-r from-background via-background/95 to-background rounded-xl border border-border/50 shadow-lg shadow-black/5">
       <div className="flex items-center justify-between p-1">
         {/* Scrollable tabs container */}
-        <div className="flex items-center space-x-0.5 overflow-x-auto scrollbar-hide flex-1">
+        <div className="main-tabs-scroll flex items-center space-x-0.5 overflow-x-auto overflow-y-hidden flex-1 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-transparent">
           {tabs.map(({ name, icon: Icon, color }) => (
             <div key={name} className="relative group flex-shrink-0">
               <Button
@@ -147,7 +147,7 @@ export function NavigationTabs({
             size="sm"
             className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
             onClick={() => {
-              const container = document.querySelector(".scrollbar-hide");
+              const container = document.querySelector(".main-tabs-scroll");
               if (container) {
                 container.scrollLeft -= 200;
               }
@@ -160,7 +160,7 @@ export function NavigationTabs({
             size="sm"
             className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
             onClick={() => {
-              const container = document.querySelector(".scrollbar-hide");
+              const container = document.querySelector(".main-tabs-scroll");
               if (container) {
                 container.scrollLeft += 200;
               }

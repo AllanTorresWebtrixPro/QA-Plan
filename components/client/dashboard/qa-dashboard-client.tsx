@@ -87,7 +87,7 @@ export function QADashboardClient() {
   const [selectedPriority, setSelectedPriority] = useState("All");
   const [noteInputs, setNoteInputs] = useState<Record<string, string>>({});
   const [activeTab, setActiveTab] = useState("All");
-  const [activeSettingsSubsection, setActiveSettingsSubsection] = useState("Company");
+  const [activeSettingsSubsection, setActiveSettingsSubsection] = useState("Access Control");
   const [pendingNoteTestId, setPendingNoteTestId] = useState<string | null>(null);
   const [selectedUserFilter, setSelectedUserFilter] = useState<string>("all");
 
@@ -190,7 +190,7 @@ export function QADashboardClient() {
     if (activeTab === "Settings") {
       // For Settings, filter by category and subsection
       matchesCategory = test.category === "Settings" && 
-        (test.subcategory === activeSettingsSubsection || !test.subcategory);
+        test.subcategory === activeSettingsSubsection;
     } else {
       // For other tabs, use regular category filtering
       const category = getCategoryFromTab(activeTab);

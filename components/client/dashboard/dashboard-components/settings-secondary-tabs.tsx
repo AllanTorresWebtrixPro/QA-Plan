@@ -14,6 +14,11 @@ import {
   BarChart3,
   Mail,
   Bell,
+  Eye,
+  Monitor,
+  Zap,
+  Lock,
+  Cross,
 } from "lucide-react";
 
 interface SettingsSecondaryTabsProps {
@@ -76,13 +81,43 @@ export function SettingsSecondaryTabs({
       icon: Bell,
       color: "from-yellow-500/20 to-orange-500/20",
     },
+    {
+      name: "Access Control",
+      icon: Lock,
+      color: "from-gray-500/20 to-slate-500/20",
+    },
+    {
+      name: "Accessibility Testing",
+      icon: Eye,
+      color: "from-cyan-500/20 to-blue-500/20",
+    },
+    {
+      name: "Browser Compatibility",
+      icon: Monitor,
+      color: "from-emerald-500/20 to-green-500/20",
+    },
+    {
+      name: "Performance Testing",
+      icon: Zap,
+      color: "from-yellow-500/20 to-amber-500/20",
+    },
+    {
+      name: "Security Testing",
+      icon: Shield,
+      color: "from-red-500/20 to-pink-500/20",
+    },
+    {
+      name: "Cross-Section Testing",
+      icon: Cross,
+      color: "from-violet-500/20 to-purple-500/20",
+    },
   ];
 
   return (
     <div className="relative bg-gradient-to-r from-muted/50 via-muted/30 to-muted/50 rounded-lg border border-border/30 shadow-sm">
       <div className="flex items-center justify-between p-1">
         {/* Scrollable subsections container */}
-        <div className="flex items-center space-x-0.5 overflow-x-auto scrollbar-hide flex-1">
+        <div className="settings-tabs-scroll flex items-center space-x-0.5 overflow-x-auto overflow-y-hidden flex-1 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-transparent">
           {subsections.map(({ name, icon: Icon, color }) => (
             <div key={name} className="relative group flex-shrink-0">
               <Button
@@ -127,7 +162,7 @@ export function SettingsSecondaryTabs({
             size="sm"
             className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
             onClick={() => {
-              const container = document.querySelector(".scrollbar-hide");
+              const container = document.querySelector(".settings-tabs-scroll");
               if (container) {
                 container.scrollLeft -= 150;
               }
@@ -140,7 +175,7 @@ export function SettingsSecondaryTabs({
             size="sm"
             className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
             onClick={() => {
-              const container = document.querySelector(".scrollbar-hide");
+              const container = document.querySelector(".settings-tabs-scroll");
               if (container) {
                 container.scrollLeft += 150;
               }
