@@ -277,32 +277,4 @@ export function useAllAuthUsersStats() {
   return allAuthUsersStats;
 }
 
-/**
- * Hook to fetch Basecamp cards for multiple tests in batch
- */
-export function useBatchBasecampCards(testIds: string[]) {
-  return useQuery({
-    queryKey: ['basecamp-cards-batch', testIds],
-    queryFn: async () => {
-      if (testIds.length === 0) return {};
-      
-      const response = await fetch('/api/qa/test-cards-batch', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ testIds }),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch batch cards');
-      }
-      
-      const data = await response.json();
-      return data.data || {};
-    },
-    enabled: testIds.length > 0,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 10 * 60 * 1000, // 10 minutes
-  });
-}
+
