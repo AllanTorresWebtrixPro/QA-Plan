@@ -142,12 +142,47 @@ export function QADashboardClient() {
 
   const filteredTests = getFilteredTests();
 
+  // Calculate stats from filtered tests
+  const getFilteredStats = () => {
+    const completed = finalFilteredTests.filter(test => test.completed).length;
+    const total = finalFilteredTests.length;
+    const highPriorityRemaining = finalFilteredTests.filter(test => 
+      !test.completed && test.priority === "High"
+    ).length;
+    
+    return {
+      completed,
+      total,
+      percentage: total > 0 ? (completed / total) * 100 : 0,
+      highPriorityRemaining
+    };
+  };
+
+  // Map tab names to category names
+  const getCategoryFromTab = (tab: string) => {
+    const tabToCategoryMap: Record<string, string> = {
+      "All": "All",
+      "Auth": "Authentication",
+      "Invoices": "Invoices",
+      "Surveys": "Surveys",
+      "On-Site": "On-Site Invoices",
+      "Trips": "Current Trips",
+      "Prospects": "Prospects",
+      "Clients": "Clients",
+      "Agents": "Agents",
+      "Payments": "Payments",
+      "Team": "All", // Team shows all tests
+      "Summary": "All" // Summary shows all tests
+    };
+    return tabToCategoryMap[tab] || "All";
+  };
+
   // Apply search and category filters
   const finalFilteredTests = filteredTests.filter((test) => {
     const matchesSearch =
       test.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       test.category.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === "All" || test.category === selectedCategory;
+    const matchesCategory = getCategoryFromTab(activeTab) === "All" || test.category === getCategoryFromTab(activeTab);
     const matchesPriority = selectedPriority === "All" || test.priority === selectedPriority;
 
     return matchesSearch && matchesCategory && matchesPriority;
@@ -411,13 +446,13 @@ export function QADashboardClient() {
                   <div className="text-center">
                     <CheckCircle className="h-8 w-8 text-green-600 mx-auto mb-2" />
                     <div className="text-2xl font-bold text-green-600">
-                      {currentUserStats.completed}
+                      {getFilteredStats().completed}
                     </div>
                     <div className="text-sm text-gray-600">
-                      My Completed Tests
+                      Completed Tests
                     </div>
                     <div className="text-xs text-gray-500">
-                      out of {currentUserStats.total} total tests
+                      out of {getFilteredStats().total} total tests
                     </div>
                   </div>
                 </CardContent>
@@ -427,7 +462,7 @@ export function QADashboardClient() {
                   <div className="text-center">
                     <AlertCircle className="h-8 w-8 text-red-600 mx-auto mb-2" />
                     <div className="text-2xl font-bold text-red-600">
-                      {currentUserStats.highPriorityRemaining}
+                      {getFilteredStats().highPriorityRemaining}
                     </div>
                     <div className="text-sm text-gray-600">
                       High Priority Remaining
@@ -446,9 +481,9 @@ export function QADashboardClient() {
                     </div>
                     <div className="space-y-1 text-xs">
                       {Array.from(
-                        new Set(testsWithProgress.map((t) => t.category))
+                        new Set(finalFilteredTests.map((t) => t.category))
                       ).map((category) => {
-                        const categoryTests = testsWithProgress.filter(
+                        const categoryTests = finalFilteredTests.filter(
                           (t) => t.category === category
                         );
                         const completed = categoryTests.filter(
