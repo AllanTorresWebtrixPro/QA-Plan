@@ -40,6 +40,7 @@ import { HeaderSection } from "./dashboard-components/header-section";
 import { ProgressSection } from "./dashboard-components/progress-section";
 import { ExportButtons } from "./dashboard-components/export-buttons";
 import { NavigationTabs } from "./dashboard-components/navigation-tabs";
+import { SettingsSecondaryTabs } from "./dashboard-components/settings-secondary-tabs";
 import { TestCategoriesSection } from "./dashboard-components/test-categories-section";
 import { SidebarSection } from "./dashboard-components/sidebar-section";
 
@@ -86,6 +87,7 @@ export function QADashboardClient() {
   const [selectedPriority, setSelectedPriority] = useState("All");
   const [noteInputs, setNoteInputs] = useState<Record<string, string>>({});
   const [activeTab, setActiveTab] = useState("All");
+  const [activeSettingsSubsection, setActiveSettingsSubsection] = useState("Company");
   const [pendingNoteTestId, setPendingNoteTestId] = useState<string | null>(null);
   const [selectedUserFilter, setSelectedUserFilter] = useState<string>("all");
 
@@ -172,7 +174,8 @@ export function QADashboardClient() {
       "Agents": "Agents",
       "Payments": "Payments",
       "Team": "All", // Team shows all tests
-      "Summary": "All" // Summary shows all tests
+      "Summary": "All", // Summary shows all tests
+      "Settings": "Settings" // Settings category
     };
     return tabToCategoryMap[tab] || "All";
   };
@@ -182,7 +185,18 @@ export function QADashboardClient() {
     const matchesSearch =
       test.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       test.category.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = getCategoryFromTab(activeTab) === "All" || test.category === getCategoryFromTab(activeTab);
+    
+    let matchesCategory = true;
+    if (activeTab === "Settings") {
+      // For Settings, filter by category and subsection
+      matchesCategory = test.category === "Settings" && 
+        (test.subcategory === activeSettingsSubsection || !test.subcategory);
+    } else {
+      // For other tabs, use regular category filtering
+      const category = getCategoryFromTab(activeTab);
+      matchesCategory = category === "All" || test.category === category;
+    }
+    
     const matchesPriority = selectedPriority === "All" || test.priority === selectedPriority;
 
     return matchesSearch && matchesCategory && matchesPriority;
@@ -359,6 +373,16 @@ export function QADashboardClient() {
         {/* Navigation Tabs */}
         <NavigationTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
+        {/* Settings Secondary Tabs */}
+        {activeTab === "Settings" && (
+          <div className="mt-4">
+            <SettingsSecondaryTabs
+              activeSubsection={activeSettingsSubsection}
+              onSubsectionChange={setActiveSettingsSubsection}
+            />
+          </div>
+        )}
+
         {/* Tab Content */}
         {activeTab !== "All" && (
           <div className="mb-6">
@@ -374,6 +398,7 @@ export function QADashboardClient() {
               {activeTab === "Payments" && "Payment Processing Testing"}
               {activeTab === "Team" && "Team Progress Overview"}
               {activeTab === "Summary" && "QA Testing Summary"}
+              {activeTab === "Settings" && "Settings Testing"}
             </h2>
             <p className="text-muted-foreground mb-4">
               {activeTab === "Auth" &&
@@ -398,6 +423,8 @@ export function QADashboardClient() {
                 "Track team progress and performance across all test categories."}
               {activeTab === "Summary" &&
                 "Overview of all testing progress and key metrics."}
+              {activeTab === "Settings" &&
+                `Test all settings functionality including ${activeSettingsSubsection.toLowerCase()} management, configuration, and system administration.`}
             </p>
           </div>
         )}

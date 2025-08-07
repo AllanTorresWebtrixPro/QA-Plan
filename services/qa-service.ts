@@ -185,6 +185,7 @@ export interface TestItem {
   id: string;
   title: string;
   category: string;
+  subcategory?: string; // For Settings subsections
   priority: "High" | "Medium" | "Low";
   steps: string[];
   expected: string;

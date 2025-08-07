@@ -15,6 +15,7 @@ import {
   CreditCard,
   Users,
   PieChart,
+  Settings,
 } from "lucide-react";
 
 interface NavigationTabsProps {
@@ -86,6 +87,11 @@ export function NavigationTabs({
       name: "Summary",
       icon: PieChart,
       color: "from-amber-500/20 to-yellow-500/20",
+    },
+    {
+      name: "Settings",
+      icon: Settings,
+      color: "from-slate-500/20 to-gray-500/20",
     },
   ];
 
