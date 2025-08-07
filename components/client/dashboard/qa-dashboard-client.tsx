@@ -160,6 +160,15 @@ export function QADashboardClient() {
     };
   };
 
+  // Define disabled Settings subsections
+  const disabledSettingsSubsections = [
+    "Accessibility Testing",
+    "Browser Compatibility", 
+    "Performance Testing",
+    "Security Testing",
+    "Cross-Section Testing"
+  ];
+
   // Map tab names to category names
   const getCategoryFromTab = (tab: string) => {
     const tabToCategoryMap: Record<string, string> = {
@@ -182,6 +191,11 @@ export function QADashboardClient() {
 
   // Apply search and category filters
   const finalFilteredTests = filteredTests.filter((test) => {
+    // Exclude tests from disabled Settings subsections
+    if (test.category === "Settings" && test.subcategory && disabledSettingsSubsections.includes(test.subcategory)) {
+      return false;
+    }
+
     const matchesSearch =
       test.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       test.category.toLowerCase().includes(searchTerm.toLowerCase());
@@ -692,13 +706,15 @@ export function QADashboardClient() {
             <SidebarSection
               currentUserStats={currentUserStats}
               allUsersStats={allAuthUsersStats}
-              allTests={testsWithProgress}
+              allTests={testsWithProgress.filter(test => 
+                !(test.category === "Settings" && test.subcategory && disabledSettingsSubsections.includes(test.subcategory))
+              )}
             />
 
             {/* Enhanced Test Categories */}
             <TestCategoriesSection
               activeTab={activeTab}
-              filteredTests={filteredTests}
+              filteredTests={finalFilteredTests}
               currentUserObject={displayUser}
             />
           </div>

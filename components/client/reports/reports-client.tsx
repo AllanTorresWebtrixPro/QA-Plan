@@ -53,10 +53,25 @@ export function ReportsClient() {
   const { data: testsWithProgress = [], isLoading } = useTestsWithProgress("user-1");
   const exportAllUsersMutation = useExportAllUsersResults();
 
-  // Filter data based on selected period and category
+  // Define disabled Settings subsections
+  const disabledSettingsSubsections = [
+    "Accessibility Testing",
+    "Browser Compatibility", 
+    "Performance Testing",
+    "Security Testing",
+    "Cross-Section Testing"
+  ];
+
+  // Filter data based on selected period and category, excluding disabled tests
   const filteredTests = testsWithProgress.filter(
-    (test: any) =>
-      selectedCategory === "All" || test.category === selectedCategory
+    (test: any) => {
+      // Exclude tests from disabled Settings subsections
+      if (test.category === "Settings" && test.subcategory && disabledSettingsSubsections.includes(test.subcategory)) {
+        return false;
+      }
+      
+      return selectedCategory === "All" || test.category === selectedCategory;
+    }
   );
 
   // Calculate statistics

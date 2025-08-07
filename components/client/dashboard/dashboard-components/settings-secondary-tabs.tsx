@@ -35,90 +35,109 @@ export function SettingsSecondaryTabs({
       name: "Company",
       icon: Building2,
       color: "from-blue-500/20 to-indigo-500/20",
+      disabled: false,
     },
     {
       name: "Users",
       icon: Users,
       color: "from-green-500/20 to-emerald-500/20",
+      disabled: false,
     },
     {
       name: "Payment Methods",
       icon: CreditCard,
       color: "from-purple-500/20 to-violet-500/20",
+      disabled: false,
     },
     {
       name: "Invoice Items",
       icon: FileText,
       color: "from-orange-500/20 to-amber-500/20",
+      disabled: false,
     },
     {
       name: "Travel Insurance",
       icon: Shield,
       color: "from-red-500/20 to-rose-500/20",
+      disabled: false,
     },
     {
       name: "Terms & Conditions",
       icon: FileCheck,
       color: "from-teal-500/20 to-cyan-500/20",
+      disabled: false,
     },
     {
       name: "Supporting Trip Docs",
       icon: FolderOpen,
       color: "from-slate-500/20 to-gray-500/20",
+      disabled: false,
     },
     {
       name: "Surveys",
       icon: BarChart3,
       color: "from-pink-500/20 to-rose-500/20",
+      disabled: false,
     },
     {
       name: "Email Templates",
       icon: Mail,
       color: "from-indigo-500/20 to-blue-500/20",
+      disabled: false,
     },
     {
       name: "Email Notifications",
       icon: Bell,
       color: "from-yellow-500/20 to-orange-500/20",
+      disabled: false,
     },
     {
       name: "Access Control",
       icon: Lock,
       color: "from-gray-500/20 to-slate-500/20",
+      disabled: false,
     },
     {
       name: "Accessibility Testing",
       icon: Eye,
       color: "from-cyan-500/20 to-blue-500/20",
+      disabled: true,
     },
     {
       name: "Browser Compatibility",
       icon: Monitor,
       color: "from-emerald-500/20 to-green-500/20",
+      disabled: true,
     },
     {
       name: "Performance Testing",
       icon: Zap,
       color: "from-yellow-500/20 to-amber-500/20",
+      disabled: true,
     },
     {
       name: "Security Testing",
       icon: Shield,
       color: "from-red-500/20 to-pink-500/20",
+      disabled: true,
     },
     {
       name: "Cross-Section Testing",
       icon: Cross,
       color: "from-violet-500/20 to-purple-500/20",
+      disabled: true,
     },
   ];
+
+  // Filter out disabled subsections
+  const enabledSubsections = subsections.filter(subsection => !subsection.disabled);
 
   return (
     <div className="relative bg-gradient-to-r from-muted/50 via-muted/30 to-muted/50 rounded-lg border border-border/30 shadow-sm">
       <div className="flex items-center justify-between p-2">
         {/* Scrollable subsections container */}
         <div className="settings-tabs-scroll flex items-center space-x-0.5 overflow-x-auto overflow-y-hidden flex-1 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-transparent">
-          {subsections.map(({ name, icon: Icon, color }) => (
+          {enabledSubsections.map(({ name, icon: Icon, color }) => (
             <div key={name} className="relative group flex-shrink-0">
               <Button
                 variant="ghost"

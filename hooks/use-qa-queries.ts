@@ -213,19 +213,33 @@ export function useAllUsersStats() {
   const { data: tests = [] } = useTests();
   const { data: userProgress = [] } = useUserProgress();
 
+  // Define disabled Settings subsections
+  const disabledSettingsSubsections = [
+    "Accessibility Testing",
+    "Browser Compatibility", 
+    "Performance Testing",
+    "Security Testing",
+    "Cross-Section Testing"
+  ];
+
   const allUsersStats = users.map((user) => {
     // Get all tests with progress for this user (same logic as useTestsWithProgress)
-    const userTestsWithProgress = tests.map((test) => {
-      const progress = userProgress.find(
-        (p) => p.user_id === user.id && p.test_id === test.id
-      );
-      return {
-        ...test,
-        completed: progress?.completed || false,
-        completedAt: progress?.completed_at,
-        notes: progress?.notes,
-      };
-    });
+    const userTestsWithProgress = tests
+      .filter(test => 
+        // Exclude tests from disabled Settings subsections
+        !(test.category === "Settings" && test.subcategory && disabledSettingsSubsections.includes(test.subcategory))
+      )
+      .map((test) => {
+        const progress = userProgress.find(
+          (p) => p.user_id === user.id && p.test_id === test.id
+        );
+        return {
+          ...test,
+          completed: progress?.completed || false,
+          completedAt: progress?.completed_at,
+          notes: progress?.notes,
+        };
+      });
 
     const completed = userTestsWithProgress.filter((t) => t.completed).length;
     const total = userTestsWithProgress.length; // This should be the same as total tests
@@ -249,19 +263,33 @@ export function useAllAuthUsersStats() {
   const { data: tests = [] } = useTests();
   const { data: userProgress = [] } = useUserProgress();
 
+  // Define disabled Settings subsections
+  const disabledSettingsSubsections = [
+    "Accessibility Testing",
+    "Browser Compatibility", 
+    "Performance Testing",
+    "Security Testing",
+    "Cross-Section Testing"
+  ];
+
   const allAuthUsersStats = authUsers.map((user) => {
     // Get all tests with progress for this user (same logic as useTestsWithProgress)
-    const userTestsWithProgress = tests.map((test) => {
-      const progress = userProgress.find(
-        (p) => p.user_id === user.id && p.test_id === test.id
-      );
-      return {
-        ...test,
-        completed: progress?.completed || false,
-        completedAt: progress?.completed_at,
-        notes: progress?.notes,
-      };
-    });
+    const userTestsWithProgress = tests
+      .filter(test => 
+        // Exclude tests from disabled Settings subsections
+        !(test.category === "Settings" && test.subcategory && disabledSettingsSubsections.includes(test.subcategory))
+      )
+      .map((test) => {
+        const progress = userProgress.find(
+          (p) => p.user_id === user.id && p.test_id === test.id
+        );
+        return {
+          ...test,
+          completed: progress?.completed || false,
+          completedAt: progress?.completed_at,
+          notes: progress?.notes,
+        };
+      });
 
     const completed = userTestsWithProgress.filter((t) => t.completed).length;
     const total = userTestsWithProgress.length; // This should be the same as total tests
