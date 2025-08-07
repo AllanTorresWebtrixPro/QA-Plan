@@ -420,7 +420,7 @@ export default function QAPlanWithDB() {
                           disabled={!noteInputs[test.id]?.trim()}
                           size="sm"
                         >
-                          Add Note
+                          Report Issue
                         </Button>
                       </div>
                     </div>
@@ -535,7 +535,7 @@ export default function QAPlanWithDB() {
                             disabled={!noteInputs[test.id]?.trim()}
                             size="sm"
                           >
-                            Add Note
+                            Report Issue
                           </Button>
                         </div>
                       </div>
@@ -649,7 +649,7 @@ export default function QAPlanWithDB() {
                             disabled={!noteInputs[test.id]?.trim()}
                             size="sm"
                           >
-                            Add Note
+                            Report Issue
                           </Button>
                         </div>
                       </div>
@@ -759,7 +759,7 @@ export default function QAPlanWithDB() {
                             disabled={!noteInputs[test.id]?.trim()}
                             size="sm"
                           >
-                            Add Note
+                            Report Issue
                           </Button>
                         </div>
                       </div>
@@ -869,7 +869,7 @@ export default function QAPlanWithDB() {
                             disabled={!noteInputs[test.id]?.trim()}
                             size="sm"
                           >
-                            Add Note
+                            Report Issue
                           </Button>
                         </div>
                       </div>
@@ -979,7 +979,7 @@ export default function QAPlanWithDB() {
                             disabled={!noteInputs[test.id]?.trim()}
                             size="sm"
                           >
-                            Add Note
+                            Report Issue
                           </Button>
                         </div>
                       </div>
@@ -1093,7 +1093,7 @@ export default function QAPlanWithDB() {
                             disabled={!noteInputs[test.id]?.trim()}
                             size="sm"
                           >
-                            Add Note
+                            Report Issue
                           </Button>
                         </div>
                       </div>
@@ -1208,7 +1208,7 @@ export default function QAPlanWithDB() {
                             disabled={!noteInputs[test.id]?.trim()}
                             size="sm"
                           >
-                            Add Note
+                            Report Issue
                           </Button>
                         </div>
                       </div>
@@ -1323,7 +1323,7 @@ export default function QAPlanWithDB() {
                             disabled={!noteInputs[test.id]?.trim()}
                             size="sm"
                           >
-                            Add Note
+                            Report Issue
                           </Button>
                         </div>
                       </div>
@@ -1437,7 +1437,7 @@ export default function QAPlanWithDB() {
                             disabled={!noteInputs[test.id]?.trim()}
                             size="sm"
                           >
-                            Add Note
+                            Report Issue
                           </Button>
                         </div>
                       </div>

@@ -604,7 +604,7 @@ export function QADashboardClient() {
                         <div className="space-y-2">
                           <div className="flex items-center gap-2">
                             <Textarea
-                              placeholder="Add notes..."
+                              placeholder="Add issue description..."
                               value={noteInputs[test.id] || ""}
                               onChange={(e) =>
                                 setNoteInputs((prev) => ({
@@ -626,7 +626,7 @@ export function QADashboardClient() {
                               {pendingNoteTestId === test.id ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
                               ) : (
-                                "Add Note"
+                                "Report Issue"
                               )}
                             </Button>
                           </div>

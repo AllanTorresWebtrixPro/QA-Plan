@@ -34,7 +34,7 @@ async function disableRLSTemp() {
     console.log('⚠️  WARNING: This is temporary for development.');
     console.log('   Remember to re-enable RLS with proper policies later.');
     console.log('');
-    console.log('Now users should be able to add notes without RLS restrictions.');
+    console.log('Now users should be able to report issues without RLS restrictions.');
     
   } catch (error) {
     console.error('❌ Error disabling RLS:', error);

@@ -290,7 +290,7 @@ export default function QAPlan() {
                         rows={2}
                       />
                       <Button onClick={() => handleAddNote(test.id)} disabled={!noteInputs[test.id]?.trim()} size="sm">
-                        Add Note
+                        Report Issue
                       </Button>
                     </div>
                   </div>

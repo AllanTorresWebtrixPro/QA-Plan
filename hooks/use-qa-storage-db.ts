@@ -191,7 +191,7 @@ export function useQAStorageDB() {
         setUserProgress((prev) => [...prev, newProgress])
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to add note")
+      setError(err instanceof Error ? err.message : "Failed to report issue")
       console.error("Error adding note:", err)
     }
   }
