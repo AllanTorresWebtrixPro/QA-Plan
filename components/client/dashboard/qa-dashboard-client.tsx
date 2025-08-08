@@ -726,8 +726,8 @@ export function QADashboardClient() {
                           testId={test.id}
                           userId={currentUser}
                           onCardAction={handleCardAction}
-                          showOnlyIfCards={true}
-                          lazyLoad={true}
+                          showOnlyIfCards={false}
+                          lazyLoad={false}
                         />
 
 

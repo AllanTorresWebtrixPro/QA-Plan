@@ -52,7 +52,7 @@ export async function GET(
     // Remove duplicates
     const uniqueCardIds = [...new Set(allCardIds)];
 
-    console.log("Looking for card IDs:", uniqueCardIds);
+    //console.log("Looking for card IDs:", uniqueCardIds);
 
     if (uniqueCardIds.length === 0) {
       console.log("No card IDs found for test:", testId);

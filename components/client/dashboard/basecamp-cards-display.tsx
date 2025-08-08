@@ -16,6 +16,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface BasecampCard {
   id: string;
@@ -46,6 +54,13 @@ export const BasecampCardsDisplay = React.forwardRef<
   const [hasChecked, setHasChecked] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Function to strip HTML tags for preview
+  const stripHtml = (html: string) => {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    return tmp.textContent || tmp.innerText || '';
+  };
 
   // Intersection Observer for lazy loading
   useEffect(() => {
@@ -276,7 +291,7 @@ export const BasecampCardsDisplay = React.forwardRef<
                     </Badge>
                   </div>
                   <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
-                    {card.content}
+                    {stripHtml(card.content)}
                   </p>
                   <div className="flex items-center gap-1 text-xs text-muted-foreground">
                     <span>Created: {new Date(card.created_at).toLocaleDateString()}</span>
@@ -286,24 +301,90 @@ export const BasecampCardsDisplay = React.forwardRef<
                   </div>
                 </div>
                 <div className="flex items-center gap-1 ml-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleAccept(card.id)}
-                    className="h-6 w-6 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
-                    title="Accept"
-                  >
-                    <CheckCircle className="h-3 w-3" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleReject(card.id)}
-                    className="h-6 w-6 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                    title="Reject"
-                  >
-                    <XCircle className="h-3 w-3" />
-                  </Button>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 w-6 p-0 text-gray-600 hover:text-blue-600 hover:bg-blue-50"
+                        title="View Details"
+                      >
+                        <Eye className="h-3 w-3" />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle>{card.title}</DialogTitle>
+                        <DialogDescription>
+                          Status: {card.column_name} • Created: {new Date(card.created_at).toLocaleString()}
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="mt-4">
+                        <div 
+                          className="prose prose-sm max-w-none"
+                          dangerouslySetInnerHTML={{ __html: card.content }}
+                        />
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 w-6 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
+                        title="Accept"
+                      >
+                        <CheckCircle className="h-3 w-3" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Accept Basecamp Card</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to accept this Basecamp card? This will mark the issue as resolved.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleAccept(card.id)}
+                          className="bg-green-600 hover:bg-green-700"
+                        >
+                          Accept
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 w-6 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                        title="Reject"
+                      >
+                        <XCircle className="h-3 w-3" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Reject Basecamp Card</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to reject this Basecamp card? This will mark the issue as not valid.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleReject(card.id)}
+                          className="bg-red-600 hover:bg-red-700"
+                        >
+                          Reject
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button
@@ -333,15 +414,35 @@ export const BasecampCardsDisplay = React.forwardRef<
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => window.open(card.url, '_blank')}
-                    className="h-6 w-6 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                    title="View in Basecamp"
-                  >
-                    <ExternalLink className="h-3 w-3" />
-                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 w-6 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        title="View in Basecamp"
+                      >
+                        <ExternalLink className="h-3 w-3" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Open in Basecamp</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This will open the Basecamp card in a new tab. Do you want to continue?
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => window.open(card.url, '_blank')}
+                          className="bg-blue-600 hover:bg-blue-700"
+                        >
+                          Open in Basecamp
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </div>
             </CardContent>
