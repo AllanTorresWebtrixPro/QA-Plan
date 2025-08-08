@@ -10,11 +10,8 @@ const supabase = createClient(
  * GET /api/qa/tests
  * Fetch all tests from the database
  */
-export async function GET(request: Request) {
+export async function GET() {
   try {
-    // Get the current user ID from the request headers or query params
-    const url = new URL(request.url);
-    const currentUserId = url.searchParams.get('userId');
     
     // First, get assigned tests from test_assignments view
     const { data: assignedTestsData, error: assignedTestsError } = await supabase
@@ -36,17 +33,13 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: allTestsError.message }, { status: 500 });
     }
 
-    // Get current user's progress for all tests
-    let currentUserProgress = [];
-    if (currentUserId) {
-      const { data: progressData, error: progressError } = await supabase
-        .from("qa_user_test_progress")
-        .select("*")
-        .eq("user_id", currentUserId);
+    // Get all user progress for all tests (to show completion status for any user)
+    const { data: allUserProgress, error: allProgressError } = await supabase
+      .from("qa_user_test_progress")
+      .select("*");
 
-      if (!progressError && progressData) {
-        currentUserProgress = progressData;
-      }
+    if (allProgressError) {
+      console.error("Error fetching all user progress:", allProgressError);
     }
 
     // Create maps for quick lookup
@@ -55,15 +48,25 @@ export async function GET(request: Request) {
       assignedTestsMap.set(test.test_id, test);
     });
 
-    const currentUserProgressMap = new Map();
-    currentUserProgress.forEach((progress) => {
-      currentUserProgressMap.set(progress.test_id, progress);
-    });
+    // Create a map of all completion status by test_id
+    const allCompletionMap = new Map();
+    if (allUserProgress) {
+      allUserProgress.forEach((progress: any) => {
+        // If any user has completed this test, mark it as completed
+        if (progress.completed) {
+          allCompletionMap.set(progress.test_id, {
+            completed: true,
+            completed_at: progress.completed_at,
+            notes: progress.notes
+          });
+        }
+      });
+    }
 
-    // Transform all tests, using assigned data when available and current user's progress
+    // Transform all tests, using assigned data when available and any user's completion status
     const transformedTests = allTestsData.map((test) => {
       const assignedTest = assignedTestsMap.get(test.id);
-      const userProgress = currentUserProgressMap.get(test.id);
+      const anyUserCompletion = allCompletionMap.get(test.id);
       
       return {
         id: test.id,
@@ -86,10 +89,10 @@ export async function GET(request: Request) {
         assignedUserAvatar: assignedTest?.assigned_user_avatar || null,
         assignedUserRole: assignedTest?.assigned_user_role || null,
         assignedByName: assignedTest?.assigned_by_name || null,
-        // Use current user's progress if available, otherwise fall back to assigned user's progress
-        completed: userProgress ? userProgress.completed : (assignedTest?.completed || false),
-        completedAt: userProgress ? userProgress.completed_at : (assignedTest?.completed_at || null),
-        notes: userProgress ? userProgress.notes : (assignedTest?.notes || null),
+        // Use any user's completion status if available, otherwise fall back to assigned user's progress
+        completed: anyUserCompletion ? anyUserCompletion.completed : (assignedTest?.completed || false),
+        completedAt: anyUserCompletion ? anyUserCompletion.completed_at : (assignedTest?.completed_at || null),
+        notes: anyUserCompletion ? anyUserCompletion.notes : (assignedTest?.notes || null),
       };
     });
 

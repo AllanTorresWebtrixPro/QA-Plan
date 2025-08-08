@@ -115,9 +115,12 @@ export function QADashboardClient() {
     avatar: currentUserObject.avatar || currentUserObject.name?.charAt(0)?.toUpperCase() || "U"
   } : undefined;
 
-  // Get all users' test progress for filtering
-  const { data: allTestsWithProgress = [], isLoading: allTestsLoading } = useTestsWithProgress("all");
+  // Get current user's test progress for main display
   const { data: testsWithProgress = [], isLoading: testsLoading, refetch } = useTestsWithProgress(currentUser);
+  // Get all users' test progress for filtering (without current user's progress)
+  const { data: allTestsWithProgress = [], isLoading: allTestsLoading } = useTestsWithProgress("all");
+  
+
   const currentUserStats = useCurrentUserStats(currentUser);
   const allUsersStats = useAllUsersStats();
   const allAuthUsersStats = useAllAuthUsersStats();
@@ -136,7 +139,7 @@ export function QADashboardClient() {
   // Filter tests based on selected user
   const getFilteredTests = () => {
     if (selectedUserFilter === "all") {
-      return allTestsWithProgress;
+      return testsWithProgress; // Use current user's tests for main display
     }
     // Filter tests assigned to the selected user
     return allTestsWithProgress.filter((test) => test.assignedTo === selectedUserFilter);
@@ -212,9 +215,13 @@ export function QADashboardClient() {
     }
     
     const matchesPriority = selectedPriority === "All" || test.priority === selectedPriority;
+    
+
 
     return matchesSearch && matchesCategory && matchesPriority;
   });
+  
+
 
 
 

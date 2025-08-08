@@ -36,10 +36,10 @@ export const queryKeys = {
 /**
  * Hook to fetch all tests
  */
-export function useTests(userId?: string) {
+export function useTests() {
   return useQuery({
-    queryKey: [...queryKeys.tests, userId],
-    queryFn: () => fetchTests(userId),
+    queryKey: queryKeys.tests,
+    queryFn: fetchTests,
     staleTime: 2 * 60 * 1000, // 2 minutes
   });
 }
@@ -166,10 +166,10 @@ export function useExportAllUsersResults() {
 /**
  * Hook to get tests with user progress
  */
-export function useTestsWithProgress(userId: string) {
-  const { data: tests = [], isLoading, error, refetch } = useTests(userId);
+export function useTestsWithProgress(userId?: string) {
+  const { data: tests = [], isLoading, error, refetch } = useTests();
 
-  // The tests now come from the API with the current user's progress included
+  // The tests now come from the API with any user's completion status included
   // So we don't need to merge with userProgress anymore
   const testsWithProgress = tests.map((test) => ({
     ...test,
