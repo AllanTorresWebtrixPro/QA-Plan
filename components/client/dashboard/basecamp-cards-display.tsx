@@ -364,7 +364,7 @@ export const BasecampCardsDisplay = React.forwardRef<
                         <Eye className="h-3 w-3" />
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+                    <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
                       <DialogHeader className="pb-4 border-b">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
