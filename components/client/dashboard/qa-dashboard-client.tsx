@@ -586,21 +586,42 @@ export function QADashboardClient() {
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
-                              <Checkbox
-                                checked={test.completed}
-                                onCheckedChange={(checked) =>
-                                  handleToggleTest(test.id, checked as boolean)
-                                }
-                                disabled={toggleTestMutation.isPending}
-                              />
+                              {test.completed ? (
+                                <div className="flex items-center gap-1">
+                                  <Badge variant="default" className="bg-green-100 text-green-800 border-green-200">
+                                    <CheckCircle className="h-3 w-3 mr-1" />
+                                    Completed
+                                  </Badge>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleToggleTest(test.id, false)}
+                                    disabled={toggleTestMutation.isPending}
+                                    className="h-6 px-2 text-xs text-gray-500 hover:text-gray-700"
+                                  >
+                                    Undo
+                                  </Button>
+                                </div>
+                              ) : (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleToggleTest(test.id, true)}
+                                  disabled={toggleTestMutation.isPending}
+                                  className="h-7 px-3 text-xs"
+                                >
+                                  {toggleTestMutation.isPending ? (
+                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                  ) : (
+                                    "Mark as Complete"
+                                  )}
+                                </Button>
+                              )}
                               <h3 className="font-medium">{test.title}</h3>
                               <Badge variant={getPriorityColor(test.priority)}>
                                 {test.priority}
                               </Badge>
                               <Badge variant="outline">{test.category}</Badge>
-                              {test.completed && (
-                                <CheckCircle className="h-4 w-4 text-green-600" />
-                              )}
                             </div>
                             <p className="text-sm text-gray-600 mb-2">
                               {test.expected}
