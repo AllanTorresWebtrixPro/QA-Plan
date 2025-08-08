@@ -62,6 +62,35 @@ export const BasecampCardsDisplay = React.forwardRef<
     return tmp.textContent || tmp.innerText || '';
   };
 
+  // Function to extract notes from card content
+  const extractNotes = (html: string) => {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    
+    // Look for the notes section
+    const text = tmp.textContent || tmp.innerText || '';
+    
+    // Find the "Notes:" section
+    const notesIndex = text.indexOf('Notes:');
+    if (notesIndex === -1) {
+      return 'No notes found';
+    }
+    
+    // Extract everything after "Notes:" until the next section or end
+    let notesText = text.substring(notesIndex + 6); // Skip "Notes:"
+    
+    // Look for the next section (Created at:)
+    const createdIndex = notesText.indexOf('Created at:');
+    if (createdIndex !== -1) {
+      notesText = notesText.substring(0, createdIndex);
+    }
+    
+    // Clean up whitespace
+    notesText = notesText.trim();
+    
+    return notesText || 'No notes found';
+  };
+
   // Intersection Observer for lazy loading
   useEffect(() => {
     if (!lazyLoad) {
@@ -291,7 +320,7 @@ export const BasecampCardsDisplay = React.forwardRef<
                     </Badge>
                   </div>
                   <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
-                    {stripHtml(card.content)}
+                    {extractNotes(card.content)}
                   </p>
                   <div className="flex items-center gap-1 text-xs text-muted-foreground">
                     <span>Created: {new Date(card.created_at).toLocaleDateString()}</span>
