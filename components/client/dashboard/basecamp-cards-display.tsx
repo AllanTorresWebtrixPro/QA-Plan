@@ -91,6 +91,26 @@ export const BasecampCardsDisplay = React.forwardRef<
     return notesText || 'No notes found';
   };
 
+  // Function to get status badge styling
+  const getStatusBadgeStyle = (status: string) => {
+    const statusLower = status.toLowerCase();
+    
+    if (statusLower.includes('to do') || statusLower.includes('todo')) {
+      return 'bg-purple-100 text-purple-800 border-purple-200';
+    } else if (statusLower.includes('in progress') || statusLower.includes('progress')) {
+      return 'bg-orange-100 text-orange-800 border-orange-200';
+    } else if (statusLower.includes('qa dev') || statusLower.includes('qadev')) {
+      return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+    } else if (statusLower.includes('ut') || statusLower.includes('user testing')) {
+      return 'bg-blue-100 text-blue-800 border-blue-200';
+    } else if (statusLower.includes('done') || statusLower.includes('complete')) {
+      return 'bg-green-100 text-green-800 border-green-200';
+    }
+    
+    // Default styling
+    return 'bg-gray-100 text-gray-800 border-gray-200';
+  };
+
   // Intersection Observer for lazy loading
   useEffect(() => {
     if (!lazyLoad) {
@@ -315,7 +335,10 @@ export const BasecampCardsDisplay = React.forwardRef<
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <h5 className="text-sm font-medium">{card.title}</h5>
-                    <Badge variant="outline" className="text-xs">
+                    <Badge 
+                      variant="outline" 
+                      className={`text-xs border ${getStatusBadgeStyle(card.column_name)}`}
+                    >
                       {card.column_name}
                     </Badge>
                   </div>
@@ -341,18 +364,39 @@ export const BasecampCardsDisplay = React.forwardRef<
                         <Eye className="h-3 w-3" />
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-                      <DialogHeader>
-                        <DialogTitle>{card.title}</DialogTitle>
-                        <DialogDescription>
-                          Status: {card.column_name} • Created: {new Date(card.created_at).toLocaleString()}
-                        </DialogDescription>
+                    <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+                      <DialogHeader className="pb-4 border-b">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <DialogTitle className="text-xl font-semibold text-gray-900 mb-2">
+                              {card.title}
+                            </DialogTitle>
+                            <div className="flex items-center gap-3 text-sm text-gray-600">
+                              <Badge 
+                                variant="outline" 
+                                className={`border ${getStatusBadgeStyle(card.column_name)}`}
+                              >
+                                {card.column_name}
+                              </Badge>
+                              <span>•</span>
+                              <span>Created: {new Date(card.created_at).toLocaleString()}</span>
+                              {card.updated_at !== card.created_at && (
+                                <>
+                                  <span>•</span>
+                                  <span>Updated: {new Date(card.updated_at).toLocaleString()}</span>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        </div>
                       </DialogHeader>
-                      <div className="mt-4">
-                        <div 
-                          className="prose prose-sm max-w-none"
-                          dangerouslySetInnerHTML={{ __html: card.content }}
-                        />
+                      <div className="mt-6">
+                        <div className="bg-gray-50 rounded-lg p-4 border">
+                          <div 
+                            className="prose prose-sm max-w-none text-gray-700"
+                            dangerouslySetInnerHTML={{ __html: card.content }}
+                          />
+                        </div>
                       </div>
                     </DialogContent>
                   </Dialog>
