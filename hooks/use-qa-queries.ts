@@ -36,10 +36,10 @@ export const queryKeys = {
 /**
  * Hook to fetch all tests
  */
-export function useTests() {
+export function useTests(userId?: string) {
   return useQuery({
-    queryKey: queryKeys.tests,
-    queryFn: fetchTests,
+    queryKey: [...queryKeys.tests, userId],
+    queryFn: () => fetchTests(userId),
     staleTime: 2 * 60 * 1000, // 2 minutes
   });
 }
@@ -105,11 +105,13 @@ export function useToggleTestCompletion() {
       testId: string;
       completed: boolean;
     }) => toggleTestCompletion(userId, testId, completed),
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
       // Invalidate and refetch all related queries
       queryClient.invalidateQueries({ queryKey: queryKeys.tests });
       queryClient.invalidateQueries({ queryKey: queryKeys.userProgress });
       queryClient.invalidateQueries({ queryKey: queryKeys.allUsersStats });
+      // Also invalidate the specific user's tests query
+      queryClient.invalidateQueries({ queryKey: [...queryKeys.tests, variables.userId] });
     },
   });
 }
@@ -165,9 +167,9 @@ export function useExportAllUsersResults() {
  * Hook to get tests with user progress
  */
 export function useTestsWithProgress(userId: string) {
-  const { data: tests = [], isLoading, error, refetch } = useTests();
+  const { data: tests = [], isLoading, error, refetch } = useTests(userId);
 
-  // The tests now come from the test_assignments view which includes progress data
+  // The tests now come from the API with the current user's progress included
   // So we don't need to merge with userProgress anymore
   const testsWithProgress = tests.map((test) => ({
     ...test,

@@ -220,14 +220,27 @@ export function QADashboardClient() {
 
   // Handle test completion toggle
   const handleToggleTest = async (testId: string, completed: boolean) => {
-    if (!currentUser) return;
+    console.log("handleToggleTest called with:", { testId, completed, currentUser });
+    
+    if (!currentUser) {
+      console.error("No currentUser found");
+      return;
+    }
 
     try {
+      console.log("Calling toggleTestMutation with:", {
+        userId: currentUser,
+        testId,
+        completed,
+      });
+      
       await toggleTestMutation.mutateAsync({
         userId: currentUser,
         testId,
         completed,
       });
+      
+      console.log("toggleTestMutation completed successfully");
     } catch (error) {
       console.error("Error toggling test:", error);
     }
@@ -604,11 +617,11 @@ export function QADashboardClient() {
                                 </div>
                               ) : (
                                 <Button
-                                  variant="outline"
+                                  variant="default"
                                   size="sm"
                                   onClick={() => handleToggleTest(test.id, true)}
                                   disabled={toggleTestMutation.isPending}
-                                  className="h-7 px-3 text-xs"
+                                  className="h-7 px-3 text-xs bg-red-500 hover:bg-red-600 text-white"
                                 >
                                   {toggleTestMutation.isPending ? (
                                     <Loader2 className="h-3 w-3 animate-spin" />

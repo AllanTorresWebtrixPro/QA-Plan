@@ -13,8 +13,11 @@ const supabase = createClient(
 export async function POST(request: Request) {
   try {
     const { userId, testId, completed } = await request.json();
+    
+    console.log("toggle-test API received:", { userId, testId, completed });
 
     if (!userId || !testId) {
+      console.error("Missing required fields:", { userId, testId });
       return NextResponse.json(
         { error: "Missing required fields: userId and testId" },
         { status: 400 }
@@ -34,41 +37,53 @@ export async function POST(request: Request) {
     }
 
     if (existingProgress) {
+      console.log("Updating existing progress record:", existingProgress);
       // Update existing record
+      const updateData = {
+        completed,
+        completed_at: completed ? new Date().toISOString() : null,
+        updated_at: new Date().toISOString(),
+      };
+      console.log("Update data:", updateData);
+      
       const { error: updateError } = await supabase
         .from("qa_user_test_progress")
-        .update({
-          completed,
-          completed_at: completed ? new Date().toISOString() : null,
-          updated_at: new Date().toISOString(),
-        })
+        .update(updateData)
         .eq("user_id", userId)
         .eq("test_id", testId);
 
       if (updateError) {
+        console.error("Update error:", updateError);
         return NextResponse.json(
           { error: updateError.message },
           { status: 500 }
         );
       }
+      console.log("Update successful");
     } else {
+      console.log("Creating new progress record");
       // Create new record
+      const insertData = {
+        id: `${userId}-${testId}`,
+        user_id: userId,
+        test_id: testId,
+        completed,
+        completed_at: completed ? new Date().toISOString() : null,
+      };
+      console.log("Insert data:", insertData);
+      
       const { error: insertError } = await supabase
         .from("qa_user_test_progress")
-        .insert({
-          id: `${userId}-${testId}`,
-          user_id: userId,
-          test_id: testId,
-          completed,
-          completed_at: completed ? new Date().toISOString() : null,
-        });
+        .insert(insertData);
 
       if (insertError) {
+        console.error("Insert error:", insertError);
         return NextResponse.json(
           { error: insertError.message },
           { status: 500 }
         );
       }
+      console.log("Insert successful");
     }
 
     return NextResponse.json({ success: true });

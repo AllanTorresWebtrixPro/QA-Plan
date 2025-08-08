@@ -238,8 +238,9 @@ export interface UserStats {
 /**
  * Fetch all tests from the database
  */
-export async function fetchTests(): Promise<TestItem[]> {
-  const response = await apiGet<TestItem[]>("/qa/tests");
+export async function fetchTests(userId?: string): Promise<TestItem[]> {
+  const url = userId ? `/qa/tests?userId=${encodeURIComponent(userId)}` : "/qa/tests";
+  const response = await apiGet<TestItem[]>(url);
   if (!response.success || !response.data) {
     throw new Error(response.error || "Failed to fetch tests");
   }

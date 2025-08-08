@@ -10,8 +10,12 @@ const supabase = createClient(
  * GET /api/qa/tests
  * Fetch all tests from the database
  */
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    // Get the current user ID from the request headers or query params
+    const url = new URL(request.url);
+    const currentUserId = url.searchParams.get('userId');
+    
     // First, get assigned tests from test_assignments view
     const { data: assignedTestsData, error: assignedTestsError } = await supabase
       .from("test_assignments")
@@ -32,15 +36,34 @@ export async function GET() {
       return NextResponse.json({ error: allTestsError.message }, { status: 500 });
     }
 
-    // Create a map of assigned tests by test_id for quick lookup
+    // Get current user's progress for all tests
+    let currentUserProgress = [];
+    if (currentUserId) {
+      const { data: progressData, error: progressError } = await supabase
+        .from("qa_user_test_progress")
+        .select("*")
+        .eq("user_id", currentUserId);
+
+      if (!progressError && progressData) {
+        currentUserProgress = progressData;
+      }
+    }
+
+    // Create maps for quick lookup
     const assignedTestsMap = new Map();
     assignedTestsData.forEach((test) => {
       assignedTestsMap.set(test.test_id, test);
     });
 
-    // Transform all tests, using assigned data when available
+    const currentUserProgressMap = new Map();
+    currentUserProgress.forEach((progress) => {
+      currentUserProgressMap.set(progress.test_id, progress);
+    });
+
+    // Transform all tests, using assigned data when available and current user's progress
     const transformedTests = allTestsData.map((test) => {
       const assignedTest = assignedTestsMap.get(test.id);
+      const userProgress = currentUserProgressMap.get(test.id);
       
       return {
         id: test.id,
@@ -63,9 +86,10 @@ export async function GET() {
         assignedUserAvatar: assignedTest?.assigned_user_avatar || null,
         assignedUserRole: assignedTest?.assigned_user_role || null,
         assignedByName: assignedTest?.assigned_by_name || null,
-        completed: assignedTest?.completed || false,
-        completedAt: assignedTest?.completed_at || null,
-        notes: assignedTest?.notes || null,
+        // Use current user's progress if available, otherwise fall back to assigned user's progress
+        completed: userProgress ? userProgress.completed : (assignedTest?.completed || false),
+        completedAt: userProgress ? userProgress.completed_at : (assignedTest?.completed_at || null),
+        notes: userProgress ? userProgress.notes : (assignedTest?.notes || null),
       };
     });
 
