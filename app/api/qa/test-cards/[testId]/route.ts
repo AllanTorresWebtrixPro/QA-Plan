@@ -55,7 +55,7 @@ export async function GET(
     //console.log("Looking for card IDs:", uniqueCardIds);
 
     if (uniqueCardIds.length === 0) {
-      console.log("No card IDs found for test:", testId);
+      //console.log("No card IDs found for test:", testId);
       const result = {
         success: true,
         cards: []

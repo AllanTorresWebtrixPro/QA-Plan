@@ -26,6 +26,17 @@ import {
   Users,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { SurveyTestSummary } from "@/components/survey-test-summary";
 import { OnsiteInvoiceTestSummary } from "@/components/onsite-invoice-test-summary";
 import { CurrentTripsTestSummary } from "@/components/current-trips-test-summary";
@@ -90,6 +101,7 @@ export function QADashboardClient() {
   const [activeSettingsSubsection, setActiveSettingsSubsection] = useState("Access Control");
   const [pendingNoteTestId, setPendingNoteTestId] = useState<string | null>(null);
   const [selectedUserFilter, setSelectedUserFilter] = useState<string>("all");
+  const [confirmingNoteTestId, setConfirmingNoteTestId] = useState<string | null>(null);
 
   // Ref for BasecampCardsDisplay to refresh cards after adding notes
   const basecampCardsRefs = useRef<Record<string, { refreshCards: () => void }>>({});
@@ -699,20 +711,45 @@ export function QADashboardClient() {
                               className="flex-1"
                               rows={2}
                             />
-                            <Button
-                              onClick={() => handleAddNote(test.id)}
-                              disabled={
-                                pendingNoteTestId === test.id ||
-                                !noteInputs[test.id]?.trim()
-                              }
-                              size="sm"
-                            >
-                              {pendingNoteTestId === test.id ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : (
-                                "Report Issue"
-                              )}
-                            </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  disabled={
+                                    pendingNoteTestId === test.id ||
+                                    !noteInputs[test.id]?.trim()
+                                  }
+                                  size="sm"
+                                >
+                                  {pendingNoteTestId === test.id ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    "Report Issue"
+                                  )}
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Confirm Issue Report</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Are you sure you want to report this issue? This will create a Basecamp card with the following description:
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <div className="mt-4 p-3 bg-gray-50 rounded-md">
+                                  <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                                    {noteInputs[test.id] || ""}
+                                  </p>
+                                </div>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => handleAddNote(test.id)}
+                                    className="bg-blue-600 hover:bg-blue-700"
+                                  >
+                                    Report Issue
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
                           </div>
                         </div>
 
