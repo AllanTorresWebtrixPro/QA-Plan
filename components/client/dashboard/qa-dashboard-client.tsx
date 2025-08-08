@@ -684,7 +684,7 @@ export function QADashboardClient() {
                           </div>
                         )}
 
-                        {/* Notes */}
+                        {/* Issue Reporting */}
                         <div className="space-y-2">
                           <div className="flex items-center gap-2">
                             <Textarea
@@ -714,11 +714,6 @@ export function QADashboardClient() {
                               )}
                             </Button>
                           </div>
-                          {test.notes && (
-                            <div className="bg-gray-50 p-2 rounded text-sm">
-                              <strong>Notes:</strong> {test.notes}
-                            </div>
-                          )}
                         </div>
 
                         {/* Basecamp Cards - Lazy Loaded */}

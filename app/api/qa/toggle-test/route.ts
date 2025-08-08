@@ -13,8 +13,6 @@ const supabase = createClient(
 export async function POST(request: Request) {
   try {
     const { userId, testId, completed } = await request.json();
-    
-    console.log("toggle-test API received:", { userId, testId, completed });
 
     if (!userId || !testId) {
       console.error("Missing required fields:", { userId, testId });
@@ -61,7 +59,6 @@ export async function POST(request: Request) {
       }
       console.log("Update successful");
     } else {
-      console.log("Creating new progress record");
       // Create new record
       const insertData = {
         id: `${userId}-${testId}`,
