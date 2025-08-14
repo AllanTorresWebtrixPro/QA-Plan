@@ -41,6 +41,7 @@ export function TestCasesClient() {
   const [filterSubcategory, setFilterSubcategory] = useState<string>("all");
   const [filterPriority, setFilterPriority] = useState<string>("all");
   const [filterAssignment, setFilterAssignment] = useState<string>("all");
+  const [filterStatus, setFilterStatus] = useState<string>("all");
   const { profile } = useAuth();
 
   useEffect(() => {
@@ -78,12 +79,20 @@ export function TestCasesClient() {
       assignmentMatch = !test.assignedTo;
     }
     
+    // Status filter
+    let statusMatch = true;
+    if (filterStatus === "completed") {
+      statusMatch = !!test.completed;
+    } else if (filterStatus === "pending") {
+      statusMatch = !test.completed;
+    }
+
     // Filter out disabled tests for non-admin users
     if (!isAdmin(profile) && test.disabled) {
       return false;
     }
     
-    return categoryMatch && subcategoryMatch && priorityMatch && assignmentMatch;
+    return categoryMatch && subcategoryMatch && priorityMatch && assignmentMatch && statusMatch;
   });
 
   const categories = Array.from(new Set(tests.map((test) => test.category)));
@@ -115,12 +124,14 @@ export function TestCasesClient() {
     setFilterSubcategory("all");
     setFilterPriority("all");
     setFilterAssignment("all");
+    setFilterStatus("all");
   };
 
   const hasActiveFilters = filterCategory !== "all" || 
                           filterSubcategory !== "all" || 
                           filterPriority !== "all" || 
-                          filterAssignment !== "all";
+                          filterAssignment !== "all" ||
+                          filterStatus !== "all";
 
   if (loading) {
     return (
@@ -196,7 +207,7 @@ export function TestCasesClient() {
             <CardTitle className="text-lg">Filters</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
               <div>
                 <label className="text-sm font-medium">Category</label>
                 <select
@@ -255,6 +266,18 @@ export function TestCasesClient() {
                   <option value="unassigned">Unassigned</option>
                 </select>
               </div>
+              <div>
+                <label className="text-sm font-medium">Status</label>
+                <select
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                  className="w-full mt-1 p-2 border rounded-md"
+                >
+                  <option value="all">All Statuses</option>
+                  <option value="completed">Completed</option>
+                  <option value="pending">Pending</option>
+                </select>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -282,6 +305,11 @@ export function TestCasesClient() {
           {filterAssignment !== "all" && (
             <Badge variant="secondary" className="text-xs">
               {filterAssignment === "assigned" ? "Assigned" : "Unassigned"}
+            </Badge>
+          )}
+          {filterStatus !== "all" && (
+            <Badge variant="secondary" className="text-xs">
+              Status: {filterStatus === "completed" ? "Completed" : "Pending"}
             </Badge>
           )}
         </div>
