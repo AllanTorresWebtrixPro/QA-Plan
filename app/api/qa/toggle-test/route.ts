@@ -3,89 +3,88 @@ import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
 /**
  * POST /api/qa/toggle-test
- * Toggle test completion status for a user
+ * Toggle the disabled status of a test (admin only)
  */
 export async function POST(request: Request) {
   try {
-    const { userId, testId, completed } = await request.json();
+    const { testId, userId } = await request.json();
 
-    if (!userId || !testId) {
-      console.error("Missing required fields:", { userId, testId });
+    if (!testId || !userId) {
       return NextResponse.json(
-        { error: "Missing required fields: userId and testId" },
+        { error: "Missing required fields: testId and userId" },
         { status: 400 }
       );
     }
 
-    // Check if progress record exists
-    const { data: existingProgress, error: checkError } = await supabase
-      .from("qa_user_test_progress")
-      .select("*")
-      .eq("user_id", userId)
-      .eq("test_id", testId)
+    // Check if user is admin
+    const { data: userProfile, error: profileError } = await supabase
+      .from("user_profiles")
+      .select("role")
+      .eq("id", userId)
       .single();
 
-    if (checkError && checkError.code !== "PGRST116") {
-      return NextResponse.json({ error: checkError.message }, { status: 500 });
+    if (profileError || !userProfile) {
+      return NextResponse.json(
+        { error: "User profile not found" },
+        { status: 404 }
+      );
     }
 
-    if (existingProgress) {
-      console.log("Updating existing progress record:", existingProgress);
-      // Update existing record
-      const updateData = {
-        completed,
-        completed_at: completed ? new Date().toISOString() : null,
-        updated_at: new Date().toISOString(),
-      };
-      console.log("Update data:", updateData);
-      
-      const { error: updateError } = await supabase
-        .from("qa_user_test_progress")
-        .update(updateData)
-        .eq("user_id", userId)
-        .eq("test_id", testId);
-
-      if (updateError) {
-        console.error("Update error:", updateError);
-        return NextResponse.json(
-          { error: updateError.message },
-          { status: 500 }
-        );
-      }
-      console.log("Update successful");
-    } else {
-      // Create new record
-      const insertData = {
-        id: `${userId}-${testId}`,
-        user_id: userId,
-        test_id: testId,
-        completed,
-        completed_at: completed ? new Date().toISOString() : null,
-      };
-      console.log("Insert data:", insertData);
-      
-      const { error: insertError } = await supabase
-        .from("qa_user_test_progress")
-        .insert(insertData);
-
-      if (insertError) {
-        console.error("Insert error:", insertError);
-        return NextResponse.json(
-          { error: insertError.message },
-          { status: 500 }
-        );
-      }
-      console.log("Insert successful");
+    if (userProfile.role !== "admin") {
+      return NextResponse.json(
+        { error: "Only admins can toggle test status" },
+        { status: 403 }
+      );
     }
 
-    return NextResponse.json({ success: true });
+    // Call the database function to toggle the test status
+    const { data, error } = await supabase.rpc("toggle_test_disabled_status", {
+      test_id: testId,
+      user_id: userId,
+    });
+
+    if (error) {
+      console.error("Error toggling test status:", error);
+      return NextResponse.json(
+        { error: "Failed to toggle test status" },
+        { status: 500 }
+      );
+    }
+
+    if (!data) {
+      return NextResponse.json(
+        { error: "Test not found or operation failed" },
+        { status: 404 }
+      );
+    }
+
+    // Get the updated test data
+    const { data: updatedTest, error: fetchError } = await supabase
+      .from("qa_tests")
+      .select("*")
+      .eq("id", testId)
+      .single();
+
+    if (fetchError) {
+      console.error("Error fetching updated test:", fetchError);
+      return NextResponse.json(
+        { error: "Test toggled but failed to fetch updated data" },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      test: updatedTest,
+      message: `Test ${updatedTest.disabled ? "disabled" : "enabled"} successfully`,
+    });
   } catch (error) {
-    console.error("Error toggling test completion:", error);
+    console.error("Error in toggle-test API:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

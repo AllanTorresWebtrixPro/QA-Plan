@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TestCasesClient } from "@/components/client/test-cases/test-cases-client";
+import { AuthGuard } from "@/components/auth/auth-guard";
 
 function TestCasesSkeleton() {
   return (
@@ -30,17 +31,19 @@ function TestCasesSkeleton() {
 
 export default function TestCasesPage() {
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Test Cases</h1>
-        <p className="text-muted-foreground">
-          View and manage all test cases for the MTP application.
-        </p>
-      </div>
+    <AuthGuard>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Test Cases</h1>
+          <p className="text-muted-foreground">
+            View and manage all test cases for the MTP application.
+          </p>
+        </div>
 
-      <Suspense fallback={<TestCasesSkeleton />}>
-        <TestCasesClient />
-      </Suspense>
-    </div>
+        <Suspense fallback={<TestCasesSkeleton />}>
+          <TestCasesClient />
+        </Suspense>
+      </div>
+    </AuthGuard>
   );
 }

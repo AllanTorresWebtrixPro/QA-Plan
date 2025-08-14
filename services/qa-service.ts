@@ -193,6 +193,7 @@ export interface TestItem {
   completed?: boolean;
   completedAt?: string;
   notes?: string;
+  disabled?: boolean; // Whether the test is disabled
   // Assignment information
   assignedTo?: string;
   assignedAt?: string;

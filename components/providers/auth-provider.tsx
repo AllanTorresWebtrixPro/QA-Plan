@@ -59,22 +59,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   useEffect(() => {
+    // Add a timeout to prevent infinite loading
+    const timeout = setTimeout(() => {
+      console.log('AuthProvider: Timeout reached, forcing loading to false')
+      setLoading(false)
+    }, 10000) // 10 second timeout
+
     // Get initial session
     const getInitialSession = async () => {
       try {
+        console.log('AuthProvider: Starting initial session check...')
         const { data: { session } } = await supabase.auth.getSession()
+        console.log('AuthProvider: Initial session result:', { hasSession: !!session, hasUser: !!session?.user })
+        
         setSession(session)
         setUser(session?.user ?? null)
         
         if (session?.user) {
+          console.log('AuthProvider: Initial session has user, fetching profile for:', session.user.id)
           const userProfile = await fetchUserProfile(session.user.id)
+          console.log('AuthProvider: Initial profile fetch result:', userProfile ? 'success' : 'failed')
           setProfile(userProfile)
+        } else {
+          console.log('AuthProvider: No initial session')
         }
         
+        console.log('AuthProvider: Setting loading to false')
         setLoading(false)
+        clearTimeout(timeout)
       } catch (error) {
         console.error('Error getting initial session:', error)
         setLoading(false)
+        clearTimeout(timeout)
       }
     }
 
@@ -89,24 +105,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(session?.user ?? null)
         
         if (session?.user) {
+          console.log('AuthProvider: User authenticated, fetching profile for:', session.user.id)
           const userProfile = await fetchUserProfile(session.user.id)
           setProfile(userProfile)
+          console.log('AuthProvider: Profile fetched:', userProfile ? 'success' : 'failed')
         } else {
+          console.log('AuthProvider: No session, clearing profile')
           setProfile(null)
         }
         
         setLoading(false)
+        clearTimeout(timeout)
       }
     )
 
-    return () => subscription.unsubscribe()
+    return () => {
+      subscription.unsubscribe()
+      clearTimeout(timeout)
+    }
   }, [])
 
   const signIn = async (email: string, password: string) => {
+    console.log('AuthProvider: Starting sign in for:', email)
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
+    console.log('AuthProvider: Sign in result:', { error: error?.message || 'success' })
     return { error }
   }
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/components/providers/auth-provider"
 import { Button } from "@/components/ui/button"
@@ -9,7 +9,6 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Loader2, Eye, EyeOff } from "lucide-react"
 
 export default function LoginPage() {
@@ -17,15 +16,22 @@ export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [name, setName] = useState("")
-  const [role, setRole] = useState<'admin' | 'tester'>('tester')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [message, setMessage] = useState("")
   const [isForgotPassword, setIsForgotPassword] = useState(false)
 
-  const { signIn, signUp, resetPassword } = useAuth()
+  const { user, signIn, signUp, resetPassword } = useAuth()
   const router = useRouter()
+
+  // Redirect if user is already authenticated
+  useEffect(() => {
+    if (user) {
+      console.log('User already authenticated, redirecting to dashboard')
+      router.push("/")
+    }
+  }, [user, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -42,21 +48,32 @@ export default function LoginPage() {
           setMessage("Check your email for a password reset link!")
         }
       } else if (isSignUp) {
-        const { error } = await signUp(email, password, name, role)
+        // All new users are testers by default
+        const { error } = await signUp(email, password, name, 'tester')
         if (error) {
           setError(error.message)
         } else {
           setMessage("Check your email for a confirmation link!")
         }
       } else {
+        console.log('Attempting to sign in...')
         const { error } = await signIn(email, password)
         if (error) {
+          console.error('Sign in error:', error)
           setError(error.message)
         } else {
-          router.push("/")
+          console.log('Sign in successful, redirecting to dashboard')
+          // Use window.location.href as a fallback if router.push doesn't work
+          try {
+            router.push("/")
+          } catch (routerError) {
+            console.error('Router error:', routerError)
+            window.location.href = "/"
+          }
         }
       }
     } catch (err) {
+      console.error('Unexpected error:', err)
       setError("An unexpected error occurred")
     } finally {
       setLoading(false)
@@ -180,18 +197,6 @@ export default function LoginPage() {
                       )}
                     </Button>
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="role">Role</Label>
-                  <Select value={role} onValueChange={(value: 'admin' | 'tester') => setRole(value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select your role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="tester">🧪 Tester</SelectItem>
-                      <SelectItem value="admin">👑 Admin</SelectItem>
-                    </SelectContent>
-                  </Select>
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

@@ -93,6 +93,8 @@ export async function GET() {
         completed: anyUserCompletion ? anyUserCompletion.completed : (assignedTest?.completed || false),
         completedAt: anyUserCompletion ? anyUserCompletion.completed_at : (assignedTest?.completed_at || null),
         notes: anyUserCompletion ? anyUserCompletion.notes : (assignedTest?.notes || null),
+        // Disabled status
+        disabled: test.disabled || false,
       };
     });
 

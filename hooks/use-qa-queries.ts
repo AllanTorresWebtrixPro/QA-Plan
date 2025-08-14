@@ -169,9 +169,26 @@ export function useExportAllUsersResults() {
 export function useTestsWithProgress(userId?: string) {
   const { data: tests = [], isLoading, error, refetch } = useTests();
 
+  // Define disabled Settings subsections
+  const disabledSettingsSubsections = [
+    "Accessibility Testing",
+    "Browser Compatibility", 
+    "Performance Testing",
+    "Security Testing",
+    "Cross-Section Testing"
+  ];
+
+  // Filter out disabled Settings subsections and disabled tests
+  const filteredTests = tests.filter(test => 
+    // Exclude tests from disabled Settings subsections
+    !(test.category === "Settings" && test.subcategory && disabledSettingsSubsections.includes(test.subcategory)) &&
+    // Exclude tests that are marked as disabled
+    !test.disabled
+  );
+
   // The tests now come from the API with any user's completion status included
   // So we don't need to merge with userProgress anymore
-  const testsWithProgress = tests.map((test) => ({
+  const testsWithProgress = filteredTests.map((test) => ({
     ...test,
     // The API now returns completed, completedAt, notes directly from the view
     completed: test.completed || false,
@@ -229,7 +246,9 @@ export function useAllUsersStats() {
     const userTestsWithProgress = tests
       .filter(test => 
         // Exclude tests from disabled Settings subsections
-        !(test.category === "Settings" && test.subcategory && disabledSettingsSubsections.includes(test.subcategory))
+        !(test.category === "Settings" && test.subcategory && disabledSettingsSubsections.includes(test.subcategory)) &&
+        // Exclude tests that are marked as disabled
+        !test.disabled
       )
       .map((test) => {
         const progress = userProgress.find(
@@ -279,7 +298,9 @@ export function useAllAuthUsersStats() {
     const userTestsWithProgress = tests
       .filter(test => 
         // Exclude tests from disabled Settings subsections
-        !(test.category === "Settings" && test.subcategory && disabledSettingsSubsections.includes(test.subcategory))
+        !(test.category === "Settings" && test.subcategory && disabledSettingsSubsections.includes(test.subcategory)) &&
+        // Exclude tests that are marked as disabled
+        !test.disabled
       )
       .map((test) => {
         const progress = userProgress.find(

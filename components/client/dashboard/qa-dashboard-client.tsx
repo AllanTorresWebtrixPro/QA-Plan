@@ -44,6 +44,7 @@ import { TestAssignmentButton } from "@/components/test-assignment-button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BasecampCardsDisplay } from "./basecamp-cards-display";
 import { useAuth } from "@/components/providers/auth-provider";
+import { isAdmin } from "@/lib/utils";
 
 // Import separated components
 import { DatabaseStatusAlert } from "./dashboard-components/database-status-alert";
@@ -208,6 +209,11 @@ export function QADashboardClient() {
   const finalFilteredTests = filteredTests.filter((test) => {
     // Exclude tests from disabled Settings subsections
     if (test.category === "Settings" && test.subcategory && disabledSettingsSubsections.includes(test.subcategory)) {
+      return false;
+    }
+
+    // Filter out disabled tests for non-admin users
+    if (!isAdmin(authProfile) && test.disabled) {
       return false;
     }
 
