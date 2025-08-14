@@ -27,6 +27,64 @@ export function BasecampCards({ testId }: BasecampCardsProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Function to extract notes from card content
+  const extractNotes = (html: string) => {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    
+    // Look for the notes section
+    const text = tmp.textContent || tmp.innerText || '';
+    
+    // Find the "Notes:" section
+    const notesIndex = text.indexOf('Notes:');
+    if (notesIndex === -1) {
+      return 'No notes found';
+    }
+    
+    // Extract everything after "Notes:" until the next section or end
+    let notesText = text.substring(notesIndex + 6); // Skip "Notes:"
+    
+    // Look for the next section (Created at:)
+    const createdIndex = notesText.indexOf('Created at:');
+    if (createdIndex !== -1) {
+      notesText = notesText.substring(0, createdIndex);
+    }
+    
+    // Clean up whitespace
+    notesText = notesText.trim();
+    
+    return notesText || 'No notes found';
+  };
+
+  // Function to extract developer comments from card content
+  const extractDeveloperComments = (html: string) => {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    
+    // Look for the developer comments section
+    const text = tmp.textContent || tmp.innerText || '';
+    
+    // Find the "Developer Comments:" section
+    const commentsIndex = text.indexOf('Developer Comments:');
+    if (commentsIndex === -1) {
+      return null;
+    }
+    
+    // Extract everything after "Developer Comments:" until the next section or end
+    let commentsText = text.substring(commentsIndex + 20); // Skip "Developer Comments:"
+    
+    // Look for the next section (Created at:)
+    const createdIndex = commentsText.indexOf('Created at:');
+    if (createdIndex !== -1) {
+      commentsText = commentsText.substring(0, createdIndex);
+    }
+    
+    // Clean up whitespace
+    commentsText = commentsText.trim();
+    
+    return commentsText || null;
+  };
+
   useEffect(() => {
     const fetchCards = async () => {
       try {
@@ -127,6 +185,13 @@ export function BasecampCards({ testId }: BasecampCardsProps) {
                           className="prose prose-sm max-w-none"
                           dangerouslySetInnerHTML={{ __html: card.content }}
                         />
+                        {extractDeveloperComments(card.content) && (
+                          <div className="mt-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                            <div className="text-sm text-gray-700">
+                              <span className="font-bold text-gray-800">Developer Comments:</span> {extractDeveloperComments(card.content)}
+                            </div>
+                          </div>
+                        )}
                       </div>
                       {card.url && (
                         <div className="mt-4 pt-4 border-t">

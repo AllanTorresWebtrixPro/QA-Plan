@@ -91,6 +91,35 @@ export const BasecampCardsDisplay = React.forwardRef<
     return notesText || 'No notes found';
   };
 
+  // Function to extract developer comments from card content
+  const extractDeveloperComments = (html: string) => {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    
+    // Look for the developer comments section
+    const text = tmp.textContent || tmp.innerText || '';
+    
+    // Find the "Developer Comments:" section
+    const commentsIndex = text.indexOf('Developer Comments:');
+    if (commentsIndex === -1) {
+      return null;
+    }
+    
+    // Extract everything after "Developer Comments:" until the next section or end
+    let commentsText = text.substring(commentsIndex + 20); // Skip "Developer Comments:"
+    
+    // Look for the next section (Created at:)
+    const createdIndex = commentsText.indexOf('Created at:');
+    if (createdIndex !== -1) {
+      commentsText = commentsText.substring(0, createdIndex);
+    }
+    
+    // Clean up whitespace
+    commentsText = commentsText.trim();
+    
+    return commentsText || null;
+  };
+
   // Function to get status badge styling
   const getStatusBadgeStyle = (status: string) => {
     const statusLower = status.toLowerCase();
@@ -345,12 +374,17 @@ export const BasecampCardsDisplay = React.forwardRef<
                   <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
                     {extractNotes(card.content)}
                   </p>
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
                     <span>Created: {new Date(card.created_at).toLocaleDateString()}</span>
                     {card.updated_at !== card.created_at && (
                       <span>• Updated: {new Date(card.updated_at).toLocaleDateString()}</span>
                     )}
                   </div>
+                  {extractDeveloperComments(card.content) && (
+                    <div className="text-xs text-gray-800">
+                      <span className="font-bold">Developer Comments:</span> {extractDeveloperComments(card.content)}
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-center gap-1 ml-2">
                   <Dialog>
