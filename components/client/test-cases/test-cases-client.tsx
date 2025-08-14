@@ -363,8 +363,14 @@ export function TestCasesClient() {
                       isDisabled={test.disabled || false}
                       onToggle={(testId, newStatus) => {
                         console.log(`Test ${testId} ${newStatus ? 'disabled' : 'enabled'}`);
-                        // Refresh the tests list
-                        window.location.reload();
+                        // Update the local state instead of reloading the page
+                        setTests(prevTests => 
+                          prevTests.map(test => 
+                            test.id === testId 
+                              ? { ...test, disabled: newStatus }
+                              : test
+                          )
+                        );
                       }}
                     />
                   </div>
