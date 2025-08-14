@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
+import { cn, filterNavigationByRole, isAdmin } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/components/providers/auth-provider";
 import {
@@ -82,15 +82,19 @@ export function MainNavigation({}: MainNavigationProps) {
       href: "/database-test",
       icon: Database,
       description: "Database connection and management",
+      adminOnly: true, // Only admins can access database management
     },
-
     {
       title: "Basecamp Config",
       href: "/basecamp-config",
       icon: ExternalLink,
       description: "Configure Basecamp integration",
+      adminOnly: true, // Only admins can configure Basecamp
     },
   ];
+
+  // Filter navigation items based on user role
+  const filteredNavigationItems = filterNavigationByRole(navigationItems, profile);
 
   const isActive = (href: string) => {
     if (href === "/") {
@@ -116,7 +120,7 @@ export function MainNavigation({}: MainNavigationProps) {
         <div className="hidden md:flex items-center gap-6">
           <NavigationMenu>
             <NavigationMenuList>
-              {navigationItems.map((item) => (
+              {filteredNavigationItems.map((item) => (
                 <NavigationMenuItem key={item.href}>
                   <Link href={item.href} legacyBehavior passHref>
                     <NavigationMenuLink
@@ -226,7 +230,7 @@ export function MainNavigation({}: MainNavigationProps) {
         <div className="md:hidden border-t bg-background">
           <div className="container py-4">
             <nav className="space-y-2">
-              {navigationItems.map((item) => (
+              {filteredNavigationItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
