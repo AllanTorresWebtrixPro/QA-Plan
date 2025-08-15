@@ -3,6 +3,7 @@ import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 import { QueryClientProvider } from "@/components/providers/query-client-provider";
+import { AuthProvider } from "@/components/providers/auth-provider";
 import { MainNavigation } from "@/components/navigation/main-navigation";
 import { BreadcrumbNavigation } from "@/components/navigation/breadcrumb-navigation";
 
@@ -30,15 +31,17 @@ html {
       </head>
       <body className="min-h-screen bg-background">
         <QueryClientProvider>
-          <div className="flex min-h-screen flex-col">
-            <MainNavigation />
-            <main className="flex-1">
-              <div className="container mx-auto px-4 py-6">
-                <BreadcrumbNavigation />
-                {children}
-              </div>
-            </main>
-          </div>
+          <AuthProvider>
+            <div className="flex min-h-screen flex-col">
+              <MainNavigation />
+              <main className="flex-1">
+                <div className="container mx-auto px-4 py-6">
+                  <BreadcrumbNavigation />
+                  {children}
+                </div>
+              </main>
+            </div>
+          </AuthProvider>
         </QueryClientProvider>
       </body>
     </html>

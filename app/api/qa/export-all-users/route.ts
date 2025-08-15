@@ -14,7 +14,7 @@ export async function GET() {
   try {
     // Fetch all users
     const { data: users, error: usersError } = await supabase
-      .from("qa_users")
+      .from("user_profiles")
       .select("*")
       .order("name", { ascending: true });
 

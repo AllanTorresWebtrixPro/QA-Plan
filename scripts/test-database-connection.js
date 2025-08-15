@@ -31,7 +31,7 @@ async function testDatabaseConnection() {
   const results = {
     connection: false,
     tables: {
-      qa_users: { exists: false, count: 0 },
+      user_profiles: { exists: false, count: 0 },
       qa_tests: { exists: false, count: 0 },
       qa_user_test_progress: { exists: false, count: 0 },
     },
@@ -43,7 +43,7 @@ async function testDatabaseConnection() {
 
     // Test basic connection
     const { data: connectionTest, error: connectionError } = await supabase
-      .from("qa_users")
+      .from("user_profiles")
       .select("count", { count: "exact", head: true });
 
     if (connectionError) {
@@ -56,7 +56,7 @@ async function testDatabaseConnection() {
 
     // Test each table
     console.log("\n📊 Testing Database Tables:");
-    const tables = ["qa_users", "qa_tests", "qa_user_test_progress"];
+    const tables = ["user_profiles", "qa_tests", "qa_user_test_progress"];
 
     for (const table of tables) {
       try {
@@ -85,7 +85,7 @@ async function testDatabaseConnection() {
     console.log("\n📋 Testing Sample Data Fetch...");
     try {
       const { data: users, error: usersError } = await supabase
-        .from("qa_users")
+        .from("user_profiles")
         .select("*")
         .limit(5);
 

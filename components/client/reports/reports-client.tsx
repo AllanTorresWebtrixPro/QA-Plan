@@ -38,6 +38,7 @@ import {
 } from "lucide-react";
 import {
   useAllUsersStats,
+  useAllAuthUsersStats,
   useTestsWithProgress,
   useExportAllUsersResults,
 } from "@/hooks/use-qa-queries";
@@ -48,13 +49,29 @@ export function ReportsClient() {
 
   // Data fetching
   const allUsersStats = useAllUsersStats();
-  const testsWithProgress = useTestsWithProgress("user-1");
+  const allAuthUsersStats = useAllAuthUsersStats();
+  const { data: testsWithProgress = [], isLoading } = useTestsWithProgress("user-1");
   const exportAllUsersMutation = useExportAllUsersResults();
 
-  // Filter data based on selected period and category
+  // Define disabled Settings subsections
+  const disabledSettingsSubsections = [
+    "Accessibility Testing",
+    "Browser Compatibility", 
+    "Performance Testing",
+    "Security Testing",
+    "Cross-Section Testing"
+  ];
+
+  // Filter data based on selected period and category, excluding disabled tests
   const filteredTests = testsWithProgress.filter(
-    (test: any) =>
-      selectedCategory === "All" || test.category === selectedCategory
+    (test: any) => {
+      // Exclude tests from disabled Settings subsections
+      if (test.category === "Settings" && test.subcategory && disabledSettingsSubsections.includes(test.subcategory)) {
+        return false;
+      }
+      
+      return selectedCategory === "All" || test.category === selectedCategory;
+    }
   );
 
   // Calculate statistics
@@ -95,7 +112,7 @@ export function ReportsClient() {
   }, {} as Record<string, { total: number; completed: number }>);
 
   // User performance ranking
-  const userRanking = [...allUsersStats]
+  const userRanking = [...allAuthUsersStats]
     .sort((a, b) => b.percentage - a.percentage)
     .slice(0, 5);
 
@@ -115,7 +132,7 @@ export function ReportsClient() {
     }
   };
 
-  if (allUsersStats.length === 0 || testsWithProgress.length === 0) {
+  if (isLoading || allAuthUsersStats.length === 0 || testsWithProgress.length === 0) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="flex items-center gap-2">

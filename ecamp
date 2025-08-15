@@ -1,0 +1,3 @@
+[33m959a037[m[33m ([m[1;36mHEAD -> [m[1;32mfeature/new-design[m[33m)[m feat: complete OAuth token generation and database integration
+[33m1b126f3[m[33m ([m[1;31morigin/feature/new-design[m[33m)[m Registration App
+[33m6dfdcf6[m feat: add database storage for Basecamp OAuth tokens

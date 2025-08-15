@@ -1,0 +1,423 @@
+/**
+ * Basecamp Service
+ *
+ * Handles all Basecamp API interactions including authentication,
+ * card creation, project management, and column operations.
+ */
+
+import { getValidBasecampToken } from "./basecamp-token-service";
+import { getUserById } from "./qa-service";
+
+interface BasecampConfig {
+  accountId: string;
+  userAgent: string;
+  projectId: string;
+  cardTableId: string;
+  defaultColumnId: string;
+}
+
+interface BasecampCard {
+  title: string;
+  content?: string;
+  due_on?: string;
+  notify?: boolean;
+}
+
+interface BasecampResponse {
+  success: boolean;
+  data?: any;
+  error?: string;
+}
+
+class BasecampService {
+  private config: BasecampConfig;
+  private baseUrl: string;
+  private userId: string;
+  private projectId: string;
+  private cardTableId: string;
+  private defaultColumnId: string;
+
+  constructor(config: BasecampConfig, userId: string) {
+    this.config = config;
+    this.userId = userId;
+    this.baseUrl = `https://3.basecampapi.com/${config.accountId}`;
+    this.projectId = config.projectId;
+    this.cardTableId = config.cardTableId;
+    this.defaultColumnId = config.defaultColumnId;
+  }
+
+  /**
+   * Get authentication headers for Basecamp API requests
+   */
+  private async getAuthHeaders(): Promise<Record<string, string>> {
+    const tokenResult = await getValidBasecampToken(this.userId);
+
+    if (!tokenResult.success || !tokenResult.accessToken) {
+      throw new Error(tokenResult.error || "Failed to get valid access token");
+    }
+
+    return {
+      Authorization: `Bearer ${tokenResult.accessToken}`,
+      "User-Agent": this.config.userAgent,
+      "Content-Type": "application/json",
+    };
+  }
+
+  /**
+   * Make a request to the Basecamp API
+   */
+  private async makeRequest(
+    endpoint: string,
+    options: RequestInit = {}
+  ): Promise<BasecampResponse> {
+    try {
+      const url = `${this.baseUrl}${endpoint}`;
+      const headers = await this.getAuthHeaders();
+
+      const response = await fetch(url, {
+        ...options,
+        headers: {
+          ...headers,
+          ...options.headers,
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(
+          `Basecamp API Error: ${response.status} ${response.statusText}`,
+          errorText
+        );
+
+        // Special handling for 401 errors
+        if (response.status === 401) {
+          return {
+            success: false,
+            error: `HTTP 401: Unauthorized - Token may not have access to this account. Please check account permissions.`,
+          };
+        }
+
+        return {
+          success: false,
+          error: `HTTP ${response.status}: ${response.statusText}`,
+        };
+      }
+
+      // Check if response has content before parsing JSON
+      const responseText = await response.text();
+      let data = null;
+      
+      if (responseText.trim()) {
+        try {
+          data = JSON.parse(responseText);
+        } catch (parseError) {
+          console.error("Error parsing JSON response:", parseError);
+          return {
+            success: false,
+            error: "Invalid JSON response from Basecamp API",
+          };
+        }
+      }
+      
+      return { success: true, data };
+    } catch (error) {
+      console.error("Basecamp API request failed:", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+  }
+
+  /**
+   * Get all projects in the account
+   */
+  async getProjects(): Promise<BasecampResponse> {
+    return this.makeRequest("/projects.json");
+  }
+
+  /**
+   * Get a specific project
+   */
+  async getProject(projectId: string): Promise<BasecampResponse> {
+    return this.makeRequest(`/buckets/${this.projectId}.json`);
+  }
+
+  /**
+   * Get card tables in a project
+   */
+  async getCardTables(projectId: string): Promise<BasecampResponse> {
+    return this.makeRequest(`/buckets/${this.projectId}/card_tables.json`);
+  }
+
+  /**
+   * Get a specific card table
+   */
+  async getCardTable(
+    projectId: string,
+    cardTableId: string
+  ): Promise<BasecampResponse> {
+    return this.makeRequest(
+      `/buckets/${this.projectId}/card_tables/${cardTableId}.json`
+    );
+  }
+
+  /**
+   * Get columns in a card table
+   */
+  async getColumns(
+    projectId: string,
+    cardTableId: string
+  ): Promise<BasecampResponse> {
+    return this.makeRequest(
+      `/buckets/${this.projectId}/card_tables/${cardTableId}/columns.json`
+    );
+  }
+
+  /**
+   * Create a card in a specific column
+   */
+  async createCard(
+    projectId: string,
+    columnId: string,
+    cardData: BasecampCard
+  ): Promise<BasecampResponse> {
+    return this.makeRequest(
+      `/buckets/${this.projectId}/card_tables/lists/${this.defaultColumnId}/cards.json`,
+      {
+        method: "POST",
+        body: JSON.stringify(cardData),
+      }
+    );
+  }
+
+  /**
+   * Create a card with test information
+   */
+  async createTestCard(
+    userId: string,
+    testId: string,
+    notes: string,
+    testTitle?: string
+  ): Promise<BasecampResponse> {
+    try {
+      console.log(`Creating test card for userId: ${userId}, testId: ${testId}`);
+      
+      const userName = await getUserById(userId);
+      console.log("Retrieved user data:", userName);
+
+      // Ensure we have a valid user name
+      const displayName = userName?.name || `User ${userId.substring(0, 8)}`;
+      const userEmail = userName?.email || `${userId}@example.com`;
+      
+      console.log(`Using display name: ${displayName}, email: ${userEmail}`);
+      
+      const cardTitle = `${testTitle || testId} (User: ${displayName})`;
+      const cardContent = `
+        <strong>Information:</strong><br>
+        <strong>User:</strong> ${displayName}<br>
+        <strong>Email:</strong> ${userEmail}<br>
+        <strong>ID:</strong> ${testId}<br>
+        <strong>Title:</strong> ${testTitle || "N/A"}<br>
+        <strong>Notes:</strong><br>
+        ${notes.replace(/\n/g, "<br>")}<br>
+        <br>
+        <em>Created at: ${new Date().toISOString()}</em>
+      `;
+
+      const cardData: BasecampCard = {
+        title: cardTitle,
+        content: cardContent,
+        notify: false,
+      };
+
+      console.log("Card data prepared:", cardData);
+
+      return this.createCard(
+        this.config.projectId,
+        this.config.defaultColumnId,
+        cardData
+      );
+    } catch (error) {
+      console.error("Error in createTestCard:", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error in createTestCard",
+      };
+    }
+  }
+
+  /**
+   * Update a card
+   */
+  async updateCard(
+    projectId: string,
+    cardId: string,
+    cardData: Partial<BasecampCard>
+  ): Promise<BasecampResponse> {
+    return this.makeRequest(
+      `/buckets/${this.projectId}/card_tables/cards/${cardId}.json`,
+      {
+        method: "PUT",
+        body: JSON.stringify(cardData),
+      }
+    );
+  }
+
+  /**
+   * Move a card to a different column
+   */
+  async moveCard(
+    projectId: string,
+    cardId: string,
+    columnId: string
+  ): Promise<BasecampResponse> {
+    return this.makeRequest(
+      `/buckets/${this.projectId}/card_tables/cards/${cardId}/moves.json`,
+      {
+        method: "POST",
+        body: JSON.stringify({ column_id: columnId }),
+      }
+    );
+  }
+
+  /**
+   * Get cards in a column
+   */
+  async getCardsInColumn(
+    projectId: string,
+    columnId: string
+  ): Promise<BasecampResponse> {
+    return this.makeRequest(
+      `/buckets/${this.projectId}/card_tables/lists/${columnId}/cards.json`
+    );
+  }
+
+  /**
+   * Get all cards in a card table
+   */
+  async getAllCardsInTable(
+    projectId: string,
+    cardTableId: string
+  ): Promise<BasecampResponse> {
+    return this.makeRequest(
+      `/buckets/${this.projectId}/card_tables/${cardTableId}/cards.json`
+    );
+  }
+
+  /**
+   * Get a specific card by ID
+   */
+  async getCardById(cardId: string): Promise<BasecampResponse> {
+    return this.makeRequest(
+      `/buckets/${this.projectId}/card_tables/cards/${cardId}.json`
+    );
+  }
+
+  /**
+   * Delete/Archive a card
+   */
+  async deleteCard(cardId: string): Promise<BasecampResponse> {
+    console.log(`Attempting to delete/archive card ${cardId} from project ${this.projectId}`);
+    
+    // Try the standard delete endpoint first
+    const response = await this.makeRequest(
+      `/buckets/${this.projectId}/card_tables/cards/${cardId}.json`,
+      {
+        method: "DELETE",
+      }
+    );
+    
+    // If that fails, try the recordings endpoint (Basecamp 3 uses recordings)
+    if (!response.success) {
+      console.log(`Standard delete failed, trying recordings endpoint for card ${cardId}`);
+      return this.makeRequest(
+        `/buckets/${this.projectId}/recordings/${cardId}.json`,
+        {
+          method: "DELETE",
+        }
+      );
+    }
+    
+    return response;
+  }
+
+  /**
+   * Test the connection to Basecamp API
+   */
+  async testConnection(): Promise<BasecampResponse> {
+    return this.makeRequest("/projects.json");
+  }
+
+  /**
+   * Check account authorization and get available accounts
+   */
+  async checkAccountAuthorization(): Promise<BasecampResponse> {
+    return this.makeRequest(
+      "https://launchpad.37signals.com/authorization.xml"
+    );
+  }
+
+  /**
+   * Get account information
+   */
+  async getAccountInfo(): Promise<BasecampResponse> {
+    return this.makeRequest("/authorization.json");
+  }
+
+  /**
+   * Get project ID
+   */
+  getProjectId(): string {
+    return this.projectId;
+  }
+
+  /**
+   * Get card table ID
+   */
+  getCardTableId(): string {
+    return this.cardTableId;
+  }
+}
+
+/**
+ * Create and configure Basecamp service instance
+ */
+export function createBasecampService(
+  userId: string = "default_user"
+): BasecampService {
+  const config: BasecampConfig = {
+    accountId: process.env.BASECAMP_ACCOUNT_ID!,
+    userAgent:
+      process.env.BASECAMP_USER_AGENT ||
+      "QA-PLAN (atorres@jokertechnologies.com)",
+    projectId: process.env.BASECAMP_PROJECT_ID!,
+    cardTableId: process.env.BASECAMP_CARD_TABLE_ID!,
+    defaultColumnId: process.env.BASECAMP_DEFAULT_COLUMN_ID!,
+  };
+
+  // Validate required environment variables
+  const requiredVars = [
+    "accountId",
+    "projectId",
+    "cardTableId",
+    "defaultColumnId",
+  ];
+  const missingVars = requiredVars.filter(
+    (varName) => !config[varName as keyof BasecampConfig]
+  );
+
+  if (missingVars.length > 0) {
+    throw new Error(
+      `Missing required Basecamp environment variables: ${missingVars.join(
+        ", "
+      )}`
+    );
+  }
+
+  return new BasecampService(config, userId);
+}
+
+export { BasecampService };
+export type { BasecampCard, BasecampResponse, BasecampConfig };
+

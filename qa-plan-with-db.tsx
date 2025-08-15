@@ -178,28 +178,8 @@ export default function QAPlanWithDB() {
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-4xl font-bold text-gray-900">MTP Application QA Plan</h1>
-
-            {/* User Switcher */}
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-600">Current User:</span>
-              <div className="flex gap-2">
-                {users.map((user) => (
-                  <Button
-                    key={user.id}
-                    variant={currentUser.id === user.id ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => switchUser(user)}
-                    className="flex items-center gap-2"
-                  >
-                    <Avatar className="h-6 w-6">
-                      <AvatarFallback className="text-xs">{user.avatar}</AvatarFallback>
-                    </Avatar>
-                    {user.name}
-                  </Button>
-                ))}
-              </div>
-            </div>
           </div>
+        </div>
 
           {/* Progress for Current User */}
           <div className="flex items-center gap-4 mb-6">
@@ -440,7 +420,7 @@ export default function QAPlanWithDB() {
                           disabled={!noteInputs[test.id]?.trim()}
                           size="sm"
                         >
-                          Add Note
+                          Report Issue
                         </Button>
                       </div>
                     </div>
@@ -555,7 +535,7 @@ export default function QAPlanWithDB() {
                             disabled={!noteInputs[test.id]?.trim()}
                             size="sm"
                           >
-                            Add Note
+                            Report Issue
                           </Button>
                         </div>
                       </div>
@@ -669,7 +649,7 @@ export default function QAPlanWithDB() {
                             disabled={!noteInputs[test.id]?.trim()}
                             size="sm"
                           >
-                            Add Note
+                            Report Issue
                           </Button>
                         </div>
                       </div>
@@ -779,7 +759,7 @@ export default function QAPlanWithDB() {
                             disabled={!noteInputs[test.id]?.trim()}
                             size="sm"
                           >
-                            Add Note
+                            Report Issue
                           </Button>
                         </div>
                       </div>
@@ -889,7 +869,7 @@ export default function QAPlanWithDB() {
                             disabled={!noteInputs[test.id]?.trim()}
                             size="sm"
                           >
-                            Add Note
+                            Report Issue
                           </Button>
                         </div>
                       </div>
@@ -999,7 +979,7 @@ export default function QAPlanWithDB() {
                             disabled={!noteInputs[test.id]?.trim()}
                             size="sm"
                           >
-                            Add Note
+                            Report Issue
                           </Button>
                         </div>
                       </div>
@@ -1113,7 +1093,7 @@ export default function QAPlanWithDB() {
                             disabled={!noteInputs[test.id]?.trim()}
                             size="sm"
                           >
-                            Add Note
+                            Report Issue
                           </Button>
                         </div>
                       </div>
@@ -1228,7 +1208,7 @@ export default function QAPlanWithDB() {
                             disabled={!noteInputs[test.id]?.trim()}
                             size="sm"
                           >
-                            Add Note
+                            Report Issue
                           </Button>
                         </div>
                       </div>
@@ -1343,7 +1323,7 @@ export default function QAPlanWithDB() {
                             disabled={!noteInputs[test.id]?.trim()}
                             size="sm"
                           >
-                            Add Note
+                            Report Issue
                           </Button>
                         </div>
                       </div>
@@ -1457,7 +1437,7 @@ export default function QAPlanWithDB() {
                             disabled={!noteInputs[test.id]?.trim()}
                             size="sm"
                           >
-                            Add Note
+                            Report Issue
                           </Button>
                         </div>
                       </div>

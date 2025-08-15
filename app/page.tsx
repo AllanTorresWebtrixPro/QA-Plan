@@ -1,4 +1,5 @@
 import QADashboardServer from "@/components/server/electric-dashboard/qa-dashboard-server";
+import { AuthGuard } from "@/components/auth/auth-guard";
 
 /**
  * Main Page Component
@@ -7,5 +8,9 @@ import QADashboardServer from "@/components/server/electric-dashboard/qa-dashboa
  * The component uses server-side rendering with client-side data fetching.
  */
 export default function Page() {
-  return <QADashboardServer />;
+  return (
+    <AuthGuard>
+      <QADashboardServer />
+    </AuthGuard>
+  );
 }

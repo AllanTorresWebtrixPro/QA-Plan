@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
+import { usePathname, useRouter } from "next/navigation";
+import { cn, filterNavigationByRole, isAdmin } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/components/providers/auth-provider";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -26,7 +27,6 @@ import {
   BarChart3,
   FileText,
   Users,
-  Settings,
   Database,
   Home,
   ChevronDown,
@@ -36,38 +36,19 @@ import {
   LogOut,
   Bell,
   Search,
+  ExternalLink,
+  Loader2,
 } from "lucide-react";
 
 interface MainNavigationProps {
-  currentUser?: {
-    id: string;
-    name: string;
-    avatar: string;
-    role: string;
-  };
-  onUserSwitch?: (userId: string) => void;
-  users?: Array<{
-    id: string;
-    name: string;
-    avatar: string;
-    role: string;
-  }>;
+  // Removed user switching functionality
 }
 
-export function MainNavigation({
-  currentUser,
-  onUserSwitch,
-  users = [],
-}: MainNavigationProps) {
-  // Default users if none provided
-  const defaultUsers = [
-    { id: "user-1", name: "John Doe", avatar: "JD", role: "QA Tester" },
-    { id: "user-2", name: "Jane Smith", avatar: "JS", role: "QA Lead" },
-    { id: "user-3", name: "Bob Johnson", avatar: "BJ", role: "QA Manager" },
-  ];
-
-  const displayUsers = users.length > 0 ? users : defaultUsers;
-  const displayCurrentUser = currentUser || displayUsers[0];
+export function MainNavigation({}: MainNavigationProps) {
+  const { user, profile, signOut } = useAuth();
+  const router = useRouter();
+  const [isSigningOut, setIsSigningOut] = useState(false);
+  
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -101,14 +82,19 @@ export function MainNavigation({
       href: "/database-test",
       icon: Database,
       description: "Database connection and management",
+      adminOnly: true, // Only admins can access database management
     },
     {
-      title: "Settings",
-      href: "/settings",
-      icon: Settings,
-      description: "Application settings and configuration",
+      title: "Basecamp Config",
+      href: "/basecamp-config",
+      icon: ExternalLink,
+      description: "Configure Basecamp integration",
+      adminOnly: true, // Only admins can configure Basecamp
     },
   ];
+
+  // Filter navigation items based on user role
+  const filteredNavigationItems = filterNavigationByRole(navigationItems, profile);
 
   const isActive = (href: string) => {
     if (href === "/") {
@@ -121,12 +107,12 @@ export function MainNavigation({
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
         {/* Logo and Brand */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 ml-6">
           <Link href="/" className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
               <BarChart3 className="h-5 w-5 text-primary-foreground" />
             </div>
-            <span className="font-bold text-lg">QA Plan</span>
+            <span className="font-bold text-lg">MTP QA Plan</span>
           </Link>
         </div>
 
@@ -134,7 +120,7 @@ export function MainNavigation({
         <div className="hidden md:flex items-center gap-6">
           <NavigationMenu>
             <NavigationMenuList>
-              {navigationItems.map((item) => (
+              {filteredNavigationItems.map((item) => (
                 <NavigationMenuItem key={item.href}>
                   <Link href={item.href} legacyBehavior passHref>
                     <NavigationMenuLink
@@ -157,101 +143,68 @@ export function MainNavigation({
 
         {/* Right Side Actions */}
         <div className="flex items-center gap-4">
-          {/* Search */}
-          <Button variant="ghost" size="sm" className="hidden md:flex">
-            <Search className="h-4 w-4" />
-          </Button>
-
-          {/* Notifications */}
-          <Button variant="ghost" size="sm" className="hidden md:flex">
-            <Bell className="h-4 w-4" />
-            <Badge className="ml-1 h-5 w-5 rounded-full p-0 text-xs">3</Badge>
-          </Button>
-
           {/* User Menu */}
-          {displayCurrentUser && (
+          {user && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="flex items-center gap-2">
                   <Avatar className="h-8 w-8">
-                    <AvatarFallback className="text-xs">
-                      {displayCurrentUser.avatar}
+                    <AvatarFallback>
+                      {user.user_metadata?.avatar || user.email?.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
-                  <span className="hidden lg:block">
-                    {displayCurrentUser.name}
-                  </span>
+                  <div className="hidden md:block text-left">
+                    <div className="font-medium">
+                      {profile?.name || user.user_metadata?.name || user.email}
+                    </div>
+                    {profile?.role && (
+                      <div className="text-xs text-muted-foreground capitalize">
+                        {profile.role}
+                      </div>
+                    )}
+                  </div>
                   <ChevronDown className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                <div className="flex items-center gap-2 p-2">
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback className="text-xs">
-                      {displayCurrentUser.avatar}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium">
-                      {displayCurrentUser.name}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {displayCurrentUser.role}
-                    </span>
-                  </div>
+                <div className="relative flex cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent focus:bg-accent focus:text-accent-foreground">
+                  <button
+                    className="flex items-center gap-2 w-full text-left"
+                    onClick={() => router.push('/profile')}
+                  >
+                    <User className="h-4 w-4" />
+                    Profile
+                  </button>
                 </div>
-                <div className="border-t" />
-
-                {/* User Switcher */}
-                {displayUsers.length > 1 && (
-                  <>
-                    <div className="p-2">
-                      <span className="text-xs font-medium text-muted-foreground">
-                        Switch User
-                      </span>
-                    </div>
-                    {displayUsers.map((user) => (
-                      <DropdownMenuItem
-                        key={user.id}
-                        onClick={() => onUserSwitch?.(user.id)}
-                        className={cn(
-                          "flex items-center gap-2",
-                          displayCurrentUser.id === user.id && "bg-accent"
-                        )}
-                      >
-                        <Avatar className="h-6 w-6">
-                          <AvatarFallback className="text-xs">
-                            {user.avatar}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="text-sm">{user.name}</span>
-                        {displayCurrentUser.id === user.id && (
-                          <Badge
-                            variant="secondary"
-                            className="ml-auto text-xs"
-                          >
-                            Current
-                          </Badge>
-                        )}
-                      </DropdownMenuItem>
-                    ))}
-                    <div className="border-t" />
-                  </>
-                )}
-
-                <DropdownMenuItem>
-                  <User className="mr-2 h-4 w-4" />
-                  <span>Profile</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
-                </DropdownMenuItem>
-                <div className="border-t" />
-                <DropdownMenuItem>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
-                </DropdownMenuItem>
+                <div className="relative flex cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-red-50 focus:bg-red-50 focus:text-red-600">
+                  <button
+                    className="flex items-center gap-2 text-red-600 w-full text-left"
+                    disabled={isSigningOut}
+                    onClick={async () => {
+                      if (isSigningOut) return;
+                      
+                      try {
+                        setIsSigningOut(true);
+                        console.log('Sign out button clicked');
+                        await signOut()
+                        // The signOut function now handles the redirect
+                      } catch (error) {
+                        console.error('Sign out failed:', error)
+                        // Show user-friendly error message
+                        alert('Sign out failed. Please try refreshing the page and signing out again.');
+                      } finally {
+                        setIsSigningOut(false);
+                      }
+                    }}
+                  >
+                    {isSigningOut ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <LogOut className="h-4 w-4" />
+                    )}
+                    {isSigningOut ? 'Signing Out...' : 'Sign Out'}
+                  </button>
+                </div>
               </DropdownMenuContent>
             </DropdownMenu>
           )}
@@ -277,7 +230,7 @@ export function MainNavigation({
         <div className="md:hidden border-t bg-background">
           <div className="container py-4">
             <nav className="space-y-2">
-              {navigationItems.map((item) => (
+              {filteredNavigationItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}

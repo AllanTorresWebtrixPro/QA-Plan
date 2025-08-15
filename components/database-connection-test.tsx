@@ -25,7 +25,7 @@ import {
 interface DatabaseStatus {
   connection: boolean;
   tables: {
-    qa_users: { exists: boolean; count: number };
+    user_profiles: { exists: boolean; count: number };
     qa_tests: { exists: boolean; count: number };
     qa_user_test_progress: { exists: boolean; count: number };
   };
@@ -52,7 +52,7 @@ export function DatabaseConnectionTest() {
     const status: DatabaseStatus = {
       connection: false,
       tables: {
-        qa_users: { exists: false, count: 0 },
+        user_profiles: { exists: false, count: 0 },
         qa_tests: { exists: false, count: 0 },
         qa_user_test_progress: { exists: false, count: 0 },
       },
@@ -74,7 +74,7 @@ export function DatabaseConnectionTest() {
 
       // Test 2: Test basic connection
       const { data: connectionTest, error: connectionError } = await supabase
-        .from("qa_users")
+        .from("user_profiles")
         .select("count", { count: "exact", head: true });
 
       if (connectionError) {
@@ -84,7 +84,7 @@ export function DatabaseConnectionTest() {
       }
 
       // Test 3: Check each table
-      const tables = ["qa_users", "qa_tests", "qa_user_test_progress"] as const;
+      const tables = ["user_profiles", "qa_tests", "qa_user_test_progress"] as const;
 
       for (const table of tables) {
         try {
@@ -114,7 +114,7 @@ export function DatabaseConnectionTest() {
       // Test 4: Try to fetch some sample data
       try {
         const { data: users, error: usersError } = await supabase
-          .from("qa_users")
+          .from("user_profiles")
           .select("*")
           .limit(5);
 
@@ -229,9 +229,9 @@ export function DatabaseConnectionTest() {
                       <span className="text-sm">Users</span>
                     </div>
                     <div className="text-right">
-                      {getStatusIcon(status.tables.qa_users.exists)}
+                      {getStatusIcon(status.tables.user_profiles.exists)}
                       <div className="text-xs text-muted-foreground">
-                        {status.tables.qa_users.count} records
+                        {status.tables.user_profiles.count} records
                       </div>
                     </div>
                   </div>

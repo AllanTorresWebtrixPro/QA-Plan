@@ -179,22 +179,6 @@ export function SettingsClient() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Default User</Label>
-                  <Select defaultValue="user-1">
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="user-1">John Doe</SelectItem>
-                      <SelectItem value="user-2">Jane Smith</SelectItem>
-                      <SelectItem value="user-3">Bob Johnson</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <Separator />
-
-                <div className="space-y-2">
                   <Label>Time Zone</Label>
                   <Select defaultValue="UTC">
                     <SelectTrigger>

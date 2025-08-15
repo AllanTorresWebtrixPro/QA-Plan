@@ -22,6 +22,7 @@ export interface UserTestProgress {
   completed: boolean
   completed_at?: string
   notes?: string
+  basecamp_card_ids?: string[]
   created_at: string
   updated_at: string
 }
@@ -190,7 +191,7 @@ export function useQAStorageDB() {
         setUserProgress((prev) => [...prev, newProgress])
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to add note")
+      setError(err instanceof Error ? err.message : "Failed to report issue")
       console.error("Error adding note:", err)
     }
   }
@@ -319,7 +320,7 @@ export function useQAStorageDB() {
   // Verify database connection
   const verifyDatabaseConnection = async () => {
     try {
-      const { data, error } = await supabase.from("qa_users").select("count", { count: "exact" })
+      const { data, error } = await supabase.from("user_profiles").select("count", { count: "exact" })
       if (error) throw error
       return { success: true, userCount: data?.[0]?.count || 0 }
     } catch (err) {

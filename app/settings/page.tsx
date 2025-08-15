@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SettingsClient } from "@/components/client/settings/settings-client";
+import { AuthGuard } from "@/components/auth/auth-guard";
 
 function SettingsSkeleton() {
   return (
@@ -41,17 +42,19 @@ function SettingsSkeleton() {
 
 export default function SettingsPage() {
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-        <p className="text-muted-foreground">
-          Configure application settings and preferences.
-        </p>
-      </div>
+    <AuthGuard>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+          <p className="text-muted-foreground">
+            Configure application settings and preferences.
+          </p>
+        </div>
 
-      <Suspense fallback={<SettingsSkeleton />}>
-        <SettingsClient />
-      </Suspense>
-    </div>
+        <Suspense fallback={<SettingsSkeleton />}>
+          <SettingsClient />
+        </Suspense>
+      </div>
+    </AuthGuard>
   );
 }
