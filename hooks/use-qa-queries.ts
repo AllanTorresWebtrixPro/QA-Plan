@@ -316,7 +316,7 @@ export function useAllAuthUsersStats() {
 
     const completed = userTestsWithProgress.filter((t) => t.completed).length;
     const assigned = userTestsWithProgress.filter((t) => t.assignedTo === user.id).length;
-    const total = assigned > 0 ? assigned : userTestsWithProgress.length; // Use assigned tests if any, otherwise fallback to all tests
+    const total = assigned; // Always use assigned tests count, even if 0
 
     return {
       user,
