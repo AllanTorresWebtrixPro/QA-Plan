@@ -130,7 +130,14 @@ export function SidebarSection({
                       </div>
                     </div>
                   </div>
-
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-green-600">
+                      {userStats.completed}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      completed
+                    </div>
+                  </div>
                 </div>
                 <Progress value={userStats.percentage} className="h-1.5" />
               </div>
