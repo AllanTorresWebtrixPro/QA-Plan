@@ -49,23 +49,6 @@ export function SidebarSection({
   allUsersStats,
   allTests,
 }: SidebarSectionProps) {
-  // Calculate real totals from actual test data
-  const totalCompleted = allUsersStats.reduce(
-    (sum, user) => sum + user.completed,
-    0
-  );
-
-  // Calculate total high priority tests from actual test data
-  const totalHighPriorityTests = allTests.filter(
-    (test) => test.priority === "High"
-  ).length;
-  const completedHighPriorityTests = allTests.filter(
-    (test) => test.priority === "High" && test.completed
-  ).length;
-  const totalHighPriorityRemaining =
-    totalHighPriorityTests - completedHighPriorityTests;
-
-  const activeUsers = allUsersStats.length;
 
   return (
     <div className="space-y-6">
@@ -85,20 +68,6 @@ export function SidebarSection({
               </div>
               <div className="text-sm text-blue-700 font-medium">
                 Completion Rate
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4 text-center">
-              <div className="bg-white rounded-lg p-3 border border-blue-200">
-                <div className="text-lg font-semibold text-green-600">
-                  {currentUserStats.completed}
-                </div>
-                <div className="text-xs text-gray-600">Completed</div>
-              </div>
-              <div className="bg-white rounded-lg p-3 border border-blue-200">
-                <div className="text-lg font-semibold text-red-600">
-                  {currentUserStats.highPriorityRemaining}
-                </div>
-                <div className="text-xs text-gray-600">High Priority</div>
               </div>
             </div>
             <div className="bg-white rounded-lg p-3 border border-blue-200">
@@ -176,51 +145,7 @@ export function SidebarSection({
         </CardContent>
       </Card>
 
-      {/* Quick Stats */}
-      <Card className="bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-purple-900">
-            <CheckCircle className="h-5 w-5" />
-            Quick Stats
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between bg-white rounded-lg p-3 border border-purple-200">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-green-600" />
-                <span className="text-sm font-medium">Total Completed</span>
-              </div>
-              <Badge variant="default" className="bg-green-100 text-green-800">
-                {totalCompleted}
-              </Badge>
-            </div>
-            <div className="flex items-center justify-between bg-white rounded-lg p-3 border border-purple-200">
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4 text-orange-600" />
-                <span className="text-sm font-medium">
-                  High Priority Remaining
-                </span>
-              </div>
-              <Badge variant="destructive">{totalHighPriorityRemaining}</Badge>
-            </div>
-            <div className="flex items-center justify-between bg-white rounded-lg p-3 border border-purple-200">
-              <div className="flex items-center gap-2">
-                <Users className="h-4 w-4 text-blue-600" />
-                <span className="text-sm font-medium">Active Users</span>
-              </div>
-              <Badge variant="secondary">{activeUsers}</Badge>
-            </div>
-            <div className="flex items-center justify-between bg-white rounded-lg p-3 border border-purple-200">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-blue-600" />
-                <span className="text-sm font-medium">Total Tests</span>
-              </div>
-              <Badge variant="outline">{allTests.length}</Badge>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+
     </div>
   );
 }

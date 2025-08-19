@@ -17,6 +17,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   Search,
   Filter,
   CheckCircle,
@@ -24,6 +30,7 @@ import {
   User,
   Loader2,
   Users,
+  ChevronDown,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -47,10 +54,8 @@ import { useAuth } from "@/components/providers/auth-provider";
 import { isAdmin } from "@/lib/utils";
 
 // Import separated components
-import { DatabaseStatusAlert } from "./dashboard-components/database-status-alert";
 import { HeaderSection } from "./dashboard-components/header-section";
-import { ProgressSection } from "./dashboard-components/progress-section";
-import { ExportButtons } from "./dashboard-components/export-buttons";
+import { KPICards } from "./dashboard-components/kpi-cards";
 import { NavigationTabs } from "./dashboard-components/navigation-tabs";
 import { SettingsSecondaryTabs } from "./dashboard-components/settings-secondary-tabs";
 import { TestCategoriesSection } from "./dashboard-components/test-categories-section";
@@ -125,7 +130,8 @@ export function QADashboardClient() {
   const displayUser = currentUserObject ? {
     id: currentUserObject.id,
     name: currentUserObject.name,
-    avatar: currentUserObject.avatar || currentUserObject.name?.charAt(0)?.toUpperCase() || "U"
+    avatar: currentUserObject.avatar || currentUserObject.name?.charAt(0)?.toUpperCase() || "U",
+    email: authUser?.email || ""
   } : undefined;
 
   // Get current user's test progress for main display
@@ -388,41 +394,96 @@ export function QADashboardClient() {
           scroll-snap-align: start;
         }
       `}</style>
-      <div className="space-y-6">
-        {/* Database Status Alert */}
-        <DatabaseStatusAlert dbStatus={dbStatus} />
-
-        {/* Header Section */}
-                    <HeaderSection
-              users={authUsers}
-              selectedUserFilter={selectedUserFilter}
-              onUserFilterChange={handleUserFilterChange}
-            />
-
-        {/* Progress Section */}
-        <ProgressSection
-          currentUserObject={selectedUserFilter === "all" ? displayUser : authUsers.find(u => u.id === selectedUserFilter) || displayUser}
-          currentUserStats={selectedUserFilter === "all" ? currentUserStats : (() => {
-            const authUserStats = allAuthUsersStats.find(stats => stats.user.id === selectedUserFilter);
-            if (authUserStats) {
-              return {
-                completed: authUserStats.completed,
-                total: authUserStats.total,
-                percentage: authUserStats.percentage,
-                highPriorityRemaining: 0 // We'll calculate this if needed
-              };
-            }
-            return currentUserStats;
-          })()}
+      <div className="space-y-4">
+        {/* Consolidated Header Section */}
+        <HeaderSection
+          dbStatus={dbStatus}
         />
 
-        {/* Export Buttons */}
-        <ExportButtons
-          onExportUser={handleExportUser}
-          onExportAllUsers={handleExportAllUsers}
-          isExportUserPending={exportUserMutation.isPending}
-          isExportAllUsersPending={exportAllUsersMutation.isPending}
+        {/* KPI Cards */}
+        <KPICards
+          totalCompleted={allAuthUsersStats.reduce((sum, user) => sum + user.completed, 0)}
+          totalHighPriorityRemaining={testsWithProgress.filter(test => test.priority === "High" && !test.completed).length}
+          activeUsers={allAuthUsersStats.length}
+          totalTests={testsWithProgress.length}
         />
+
+        {/* User Filter */}
+        <div className="flex justify-end">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">User:</span>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="flex items-center gap-2 min-w-[160px] h-9"
+                >
+                  <Avatar className="h-5 w-5">
+                    <AvatarFallback className="text-xs">
+                      {selectedUserFilter === "all" ? "All" : authUsers.find(u => u.id === selectedUserFilter)?.avatar || "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="font-medium truncate text-sm">
+                    {selectedUserFilter === "all" ? "All Users" : authUsers.find(u => u.id === selectedUserFilter)?.name || "Unknown User"}
+                  </span>
+                  <ChevronDown className="h-3 w-3 ml-auto" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-64">
+                <div className="px-2 py-1.5 text-sm font-medium text-muted-foreground border-b">
+                  Filter Tests
+                </div>
+                <DropdownMenuItem
+                  onClick={() => handleUserFilterChange("all")}
+                  className={`flex items-center gap-3 cursor-pointer py-2 ${
+                    selectedUserFilter === "all" ? "bg-accent" : ""
+                  }`}
+                >
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback className="text-sm">
+                      All
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium truncate">All Users</div>
+                    {selectedUserFilter === "all" ? (
+                      <div className="text-xs text-muted-foreground">
+                        Currently selected
+                      </div>
+                    ) : (
+                      <div className="text-xs text-muted-foreground">
+                        Show all test results
+                      </div>
+                    )}
+                  </div>
+                </DropdownMenuItem>
+                {authUsers.map((user) => (
+                  <DropdownMenuItem
+                    key={user.id}
+                    onClick={() => handleUserFilterChange(user.id)}
+                    className={`flex items-center gap-3 cursor-pointer py-2 ${
+                      selectedUserFilter === user.id ? "bg-accent" : ""
+                    }`}
+                  >
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback className="text-sm">
+                        {user.avatar}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium truncate">{user.name}</div>
+                      {selectedUserFilter === user.id && (
+                        <div className="text-xs text-muted-foreground">
+                          Currently selected
+                        </div>
+                      )}
+                    </div>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
 
         {/* Navigation Tabs */}
         <NavigationTabs activeTab={activeTab} onTabChange={setActiveTab} />
