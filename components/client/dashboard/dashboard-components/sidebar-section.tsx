@@ -169,36 +169,38 @@ export function SidebarSection({
             )}
 
             {activeTab !== "All" && activeTab !== "Summary" && (
-              <div className="grid grid-cols-3 gap-4">
-                <div className="bg-white rounded-xl p-4 border border-blue-200 shadow-sm">
+              <div className="space-y-4">
+                <div className="bg-white rounded-xl p-6 border border-blue-200 shadow-sm">
                   <div className="text-center">
-                    <div className="text-3xl font-bold text-blue-600">
+                    <div className="text-4xl font-bold text-blue-600">
                       {filteredTests.filter((t) => t.completed).length}
                     </div>
                     <div className="text-sm text-gray-700 font-medium">Completed</div>
                   </div>
                 </div>
-                <div className="bg-white rounded-xl p-4 border border-orange-200 shadow-sm">
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-orange-600">
-                      {filteredTests.filter((t) => !t.completed).length}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-white rounded-lg p-3 border border-orange-200 shadow-sm">
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-orange-500">
+                        {filteredTests.filter((t) => !t.completed).length}
+                      </div>
+                      <div className="text-xs text-gray-600 font-medium">Remaining</div>
                     </div>
-                    <div className="text-sm text-gray-700 font-medium">Remaining</div>
                   </div>
-                </div>
-                <div className="bg-white rounded-xl p-4 border border-green-200 shadow-sm">
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-green-600">
-                      {filteredTests.length > 0
-                        ? Math.round(
-                            (filteredTests.filter((t) => t.completed).length /
-                              filteredTests.length) *
-                              100
-                          )
-                        : 0}
-                      %
+                  <div className="bg-white rounded-lg p-3 border border-green-200 shadow-sm">
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-green-500">
+                        {filteredTests.length > 0
+                          ? Math.round(
+                              (filteredTests.filter((t) => t.completed).length /
+                                filteredTests.length) *
+                                100
+                            )
+                          : 0}
+                        %
+                      </div>
+                      <div className="text-xs text-gray-600 font-medium">Progress</div>
                     </div>
-                    <div className="text-sm text-gray-700 font-medium">Progress</div>
                   </div>
                 </div>
               </div>
