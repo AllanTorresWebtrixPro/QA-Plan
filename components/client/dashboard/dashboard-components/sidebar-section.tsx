@@ -60,68 +60,85 @@ export function SidebarSection({
   return (
     <div className="space-y-6">
       {/* Combined Progress Summary & Test Categories */}
-      <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-blue-900">
-            <TrendingUp className="h-5 w-5" />
-            {activeTab === "All" && "Progress Summary"}
-            {activeTab === "Summary" && "Progress by Category"}
-            {activeTab !== "All" &&
-              activeTab !== "Summary" &&
-              `${activeTab} Test Categories`}
+      <Card className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border-blue-200 shadow-lg">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-3 text-blue-900">
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <TrendingUp className="h-5 w-5 text-blue-600" />
+            </div>
+            <div>
+              <div className="text-lg font-bold">
+                {activeTab === "All" && "Progress Summary"}
+                {activeTab === "Summary" && "Progress by Category"}
+                {activeTab !== "All" &&
+                  activeTab !== "Summary" &&
+                  `${activeTab} Test Categories`}
+              </div>
+              <div className="text-xs text-blue-600 font-medium">
+                {activeTab === "All" && "Overall completion overview"}
+                {activeTab === "Summary" && "Detailed category breakdown"}
+                {activeTab !== "All" &&
+                  activeTab !== "Summary" &&
+                  "Category-specific progress"}
+              </div>
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
+          <div className="space-y-6">
             {activeTab === "All" && (
               <>
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-blue-600">
+                  <div className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                     {currentUserStats.percentage.toFixed(1)}%
                   </div>
-                  <div className="text-sm text-blue-700 font-medium">
+                  <div className="text-sm text-blue-700 font-medium mt-1">
                     Completion Rate
                   </div>
                 </div>
-                <div className="bg-white rounded-lg p-3 border border-blue-200">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-700">
+                <div className="bg-white rounded-xl p-4 border border-blue-200 shadow-sm">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-sm font-semibold text-gray-800">
                       Overall Progress
                     </span>
-                    <span className="text-sm text-gray-600">
+                    <span className="text-sm font-medium text-blue-600">
                       {currentUserStats.percentage.toFixed(0)}%
                     </span>
                   </div>
-                  <Progress value={currentUserStats.percentage} className="h-2" />
+                  <Progress value={currentUserStats.percentage} className="h-3 bg-blue-100" />
                 </div>
               </>
             )}
 
             {activeTab === "Summary" && (
-              <div className="space-y-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">
-                    {filteredTests.filter((t) => t.completed).length}
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-white rounded-xl p-4 border border-green-200 shadow-sm">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-green-600">
+                        {filteredTests.filter((t) => t.completed).length}
+                      </div>
+                      <div className="text-sm text-gray-700 font-medium">Completed Tests</div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        of {filteredTests.length} total
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-sm text-gray-600">My Completed Tests</div>
-                  <div className="text-xs text-gray-500">
-                    out of {filteredTests.length} total tests
+                  <div className="bg-white rounded-xl p-4 border border-red-200 shadow-sm">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-red-600">
+                        {filteredTests.filter((t) => !t.completed && t.priority === "High").length}
+                      </div>
+                      <div className="text-sm text-gray-700 font-medium">High Priority</div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        remaining
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-red-600">
-                    {filteredTests.filter((t) => !t.completed && t.priority === "High").length}
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    High Priority Remaining
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    high priority tests pending
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <div className="text-sm font-medium">Progress by Category:</div>
-                  <div className="space-y-1 text-xs">
+                <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+                  <div className="text-sm font-semibold text-gray-800 mb-3">Progress by Category:</div>
+                  <div className="space-y-2">
                     {Array.from(new Set(filteredTests.map((t) => t.category))).map(
                       (category) => {
                         const categoryTests = filteredTests.filter(
@@ -130,12 +147,18 @@ export function SidebarSection({
                         const completed = categoryTests.filter(
                           (t) => t.completed
                         ).length;
+                        const percentage = categoryTests.length > 0 ? Math.round((completed / categoryTests.length) * 100) : 0;
                         return (
-                          <div key={category} className="flex justify-between">
-                            <span>{category}</span>
-                            <span>
-                              {completed}/{categoryTests.length}
-                            </span>
+                          <div key={category} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                            <span className="text-sm font-medium text-gray-700">{category}</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-gray-600">
+                                {completed}/{categoryTests.length}
+                              </span>
+                              <span className="text-xs font-medium text-blue-600">
+                                {percentage}%
+                              </span>
+                            </div>
                           </div>
                         );
                       }
@@ -146,29 +169,37 @@ export function SidebarSection({
             )}
 
             {activeTab !== "All" && activeTab !== "Summary" && (
-              <div className="text-center py-4">
-                <div className="text-2xl font-bold text-blue-600">
-                  {filteredTests.filter((t) => t.completed).length}
-                </div>
-                <div className="text-sm text-gray-600">Completed</div>
-                <div className="mt-4">
-                  <div className="text-2xl font-bold text-orange-600">
-                    {filteredTests.filter((t) => !t.completed).length}
+              <div className="grid grid-cols-3 gap-4">
+                <div className="bg-white rounded-xl p-4 border border-blue-200 shadow-sm">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-blue-600">
+                      {filteredTests.filter((t) => t.completed).length}
+                    </div>
+                    <div className="text-sm text-gray-700 font-medium">Completed</div>
                   </div>
-                  <div className="text-sm text-gray-600">Remaining</div>
                 </div>
-                <div className="mt-4">
-                  <div className="text-2xl font-bold text-green-600">
-                    {filteredTests.length > 0
-                      ? Math.round(
-                          (filteredTests.filter((t) => t.completed).length /
-                            filteredTests.length) *
-                            100
-                        )
-                      : 0}
-                    %
+                <div className="bg-white rounded-xl p-4 border border-orange-200 shadow-sm">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-orange-600">
+                      {filteredTests.filter((t) => !t.completed).length}
+                    </div>
+                    <div className="text-sm text-gray-700 font-medium">Remaining</div>
                   </div>
-                  <div className="text-sm text-gray-600">Progress</div>
+                </div>
+                <div className="bg-white rounded-xl p-4 border border-green-200 shadow-sm">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-green-600">
+                      {filteredTests.length > 0
+                        ? Math.round(
+                            (filteredTests.filter((t) => t.completed).length /
+                              filteredTests.length) *
+                              100
+                          )
+                        : 0}
+                      %
+                    </div>
+                    <div className="text-sm text-gray-700 font-medium">Progress</div>
+                  </div>
                 </div>
               </div>
             )}
