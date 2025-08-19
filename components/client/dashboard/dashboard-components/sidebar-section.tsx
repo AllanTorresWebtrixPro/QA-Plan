@@ -130,11 +130,7 @@ export function SidebarSection({
                       </div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="text-sm font-semibold text-green-600">
-                      {userStats.percentage.toFixed(1)}%
-                    </div>
-                  </div>
+
                 </div>
                 <Progress value={userStats.percentage} className="h-1.5" />
               </div>
