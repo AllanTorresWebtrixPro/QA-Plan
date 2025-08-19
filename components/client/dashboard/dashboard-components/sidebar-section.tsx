@@ -126,7 +126,7 @@ export function SidebarSection({
                         {userStats.user.name}
                       </div>
                       <div className="text-xs text-gray-500">
-                        {userStats.completed} completed / {userStats.total} assigned
+                        {userStats.completed} Completed / {userStats.total} Assigned
                       </div>
                     </div>
                   </div>
@@ -135,7 +135,7 @@ export function SidebarSection({
                       {userStats.completed}
                     </div>
                     <div className="text-xs text-gray-500">
-                      completed
+                      Completed
                     </div>
                   </div>
                 </div>
