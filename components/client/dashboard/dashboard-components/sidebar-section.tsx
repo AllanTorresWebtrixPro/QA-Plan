@@ -134,22 +134,6 @@ export function SidebarSection({
                     <div className="text-sm font-semibold text-green-600">
                       {userStats.percentage.toFixed(1)}%
                     </div>
-                    <Badge
-                      variant={
-                        userStats.percentage >= 80
-                          ? "default"
-                          : userStats.percentage >= 50
-                          ? "secondary"
-                          : "destructive"
-                      }
-                      className="text-xs"
-                    >
-                      {userStats.percentage >= 80
-                        ? "Excellent"
-                        : userStats.percentage >= 50
-                        ? "Good"
-                        : "Needs Work"}
-                    </Badge>
                   </div>
                 </div>
                 <Progress value={userStats.percentage} className="h-1.5" />
