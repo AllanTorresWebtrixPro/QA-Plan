@@ -288,7 +288,7 @@ export async function toggleTestCompletion(
   testId: string,
   completed: boolean
 ): Promise<void> {
-  const response = await apiPost("/qa/toggle-test", {
+  const response = await apiPost("/qa/toggle-test-completion", {
     userId,
     testId,
     completed,
