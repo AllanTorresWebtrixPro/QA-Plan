@@ -58,7 +58,7 @@ import { HeaderSection } from "./dashboard-components/header-section";
 import { KPICards } from "./dashboard-components/kpi-cards";
 import { NavigationTabs } from "./dashboard-components/navigation-tabs";
 import { SettingsSecondaryTabs } from "./dashboard-components/settings-secondary-tabs";
-import { TestCategoriesSection } from "./dashboard-components/test-categories-section";
+
 import { SidebarSection } from "./dashboard-components/sidebar-section";
 
 // Custom hooks for data fetching
@@ -849,10 +849,6 @@ export function QADashboardClient() {
               allTests={testsWithProgress.filter(test => 
                 !(test.category === "Settings" && test.subcategory && disabledSettingsSubsections.includes(test.subcategory))
               )}
-            />
-
-            {/* Enhanced Test Categories */}
-            <TestCategoriesSection
               activeTab={activeTab}
               filteredTests={finalFilteredTests}
               currentUserObject={displayUser}

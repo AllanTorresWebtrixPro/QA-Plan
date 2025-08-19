@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Users, TrendingUp, AlertTriangle, CheckCircle } from "lucide-react";
+import { TestCategoriesSection } from "./test-categories-section";
 
 interface User {
   id: string;
@@ -42,12 +43,18 @@ interface SidebarSectionProps {
   currentUserStats: UserStats;
   allUsersStats: AllUserStats[];
   allTests: Test[]; // Add all tests data
+  activeTab: string;
+  filteredTests: Test[];
+  currentUserObject: User | undefined;
 }
 
 export function SidebarSection({
   currentUserStats,
   allUsersStats,
   allTests,
+  activeTab,
+  filteredTests,
+  currentUserObject,
 }: SidebarSectionProps) {
 
   return (
@@ -85,6 +92,13 @@ export function SidebarSection({
         </CardContent>
       </Card>
 
+      {/* Test Categories Section */}
+      <TestCategoriesSection
+        activeTab={activeTab}
+        filteredTests={filteredTests}
+        currentUserObject={currentUserObject}
+      />
+
       {/* Enhanced All Users Progress */}
       <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
         <CardHeader>
@@ -112,7 +126,7 @@ export function SidebarSection({
                         {userStats.user.name}
                       </div>
                       <div className="text-xs text-gray-500">
-                        {userStats.completed}/{userStats.total} tests
+                        {userStats.completed} completed / {userStats.total} assigned
                       </div>
                     </div>
                   </div>
