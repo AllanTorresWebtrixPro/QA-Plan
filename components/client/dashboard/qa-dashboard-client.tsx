@@ -31,6 +31,7 @@ import {
   Loader2,
   Users,
   ChevronDown,
+  AlertTriangle,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -408,8 +409,17 @@ export function QADashboardClient() {
           totalTests={testsWithProgress.length}
         />
 
-        {/* User Filter */}
-        <div className="flex justify-end">
+        {/* Misc Issues Button and User Filter */}
+        <div className="flex justify-between items-center">
+          <Button
+            onClick={() => window.open('/misc-issues', '_blank')}
+            variant="outline"
+            className="flex items-center gap-2 bg-orange-50 border-orange-200 text-orange-700 hover:bg-orange-100 hover:border-orange-300"
+          >
+            <AlertCircle className="h-4 w-4" />
+            Misc Issues
+          </Button>
+
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground">User:</span>
             <DropdownMenu>

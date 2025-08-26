@@ -248,6 +248,64 @@ class BasecampService {
   }
 
   /**
+   * Create a card for a miscellaneous issue
+   */
+  async createMiscIssueCard(
+    userId: string,
+    issueTitle: string,
+    issueDescription: string,
+    category: string,
+    priority: string
+  ): Promise<BasecampResponse> {
+    try {
+      console.log(`Creating misc issue card for userId: ${userId}, title: ${issueTitle}`);
+      
+      const userName = await getUserById(userId);
+      console.log("Retrieved user data:", userName);
+
+      // Ensure we have a valid user name
+      const displayName = userName?.name || `User ${userId.substring(0, 8)}`;
+      const userEmail = userName?.email || `${userId}@example.com`;
+      
+      console.log(`Using display name: ${displayName}, email: ${userEmail}`);
+      
+      const cardTitle = `Misc Issue: ${issueTitle} (User: ${displayName})`;
+      const cardContent = `
+        <strong>Misc Issue Report:</strong><br>
+        <strong>Title:</strong> ${issueTitle}<br>
+        <strong>Category:</strong> ${category}<br>
+        <strong>Priority:</strong> ${priority}<br>
+        <strong>Reported By:</strong> ${displayName}<br>
+        <strong>Email:</strong> ${userEmail}<br>
+        <strong>Description:</strong><br>
+        ${issueDescription.replace(/\n/g, "<br>")}<br>
+        <br>
+        <em>Created at: ${new Date().toISOString()}</em>
+      `;
+
+      const cardData: BasecampCard = {
+        title: cardTitle,
+        content: cardContent,
+        notify: false,
+      };
+
+      console.log("Misc issue card data prepared:", cardData);
+
+      return this.createCard(
+        this.config.projectId,
+        this.config.defaultColumnId,
+        cardData
+      );
+    } catch (error) {
+      console.error("Error in createMiscIssueCard:", error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error in createMiscIssueCard",
+      };
+    }
+  }
+
+  /**
    * Update a card
    */
   async updateCard(
@@ -377,6 +435,13 @@ class BasecampService {
    */
   getCardTableId(): string {
     return this.cardTableId;
+  }
+
+  /**
+   * Get default column ID
+   */
+  getDefaultColumnId(): string {
+    return this.defaultColumnId;
   }
 }
 

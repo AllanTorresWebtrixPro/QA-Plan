@@ -348,7 +348,7 @@ export const BasecampCardsDisplay = React.forwardRef<
   if (cards.length === 0) {
     return (
       <div ref={containerRef} className="mt-3">
-        <div className="text-sm text-muted-foreground">No Basecamp cards found for this test.</div>
+        <div className="text-sm text-muted-foreground">No Basecamp cards found.</div>
       </div>
     );
   }

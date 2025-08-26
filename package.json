@@ -23,7 +23,8 @@
     "migrate:all": "node scripts/run-comprehensive-migration.js",
     "fix:rls": "node scripts/run-rls-fix.js",
     "disable:rls": "node scripts/disable-rls-temp.js",
-    "create:basecamp-cards": "node scripts/run-basecamp-cards-migration.js"
+    "create:basecamp-cards": "node scripts/run-basecamp-cards-migration.js",
+    "migrate:misc-issues": "node scripts/run-misc-issues-migration.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
