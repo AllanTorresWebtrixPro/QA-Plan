@@ -156,12 +156,7 @@ export function TestAssignmentButton({
           </Badge>
         )}
       </div>
-      {completed && (
-        <Badge variant="default" className="text-xs">
-          <CheckCircle className="h-3 w-3 mr-1" />
-          Completed
-        </Badge>
-      )}
+
     </div>
   )
 } 

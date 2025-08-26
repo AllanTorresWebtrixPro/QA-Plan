@@ -6,6 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Users, TrendingUp, AlertTriangle, CheckCircle } from "lucide-react";
 
+
 interface User {
   id: string;
   name: string;
@@ -42,76 +43,168 @@ interface SidebarSectionProps {
   currentUserStats: UserStats;
   allUsersStats: AllUserStats[];
   allTests: Test[]; // Add all tests data
+  activeTab: string;
+  filteredTests: Test[];
+  currentUserObject: User | undefined;
 }
 
 export function SidebarSection({
   currentUserStats,
   allUsersStats,
   allTests,
+  activeTab,
+  filteredTests,
+  currentUserObject,
 }: SidebarSectionProps) {
-  // Calculate real totals from actual test data
-  const totalCompleted = allUsersStats.reduce(
-    (sum, user) => sum + user.completed,
-    0
-  );
-
-  // Calculate total high priority tests from actual test data
-  const totalHighPriorityTests = allTests.filter(
-    (test) => test.priority === "High"
-  ).length;
-  const completedHighPriorityTests = allTests.filter(
-    (test) => test.priority === "High" && test.completed
-  ).length;
-  const totalHighPriorityRemaining =
-    totalHighPriorityTests - completedHighPriorityTests;
-
-  const activeUsers = allUsersStats.length;
 
   return (
     <div className="space-y-6">
-      {/* Enhanced Progress Summary */}
-      <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-blue-900">
-            <TrendingUp className="h-5 w-5" />
-            Progress Summary
+      {/* Combined Progress Summary & Test Categories */}
+      <Card className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border-blue-200 shadow-lg">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-3 text-blue-900">
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <TrendingUp className="h-5 w-5 text-blue-600" />
+            </div>
+            <div>
+              <div className="text-lg font-bold">
+                {activeTab === "All" && "Progress Summary"}
+                {activeTab === "Summary" && "Progress by Category"}
+                {activeTab !== "All" &&
+                  activeTab !== "Summary" &&
+                  `${activeTab} Test Categories`}
+              </div>
+              <div className="text-xs text-blue-600 font-medium">
+                {activeTab === "All" && "Overall completion overview"}
+                {activeTab === "Summary" && "Detailed category breakdown"}
+                {activeTab !== "All" &&
+                  activeTab !== "Summary" &&
+                  "Category-specific progress"}
+              </div>
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600">
-                {currentUserStats.percentage.toFixed(1)}%
-              </div>
-              <div className="text-sm text-blue-700 font-medium">
-                Completion Rate
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4 text-center">
-              <div className="bg-white rounded-lg p-3 border border-blue-200">
-                <div className="text-lg font-semibold text-green-600">
-                  {currentUserStats.completed}
+          <div className="space-y-6">
+            {activeTab === "All" && (
+              <>
+                <div className="text-center">
+                  <div className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                    {currentUserStats.percentage.toFixed(1)}%
+                  </div>
+                  <div className="text-sm text-blue-700 font-medium mt-1">
+                    Completion Rate
+                  </div>
                 </div>
-                <div className="text-xs text-gray-600">Completed</div>
-              </div>
-              <div className="bg-white rounded-lg p-3 border border-blue-200">
-                <div className="text-lg font-semibold text-red-600">
-                  {currentUserStats.highPriorityRemaining}
+                <div className="bg-white rounded-xl p-4 border border-blue-200 shadow-sm">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-sm font-semibold text-gray-800">
+                      Overall Progress
+                    </span>
+                    <span className="text-sm font-medium text-blue-600">
+                      {currentUserStats.percentage.toFixed(0)}%
+                    </span>
+                  </div>
+                  <Progress value={currentUserStats.percentage} className="h-3 bg-blue-100" />
                 </div>
-                <div className="text-xs text-gray-600">High Priority</div>
+              </>
+            )}
+
+            {activeTab === "Summary" && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-white rounded-xl p-4 border border-green-200 shadow-sm">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-green-600">
+                        {filteredTests.filter((t) => t.completed).length}
+                      </div>
+                      <div className="text-sm text-gray-700 font-medium">Completed Tests</div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        of {filteredTests.length} total
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-white rounded-xl p-4 border border-red-200 shadow-sm">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold text-red-600">
+                        {filteredTests.filter((t) => !t.completed && t.priority === "High").length}
+                      </div>
+                      <div className="text-sm text-gray-700 font-medium">High Priority</div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        remaining
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+                  <div className="text-sm font-semibold text-gray-800 mb-3">Progress by Category:</div>
+                  <div className="space-y-2">
+                    {Array.from(new Set(filteredTests.map((t) => t.category))).map(
+                      (category) => {
+                        const categoryTests = filteredTests.filter(
+                          (t) => t.category === category
+                        );
+                        const completed = categoryTests.filter(
+                          (t) => t.completed
+                        ).length;
+                        const percentage = categoryTests.length > 0 ? Math.round((completed / categoryTests.length) * 100) : 0;
+                        return (
+                          <div key={category} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                            <span className="text-sm font-medium text-gray-700">{category}</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-gray-600">
+                                {completed}/{categoryTests.length}
+                              </span>
+                              <span className="text-xs font-medium text-blue-600">
+                                {percentage}%
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      }
+                    )}
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="bg-white rounded-lg p-3 border border-blue-200">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-gray-700">
-                  Overall Progress
-                </span>
-                <span className="text-sm text-gray-600">
-                  {currentUserStats.percentage.toFixed(0)}%
-                </span>
+            )}
+
+            {activeTab !== "All" && activeTab !== "Summary" && (
+              <div className="space-y-4">
+                <div className="bg-white rounded-xl p-6 border border-blue-200 shadow-sm">
+                  <div className="text-center">
+                    <div className="text-4xl font-bold text-blue-600">
+                      {filteredTests.filter((t) => t.completed).length}
+                    </div>
+                    <div className="text-sm text-gray-700 font-medium">Completed</div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-white rounded-lg p-3 border border-orange-200 shadow-sm">
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-orange-500">
+                        {filteredTests.filter((t) => !t.completed).length}
+                      </div>
+                      <div className="text-xs text-gray-600 font-medium">Remaining</div>
+                    </div>
+                  </div>
+                  <div className="bg-white rounded-lg p-3 border border-green-200 shadow-sm">
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-green-500">
+                        {filteredTests.length > 0
+                          ? Math.round(
+                              (filteredTests.filter((t) => t.completed).length /
+                                filteredTests.length) *
+                                100
+                            )
+                          : 0}
+                        %
+                      </div>
+                      <div className="text-xs text-gray-600 font-medium">Progress</div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <Progress value={currentUserStats.percentage} className="h-2" />
-            </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -143,30 +236,17 @@ export function SidebarSection({
                         {userStats.user.name}
                       </div>
                       <div className="text-xs text-gray-500">
-                        {userStats.completed}/{userStats.total} tests
+                        {userStats.completed} Completed / {userStats.total} Assigned
                       </div>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-sm font-semibold text-green-600">
-                      {userStats.percentage.toFixed(1)}%
+                    <div className="text-2xl font-bold text-green-600">
+                      {userStats.completed}
                     </div>
-                    <Badge
-                      variant={
-                        userStats.percentage >= 80
-                          ? "default"
-                          : userStats.percentage >= 50
-                          ? "secondary"
-                          : "destructive"
-                      }
-                      className="text-xs"
-                    >
-                      {userStats.percentage >= 80
-                        ? "Excellent"
-                        : userStats.percentage >= 50
-                        ? "Good"
-                        : "Needs Work"}
-                    </Badge>
+                    <div className="text-xs text-gray-500">
+                      Completed
+                    </div>
                   </div>
                 </div>
                 <Progress value={userStats.percentage} className="h-1.5" />
@@ -176,51 +256,7 @@ export function SidebarSection({
         </CardContent>
       </Card>
 
-      {/* Quick Stats */}
-      <Card className="bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-purple-900">
-            <CheckCircle className="h-5 w-5" />
-            Quick Stats
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between bg-white rounded-lg p-3 border border-purple-200">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-green-600" />
-                <span className="text-sm font-medium">Total Completed</span>
-              </div>
-              <Badge variant="default" className="bg-green-100 text-green-800">
-                {totalCompleted}
-              </Badge>
-            </div>
-            <div className="flex items-center justify-between bg-white rounded-lg p-3 border border-purple-200">
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4 text-orange-600" />
-                <span className="text-sm font-medium">
-                  High Priority Remaining
-                </span>
-              </div>
-              <Badge variant="destructive">{totalHighPriorityRemaining}</Badge>
-            </div>
-            <div className="flex items-center justify-between bg-white rounded-lg p-3 border border-purple-200">
-              <div className="flex items-center gap-2">
-                <Users className="h-4 w-4 text-blue-600" />
-                <span className="text-sm font-medium">Active Users</span>
-              </div>
-              <Badge variant="secondary">{activeUsers}</Badge>
-            </div>
-            <div className="flex items-center justify-between bg-white rounded-lg p-3 border border-purple-200">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-blue-600" />
-                <span className="text-sm font-medium">Total Tests</span>
-              </div>
-              <Badge variant="outline">{allTests.length}</Badge>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+
     </div>
   );
 }
