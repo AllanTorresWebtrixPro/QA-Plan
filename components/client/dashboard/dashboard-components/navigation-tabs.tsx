@@ -65,6 +65,10 @@ export function NavigationTabs({
       icon: Building2,
     },
     {
+      name: "Companies",
+      icon: Building2,
+    },
+    {
       name: "Agents",
       icon: Users2,
     },
@@ -110,9 +114,7 @@ export function NavigationTabs({
                     activeTab === name ? "text-blue-600" : "text-gray-500"
                   )}
                 />
-                <span className="font-medium">
-                  {name}
-                </span>
+                <span className="font-medium">{name}</span>
               </Button>
               {activeTab === name && (
                 <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-8 h-0.5 bg-blue-600 rounded-full" />

@@ -104,13 +104,20 @@ export function QADashboardClient() {
   const [selectedPriority, setSelectedPriority] = useState("All");
   const [noteInputs, setNoteInputs] = useState<Record<string, string>>({});
   const [activeTab, setActiveTab] = useState("All");
-  const [activeSettingsSubsection, setActiveSettingsSubsection] = useState("Access Control");
-  const [pendingNoteTestId, setPendingNoteTestId] = useState<string | null>(null);
+  const [activeSettingsSubsection, setActiveSettingsSubsection] =
+    useState("Access Control");
+  const [pendingNoteTestId, setPendingNoteTestId] = useState<string | null>(
+    null
+  );
   const [selectedUserFilter, setSelectedUserFilter] = useState<string>("all");
-  const [confirmingNoteTestId, setConfirmingNoteTestId] = useState<string | null>(null);
+  const [confirmingNoteTestId, setConfirmingNoteTestId] = useState<
+    string | null
+  >(null);
 
   // Ref for BasecampCardsDisplay to refresh cards after adding notes
-  const basecampCardsRefs = useRef<Record<string, { refreshCards: () => void }>>({});
+  const basecampCardsRefs = useRef<
+    Record<string, { refreshCards: () => void }>
+  >({});
 
   // Get authenticated user
   const { user: authUser, profile: authProfile } = useAuth();
@@ -124,21 +131,31 @@ export function QADashboardClient() {
   const currentUser = authUser?.id || "";
 
   // Get current user object for components
-  const currentUserObject = authProfile || users.find((user) => user.id === currentUser) || users[0];
+  const currentUserObject =
+    authProfile || users.find((user) => user.id === currentUser) || users[0];
 
   // Create a proper user object for components that expect the User interface
-  const displayUser = currentUserObject ? {
-    id: currentUserObject.id,
-    name: currentUserObject.name,
-    avatar: currentUserObject.avatar || currentUserObject.name?.charAt(0)?.toUpperCase() || "U",
-    email: authUser?.email || ""
-  } : undefined;
+  const displayUser = currentUserObject
+    ? {
+        id: currentUserObject.id,
+        name: currentUserObject.name,
+        avatar:
+          currentUserObject.avatar ||
+          currentUserObject.name?.charAt(0)?.toUpperCase() ||
+          "U",
+        email: authUser?.email || "",
+      }
+    : undefined;
 
   // Get current user's test progress for main display
-  const { data: testsWithProgress = [], isLoading: testsLoading, refetch } = useTestsWithProgress(currentUser);
+  const {
+    data: testsWithProgress = [],
+    isLoading: testsLoading,
+    refetch,
+  } = useTestsWithProgress(currentUser);
   // Get all users' test progress for filtering (without current user's progress)
-  const { data: allTestsWithProgress = [], isLoading: allTestsLoading } = useTestsWithProgress("all");
-  
+  const { data: allTestsWithProgress = [], isLoading: allTestsLoading } =
+    useTestsWithProgress("all");
 
   const currentUserStats = useCurrentUserStats(currentUser);
   const allUsersStats = useAllUsersStats();
@@ -161,52 +178,57 @@ export function QADashboardClient() {
       return testsWithProgress; // Use current user's tests for main display
     }
     // Filter tests assigned to the selected user
-    return allTestsWithProgress.filter((test) => test.assignedTo === selectedUserFilter);
+    return allTestsWithProgress.filter(
+      (test) => test.assignedTo === selectedUserFilter
+    );
   };
 
   const filteredTests = getFilteredTests();
 
   // Calculate stats from filtered tests
   const getFilteredStats = () => {
-    const completed = finalFilteredTests.filter(test => test.completed).length;
-    const total = finalFilteredTests.length;
-    const highPriorityRemaining = finalFilteredTests.filter(test => 
-      !test.completed && test.priority === "High"
+    const completed = finalFilteredTests.filter(
+      (test) => test.completed
     ).length;
-    
+    const total = finalFilteredTests.length;
+    const highPriorityRemaining = finalFilteredTests.filter(
+      (test) => !test.completed && test.priority === "High"
+    ).length;
+
     return {
       completed,
       total,
       percentage: total > 0 ? (completed / total) * 100 : 0,
-      highPriorityRemaining
+      highPriorityRemaining,
     };
   };
 
   // Define disabled Settings subsections
   const disabledSettingsSubsections = [
     "Accessibility Testing",
-    "Browser Compatibility", 
+    "Browser Compatibility",
     "Performance Testing",
     "Security Testing",
-    "Cross-Section Testing"
+    "Cross-Section Testing",
   ];
 
   // Map tab names to category names
   const getCategoryFromTab = (tab: string) => {
     const tabToCategoryMap: Record<string, string> = {
-      "All": "All",
-      "Auth": "Authentication",
-      "Invoices": "Invoices",
-      "Surveys": "Surveys",
+      All: "All",
+      Auth: "Authentication",
+      Invoices: "Invoices",
+      Surveys: "Surveys",
       "On-Site": "On-Site Invoices",
-      "Trips": "Current Trips",
-      "Prospects": "Prospects",
-      "Clients": "Clients",
-      "Agents": "Agents",
-      "Payments": "Payments",
-      "Team": "All", // Team shows all tests
-      "Summary": "All", // Summary shows all tests
-      "Settings": "Settings" // Settings category
+      Trips: "Current Trips",
+      Prospects: "Prospects",
+      Clients: "Clients",
+      Companies: "Company",
+      Agents: "Agents",
+      Payments: "Payments",
+      Team: "All", // Team shows all tests
+      Summary: "All", // Summary shows all tests
+      Settings: "Settings", // Settings category
     };
     return tabToCategoryMap[tab] || "All";
   };
@@ -214,7 +236,11 @@ export function QADashboardClient() {
   // Apply search and category filters
   const finalFilteredTests = filteredTests.filter((test) => {
     // Exclude tests from disabled Settings subsections
-    if (test.category === "Settings" && test.subcategory && disabledSettingsSubsections.includes(test.subcategory)) {
+    if (
+      test.category === "Settings" &&
+      test.subcategory &&
+      disabledSettingsSubsections.includes(test.subcategory)
+    ) {
       return false;
     }
 
@@ -226,33 +252,33 @@ export function QADashboardClient() {
     const matchesSearch =
       test.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       test.category.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     let matchesCategory = true;
     if (activeTab === "Settings") {
       // For Settings, filter by category and subsection
-      matchesCategory = test.category === "Settings" && 
+      matchesCategory =
+        test.category === "Settings" &&
         test.subcategory === activeSettingsSubsection;
     } else {
       // For other tabs, use regular category filtering
       const category = getCategoryFromTab(activeTab);
       matchesCategory = category === "All" || test.category === category;
     }
-    
-    const matchesPriority = selectedPriority === "All" || test.priority === selectedPriority;
-    
 
+    const matchesPriority =
+      selectedPriority === "All" || test.priority === selectedPriority;
 
     return matchesSearch && matchesCategory && matchesPriority;
   });
-  
-
-
-
 
   // Handle test completion toggle
   const handleToggleTest = async (testId: string, completed: boolean) => {
-    console.log("handleToggleTest called with:", { testId, completed, currentUser });
-    
+    console.log("handleToggleTest called with:", {
+      testId,
+      completed,
+      currentUser,
+    });
+
     if (!currentUser) {
       console.error("No currentUser found");
       return;
@@ -264,13 +290,13 @@ export function QADashboardClient() {
         testId,
         completed,
       });
-      
+
       await toggleTestMutation.mutateAsync({
         userId: currentUser,
         testId,
         completed,
       });
-      
+
       console.log("toggleTestMutation completed successfully");
     } catch (error) {
       console.error("Error toggling test:", error);
@@ -286,7 +312,7 @@ export function QADashboardClient() {
     console.log(`Note content: ${noteInputs[testId].trim()}`);
 
     setPendingNoteTestId(testId);
-    
+
     try {
       await addNoteMutation.mutateAsync({
         userId: currentUser,
@@ -294,7 +320,7 @@ export function QADashboardClient() {
         notes: noteInputs[testId].trim(),
       });
       setNoteInputs((prev) => ({ ...prev, [testId]: "" }));
-      
+
       // Refresh the Basecamp cards for this test to show the newly created card
       const cardsRef = basecampCardsRefs.current[testId];
       if (cardsRef) {
@@ -307,7 +333,10 @@ export function QADashboardClient() {
     }
   };
 
-  const handleCardAction = async (cardId: string, action: 'accept' | 'reject' | 'delete') => {
+  const handleCardAction = async (
+    cardId: string,
+    action: "accept" | "reject" | "delete"
+  ) => {
     console.log(`Handling ${action} for card ${cardId}`);
     // TODO: Implement Basecamp card action logic
     // This could involve:
@@ -396,14 +425,19 @@ export function QADashboardClient() {
       `}</style>
       <div className="space-y-4">
         {/* Consolidated Header Section */}
-        <HeaderSection
-          dbStatus={dbStatus}
-        />
+        <HeaderSection dbStatus={dbStatus} />
 
         {/* KPI Cards */}
         <KPICards
-          totalCompleted={allAuthUsersStats.reduce((sum, user) => sum + user.completed, 0)}
-          totalHighPriorityRemaining={testsWithProgress.filter(test => test.priority === "High" && !test.completed).length}
+          totalCompleted={allAuthUsersStats.reduce(
+            (sum, user) => sum + user.completed,
+            0
+          )}
+          totalHighPriorityRemaining={
+            testsWithProgress.filter(
+              (test) => test.priority === "High" && !test.completed
+            ).length
+          }
           activeUsers={allAuthUsersStats.length}
           totalTests={testsWithProgress.length}
         />
@@ -420,11 +454,17 @@ export function QADashboardClient() {
                 >
                   <Avatar className="h-5 w-5">
                     <AvatarFallback className="text-xs">
-                      {selectedUserFilter === "all" ? "All" : authUsers.find(u => u.id === selectedUserFilter)?.avatar || "U"}
+                      {selectedUserFilter === "all"
+                        ? "All"
+                        : authUsers.find((u) => u.id === selectedUserFilter)
+                            ?.avatar || "U"}
                     </AvatarFallback>
                   </Avatar>
                   <span className="font-medium truncate text-sm">
-                    {selectedUserFilter === "all" ? "All Users" : authUsers.find(u => u.id === selectedUserFilter)?.name || "Unknown User"}
+                    {selectedUserFilter === "all"
+                      ? "All Users"
+                      : authUsers.find((u) => u.id === selectedUserFilter)
+                          ?.name || "Unknown User"}
                   </span>
                   <ChevronDown className="h-3 w-3 ml-auto" />
                 </Button>
@@ -440,9 +480,7 @@ export function QADashboardClient() {
                   }`}
                 >
                   <Avatar className="h-8 w-8">
-                    <AvatarFallback className="text-sm">
-                      All
-                    </AvatarFallback>
+                    <AvatarFallback className="text-sm">All</AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
                     <div className="font-medium truncate">All Users</div>
@@ -509,6 +547,7 @@ export function QADashboardClient() {
               {activeTab === "Trips" && "Current Trips Testing"}
               {activeTab === "Prospects" && "Prospects Testing"}
               {activeTab === "Clients" && "Client Management Testing"}
+              {activeTab === "Companies" && "Company Management Testing"}
               {activeTab === "Agents" && "Agent Management Testing"}
               {activeTab === "Payments" && "Payment Processing Testing"}
               {activeTab === "Team" && "Team Progress Overview"}
@@ -530,6 +569,8 @@ export function QADashboardClient() {
                 "Test prospect management functionality including creation, status updates, and conversion tracking."}
               {activeTab === "Clients" &&
                 "Test client management functionality including profile management, communication history, and relationship tracking."}
+              {activeTab === "Companies" &&
+                "Test company management functionality including CRUD operations, logo uploads, form validation, and responsive design."}
               {activeTab === "Agents" &&
                 "Test agent management functionality including profile management, commission tracking, and performance monitoring."}
               {activeTab === "Payments" &&
@@ -590,9 +631,7 @@ export function QADashboardClient() {
                     <div className="text-2xl font-bold text-green-600">
                       {getFilteredStats().completed}
                     </div>
-                    <div className="text-sm text-gray-600">
-                      Completed Tests
-                    </div>
+                    <div className="text-sm text-gray-600">Completed Tests</div>
                     <div className="text-xs text-gray-500">
                       out of {getFilteredStats().total} total tests
                     </div>
@@ -687,14 +726,19 @@ export function QADashboardClient() {
                             <div className="flex items-center gap-2 mb-1">
                               {test.completed ? (
                                 <div className="flex items-center gap-1">
-                                  <Badge variant="default" className="bg-green-100 text-green-800 border-green-200">
+                                  <Badge
+                                    variant="default"
+                                    className="bg-green-100 text-green-800 border-green-200"
+                                  >
                                     <CheckCircle className="h-3 w-3 mr-1" />
                                     Completed
                                   </Badge>
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    onClick={() => handleToggleTest(test.id, false)}
+                                    onClick={() =>
+                                      handleToggleTest(test.id, false)
+                                    }
                                     disabled={toggleTestMutation.isPending}
                                     className="h-6 px-2 text-xs text-gray-500 hover:text-gray-700"
                                   >
@@ -705,7 +749,9 @@ export function QADashboardClient() {
                                 <Button
                                   variant="default"
                                   size="sm"
-                                  onClick={() => handleToggleTest(test.id, true)}
+                                  onClick={() =>
+                                    handleToggleTest(test.id, true)
+                                  }
                                   disabled={toggleTestMutation.isPending}
                                   className="h-7 px-3 text-xs bg-red-500 hover:bg-red-600 text-white"
                                 >
@@ -796,9 +842,13 @@ export function QADashboardClient() {
                               </AlertDialogTrigger>
                               <AlertDialogContent>
                                 <AlertDialogHeader>
-                                  <AlertDialogTitle>Confirm Issue Report</AlertDialogTitle>
+                                  <AlertDialogTitle>
+                                    Confirm Issue Report
+                                  </AlertDialogTitle>
                                   <AlertDialogDescription>
-                                    Are you sure you want to report this issue? This will create a Basecamp card with the following description:
+                                    Are you sure you want to report this issue?
+                                    This will create a Basecamp card with the
+                                    following description:
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <div className="mt-4 p-3 bg-gray-50 rounded-md">
@@ -821,7 +871,7 @@ export function QADashboardClient() {
                         </div>
 
                         {/* Basecamp Cards - Lazy Loaded */}
-                        <BasecampCardsDisplay 
+                        <BasecampCardsDisplay
                           ref={(ref) => {
                             if (ref) {
                               basecampCardsRefs.current[test.id] = ref;
@@ -833,8 +883,6 @@ export function QADashboardClient() {
                           showOnlyIfCards={false}
                           lazyLoad={false}
                         />
-
-
                       </div>
                     ))}
                   </div>
@@ -846,8 +894,13 @@ export function QADashboardClient() {
             <SidebarSection
               currentUserStats={currentUserStats}
               allUsersStats={allAuthUsersStats}
-              allTests={testsWithProgress.filter(test => 
-                !(test.category === "Settings" && test.subcategory && disabledSettingsSubsections.includes(test.subcategory))
+              allTests={testsWithProgress.filter(
+                (test) =>
+                  !(
+                    test.category === "Settings" &&
+                    test.subcategory &&
+                    disabledSettingsSubsections.includes(test.subcategory)
+                  )
               )}
               activeTab={activeTab}
               filteredTests={finalFilteredTests}
