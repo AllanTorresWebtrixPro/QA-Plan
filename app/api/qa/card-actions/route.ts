@@ -18,6 +18,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check if this is a misc issue (testId starts with 'misc-')
+    const isMiscIssue = testId.startsWith('misc-');
+
     const basecampService = createBasecampService("default_user");
 
     if (action === "accept") {
@@ -40,6 +43,23 @@ export async function POST(request: NextRequest) {
           { success: false, error: `Failed to move card: ${moveResponse.error}` },
           { status: 500 }
         );
+      }
+
+      // If this is a misc issue, update the issue status to "Resolved"
+      if (isMiscIssue) {
+        try {
+          const { error: updateError } = await supabase
+            .from("qa_misc_issues")
+            .update({ status: "Resolved" })
+            .eq("id", testId);
+
+          if (updateError) {
+            console.error("Error updating misc issue status:", updateError);
+            // Don't fail the whole operation, just log the error
+          }
+        } catch (error) {
+          console.error("Error updating misc issue status:", error);
+        }
       }
 
       return NextResponse.json({ success: true, message: "Card accepted and moved to Done" });
@@ -65,11 +85,69 @@ export async function POST(request: NextRequest) {
         );
       }
 
+      // If this is a misc issue, update the issue status to "In Progress"
+      if (isMiscIssue) {
+        try {
+          const { error: updateError } = await supabase
+            .from("qa_misc_issues")
+            .update({ status: "In Progress" })
+            .eq("id", testId);
+
+          if (updateError) {
+            console.error("Error updating misc issue status:", updateError);
+            // Don't fail the whole operation, just log the error
+          }
+        } catch (error) {
+          console.error("Error updating misc issue status:", error);
+        }
+      }
+
       return NextResponse.json({ success: true, message: "Card rejected and moved to In Progress" });
 
+    } else if (action === "delete") {
+      // Delete the card from Basecamp
+      console.log(`Deleting card ${cardId}`);
+      
+      const deleteResponse = await basecampService.deleteCard(cardId);
+
+      if (!deleteResponse.success) {
+        return NextResponse.json(
+          { success: false, error: `Failed to delete card: ${deleteResponse.error}` },
+          { status: 500 }
+        );
+      }
+
+      // If this is a misc issue, remove the card ID from the issue
+      if (isMiscIssue) {
+        try {
+          // First get the current card IDs
+          const { data: issue, error: fetchError } = await supabase
+            .from("qa_misc_issues")
+            .select("basecamp_card_ids")
+            .eq("id", testId)
+            .single();
+
+          if (!fetchError && issue?.basecamp_card_ids) {
+            const updatedCardIds = issue.basecamp_card_ids.filter((id: string) => id !== cardId);
+            
+            const { error: updateError } = await supabase
+              .from("qa_misc_issues")
+              .update({ basecamp_card_ids: updatedCardIds })
+              .eq("id", testId);
+
+            if (updateError) {
+              console.error("Error updating misc issue card IDs:", updateError);
+            }
+          }
+        } catch (error) {
+          console.error("Error updating misc issue card IDs:", error);
+        }
+      }
+
+      return NextResponse.json({ success: true, message: "Card deleted successfully" });
     } else {
       return NextResponse.json(
-        { success: false, error: "Invalid action. Must be 'accept' or 'reject'" },
+        { success: false, error: "Invalid action. Must be 'accept', 'reject', or 'delete'" },
         { status: 400 }
       );
     }

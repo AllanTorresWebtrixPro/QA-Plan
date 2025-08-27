@@ -38,6 +38,7 @@ import {
   Search,
   ExternalLink,
   Loader2,
+  AlertTriangle,
 } from "lucide-react";
 
 interface MainNavigationProps {
