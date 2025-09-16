@@ -67,12 +67,41 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
+    // Check authentication
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
+    const token = authHeader.split(' ')[1];
+    
+    // Verify the token with Supabase
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: "Invalid authentication token" },
+        { status: 401 }
+      );
+    }
+
     const { title, description, category, priority, reportedBy } = await request.json();
 
     if (!title || !description || !reportedBy) {
       return NextResponse.json(
         { error: "Missing required fields: title, description, reportedBy" },
         { status: 400 }
+      );
+    }
+
+    // Verify that the reportedBy matches the authenticated user
+    if (reportedBy !== user.id) {
+      return NextResponse.json(
+        { error: "User ID mismatch - you can only create issues for yourself" },
+        { status: 403 }
       );
     }
 
@@ -96,6 +125,23 @@ export async function POST(request: NextRequest) {
 
     if (createError) {
       console.error("Error creating misc issue:", createError);
+      
+      // Check if it's a foreign key constraint error
+      if (createError.code === '23503') {
+        return NextResponse.json(
+          { error: "Invalid user ID. Please ensure you are properly authenticated and try logging out and back in." },
+          { status: 400 }
+        );
+      }
+      
+      // Check if it's a unique constraint error
+      if (createError.code === '23505') {
+        return NextResponse.json(
+          { error: "An issue with this ID already exists. Please try again." },
+          { status: 400 }
+        );
+      }
+      
       return NextResponse.json({ error: createError.message }, { status: 500 });
     }
 

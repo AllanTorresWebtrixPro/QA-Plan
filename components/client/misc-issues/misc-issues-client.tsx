@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/providers/auth-provider";
+import { createClient } from "@supabase/supabase-js";
 import { Plus, Edit, Trash2, Filter, X, ExternalLink } from "lucide-react";
 import { MiscIssuesKPICards } from "./misc-issues-kpi-cards";
 import { MiscIssuesBasecampCards } from "./misc-issues-basecamp-cards";
@@ -59,6 +60,11 @@ interface MiscIssue {
   assignee_email?: string;
   assignee_avatar?: string;
 }
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export function MiscIssuesClient() {
   const { user, profile } = useAuth();
@@ -182,9 +188,24 @@ export function MiscIssuesClient() {
       
       console.log("Sending request:", requestBody);
 
+      // Get the session token for authentication
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast({
+          title: "Authentication Error",
+          description: "Please log in to create issues",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const response = await fetch("/api/qa/misc-issues", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session.access_token}`
+        },
         body: JSON.stringify(requestBody),
       });
 
@@ -201,9 +222,21 @@ export function MiscIssuesClient() {
         resetForm();
         fetchIssues();
       } else {
+        // Handle specific error cases
+        let errorMessage = result.error || "Failed to create issue";
+        let errorTitle = "Error";
+        
+        if (result.error?.includes("Invalid user ID")) {
+          errorTitle = "Authentication Error";
+          errorMessage = "Please log out and log back in to refresh your session.";
+        } else if (result.error?.includes("already exists")) {
+          errorTitle = "Duplicate Issue";
+          errorMessage = "An issue with this ID already exists. Please try again.";
+        }
+        
         toast({
-          title: "Error",
-          description: result.error || "Failed to create issue",
+          title: errorTitle,
+          description: errorMessage,
           variant: "destructive",
         });
       }
