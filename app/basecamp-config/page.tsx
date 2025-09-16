@@ -445,9 +445,9 @@ BASECAMP_REDIRECT_URI=${window.location.origin}/api/auth/basecamp/callback
                 3. Find Project and Card Table IDs
               </h3>
               <p className="text-sm text-muted-foreground">
-                Use the "Test Connection" button above to discover your available
-                projects, card tables, and columns. Copy the IDs to the
-                configuration form.
+                Use the "Test Connection" button above to discover your
+                available projects, card tables, and columns. Copy the IDs to
+                the configuration form.
               </p>
             </div>
 
@@ -455,8 +455,8 @@ BASECAMP_REDIRECT_URI=${window.location.origin}/api/auth/basecamp/callback
               <h3 className="font-semibold">4. Environment Variables</h3>
               <p className="text-sm text-muted-foreground">
                 Use the "Generate .env.local File" button to create a template,
-                then add your actual access token. Place the file in your project
-                root.
+                then add your actual access token. Place the file in your
+                project root.
               </p>
             </div>
 

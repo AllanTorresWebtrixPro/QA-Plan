@@ -49,7 +49,7 @@ export function MainNavigation({}: MainNavigationProps) {
   const { user, profile, signOut } = useAuth();
   const router = useRouter();
   const [isSigningOut, setIsSigningOut] = useState(false);
-  
+
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -95,7 +95,10 @@ export function MainNavigation({}: MainNavigationProps) {
   ];
 
   // Filter navigation items based on user role
-  const filteredNavigationItems = filterNavigationByRole(navigationItems, profile);
+  const filteredNavigationItems = filterNavigationByRole(
+    navigationItems,
+    profile
+  );
 
   const isActive = (href: string) => {
     if (href === "/") {
@@ -151,7 +154,8 @@ export function MainNavigation({}: MainNavigationProps) {
                 <Button variant="ghost" className="flex items-center gap-2">
                   <Avatar className="h-8 w-8">
                     <AvatarFallback>
-                      {user.user_metadata?.avatar || user.email?.charAt(0).toUpperCase()}
+                      {user.user_metadata?.avatar ||
+                        user.email?.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="hidden md:block text-left">
@@ -171,7 +175,7 @@ export function MainNavigation({}: MainNavigationProps) {
                 <div className="relative flex cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent focus:bg-accent focus:text-accent-foreground">
                   <button
                     className="flex items-center gap-2 w-full text-left"
-                    onClick={() => router.push('/profile')}
+                    onClick={() => router.push("/profile")}
                   >
                     <User className="h-4 w-4" />
                     Profile
@@ -183,16 +187,18 @@ export function MainNavigation({}: MainNavigationProps) {
                     disabled={isSigningOut}
                     onClick={async () => {
                       if (isSigningOut) return;
-                      
+
                       try {
                         setIsSigningOut(true);
-                        console.log('Sign out button clicked');
-                        await signOut()
+                        console.log("Sign out button clicked");
+                        await signOut();
                         // The signOut function now handles the redirect
                       } catch (error) {
-                        console.error('Sign out failed:', error)
+                        console.error("Sign out failed:", error);
                         // Show user-friendly error message
-                        alert('Sign out failed. Please try refreshing the page and signing out again.');
+                        alert(
+                          "Sign out failed. Please try refreshing the page and signing out again."
+                        );
                       } finally {
                         setIsSigningOut(false);
                       }
@@ -203,7 +209,7 @@ export function MainNavigation({}: MainNavigationProps) {
                     ) : (
                       <LogOut className="h-4 w-4" />
                     )}
-                    {isSigningOut ? 'Signing Out...' : 'Sign Out'}
+                    {isSigningOut ? "Signing Out..." : "Sign Out"}
                   </button>
                 </div>
               </DropdownMenuContent>
