@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { cn, filterNavigationByRole, isAdmin } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -108,15 +109,22 @@ export function MainNavigation({}: MainNavigationProps) {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="dark sticky top-0 z-50 w-full border-b border-border bg-background text-foreground">
       <div className="container flex h-16 items-center justify-between">
         {/* Logo and Brand */}
-        <div className="flex items-center gap-4 ml-6">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-              <BarChart3 className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <span className="font-bold text-lg">MTP QA Plan</span>
+        <div className="ml-6 flex items-center gap-4">
+          <Link href="/" className="flex items-center gap-3">
+            <Image
+              src="/webtrixpro-logo-dark.webp"
+              alt="WebtrixPro — Smart Software. AI-Powered"
+              width={1568}
+              height={456}
+              priority
+              className="h-9 w-auto"
+            />
+            <span className="hidden border-l border-border pl-3 font-heading text-sm font-semibold uppercase tracking-wider text-muted-foreground lg:inline">
+              QA Plan
+            </span>
           </Link>
         </div>
 

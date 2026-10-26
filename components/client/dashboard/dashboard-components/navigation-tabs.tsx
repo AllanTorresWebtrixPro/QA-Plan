@@ -100,24 +100,24 @@ export function NavigationTabs({
                 className={cn(
                   "relative px-4 py-2.5 text-sm font-medium transition-all duration-200 ease-in-out",
                   "hover:bg-gray-50 rounded-lg",
-                  "focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:ring-offset-1",
+                  "focus:outline-none focus:ring-2 focus:ring-ring/20 focus:ring-offset-1",
                   "flex items-center gap-2 min-w-fit",
                   "whitespace-nowrap",
                   activeTab === name
-                    ? "text-blue-700 bg-blue-50 border border-blue-200 shadow-sm"
+                    ? "text-brand-ink bg-accent border border-primary/30 shadow-sm"
                     : "text-gray-600 hover:text-gray-900"
                 )}
               >
                 <Icon
                   className={cn(
                     "h-4 w-4 transition-colors duration-200",
-                    activeTab === name ? "text-blue-600" : "text-gray-500"
+                    activeTab === name ? "text-brand-ink" : "text-gray-500"
                   )}
                 />
                 <span className="font-medium">{name}</span>
               </Button>
               {activeTab === name && (
-                <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-8 h-0.5 bg-blue-600 rounded-full" />
+                <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-8 h-0.5 bg-primary rounded-full" />
               )}
             </div>
           ))}

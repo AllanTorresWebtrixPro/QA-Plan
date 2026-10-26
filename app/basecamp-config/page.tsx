@@ -422,7 +422,7 @@ BASECAMP_REDIRECT_URI=${window.location.origin}/api/auth/basecamp/callback
                   href="https://github.com/basecamp/api/blob/master/sections/authentication.md"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-500 hover:underline"
+                  className="text-brand-ink hover:underline"
                 >
                   Basecamp Authentication Guide{" "}
                   <ExternalLink className="inline h-3 w-3" />

@@ -422,7 +422,7 @@ export function MiscIssuesClient() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Open":
-        return "bg-blue-100 text-blue-800 border-blue-200";
+        return "bg-accent text-brand-ink border-primary/30";
       case "In Progress":
         return "bg-orange-100 text-orange-800 border-orange-200";
       case "Resolved":

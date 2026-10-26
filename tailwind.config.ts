@@ -12,7 +12,17 @@ const config: Config = {
   ],
   theme: {
   	extend: {
+  		fontFamily: {
+  			sans: ['var(--font-inter)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+  			heading: ['var(--font-montserrat)', 'var(--font-inter)', 'ui-sans-serif', 'sans-serif']
+  		},
   		colors: {
+  			brand: {
+  				DEFAULT: 'hsl(var(--brand-green))',
+  				ink: 'hsl(var(--brand-ink))',
+  				black: 'hsl(var(--brand-black))',
+  				white: 'hsl(var(--brand-white))'
+  			},
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {

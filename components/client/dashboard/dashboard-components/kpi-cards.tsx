@@ -54,16 +54,16 @@ export function KPICards({
       </Card>
 
       {/* Active Users */}
-      <Card className="border-blue-200 hover:shadow-md transition-shadow">
+      <Card className="border-primary/30 hover:shadow-md transition-shadow">
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Users className="h-5 w-5 text-blue-600" />
+              <div className="p-2 bg-accent rounded-lg">
+                <Users className="h-5 w-5 text-brand-ink" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-600">Active Users</p>
-                <p className="text-2xl font-bold text-blue-700">{activeUsers}</p>
+                <p className="text-2xl font-bold text-brand-ink">{activeUsers}</p>
               </div>
             </div>
           </div>

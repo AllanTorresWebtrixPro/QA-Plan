@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
 import { useAuth } from "@/components/providers/auth-provider"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -81,10 +82,18 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">
+    <div className="flex min-h-[calc(100vh-10rem)] items-center justify-center bg-background p-4">
+      <Card className="w-full max-w-md border-t-4 border-t-primary shadow-sm">
+        <CardHeader className="flex flex-col items-center gap-4">
+          <Image
+            src="/webtrixpro-logo.jpg"
+            alt="WebtrixPro — Smart Software. AI-Powered"
+            width={500}
+            height={133}
+            priority
+            className="h-14 w-auto"
+          />
+          <CardTitle className="font-heading text-xl font-bold uppercase tracking-wide text-center">
             QA Plan
           </CardTitle>
           <CardDescription className="text-center">

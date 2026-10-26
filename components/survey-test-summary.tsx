@@ -127,7 +127,7 @@ export function SurveyTestSummary({
         <CardContent>
           <div className="grid md:grid-cols-3 gap-4 mb-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">
+              <div className="text-2xl font-bold text-brand-ink">
                 {completedSurveyTests.length}
               </div>
               <div className="text-sm text-gray-600">Completed</div>

@@ -870,7 +870,7 @@ export function QADashboardClient() {
                                   <AlertDialogCancel>Cancel</AlertDialogCancel>
                                   <AlertDialogAction
                                     onClick={() => handleAddNote(test.id)}
-                                    className="bg-blue-600 hover:bg-blue-700"
+                                    className="bg-primary hover:bg-primary"
                                   >
                                     Report Issue
                                   </AlertDialogAction>
