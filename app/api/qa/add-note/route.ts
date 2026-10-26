@@ -1,19 +1,13 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { dbClient } from "@/lib/db/query";
 import { createBasecampService } from "@/services/basecamp-service";
-import { getTestById, getUserById } from "@/services/qa-service";
+import { getTestById, getUserById } from "@/services/qa-server";
 
 // Use anon key for general operations
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+const supabase = dbClient;
 
 // Use service role key for database operations that need to bypass RLS
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+const supabaseAdmin = dbClient;
 
 /**
  * POST /api/qa/add-note

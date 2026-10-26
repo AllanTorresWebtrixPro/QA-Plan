@@ -1,11 +1,8 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { dbClient } from "@/lib/db/query";
 import { cookies } from "next/headers";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+const supabase = dbClient;
 
 /**
  * GET /api/qa/users
@@ -14,10 +11,7 @@ const supabase = createClient(
 export async function GET() {
   try {
     // For now, let's use the service role key to bypass RLS for testing
-    const adminSupabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    const adminSupabase = dbClient;
 
     const { data: usersData, error: usersError } = await adminSupabase
       .from("user_profiles")

@@ -1,17 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { dbClient } from "@/lib/db/query";
 import { createBasecampService } from "@/services/basecamp-service";
-import { getUserById } from "@/services/qa-service";
+import { getUserById } from "@/services/qa-server";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+const supabase = dbClient;
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+const supabaseAdmin = dbClient;
 
 /**
  * GET /api/qa/misc-issues

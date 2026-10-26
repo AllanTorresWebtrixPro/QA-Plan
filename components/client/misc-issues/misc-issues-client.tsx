@@ -36,7 +36,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/providers/auth-provider";
-import { createClient } from "@supabase/supabase-js";
 import { Plus, Edit, Trash2, Filter, X, ExternalLink } from "lucide-react";
 import { MiscIssuesKPICards } from "./misc-issues-kpi-cards";
 import { MiscIssuesBasecampCards } from "./misc-issues-basecamp-cards";
@@ -60,11 +59,6 @@ interface MiscIssue {
   assignee_email?: string;
   assignee_avatar?: string;
 }
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 export function MiscIssuesClient() {
   const { user, profile } = useAuth();
