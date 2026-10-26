@@ -60,11 +60,11 @@ export function SidebarSection({
   return (
     <div className="space-y-6">
       {/* Combined Progress Summary & Test Categories */}
-      <Card className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border-blue-200 shadow-lg">
+      <Card className="border-t-4 border-t-primary bg-card shadow-sm">
         <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-3 text-blue-900">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <TrendingUp className="h-5 w-5 text-blue-600" />
+          <CardTitle className="flex items-center gap-3 text-brand-ink">
+            <div className="p-2 bg-accent rounded-lg">
+              <TrendingUp className="h-5 w-5 text-brand-ink" />
             </div>
             <div>
               <div className="text-lg font-bold">
@@ -74,7 +74,7 @@ export function SidebarSection({
                   activeTab !== "Summary" &&
                   `${activeTab} Test Categories`}
               </div>
-              <div className="text-xs text-blue-600 font-medium">
+              <div className="text-xs text-brand-ink font-medium">
                 {activeTab === "All" && "Overall completion overview"}
                 {activeTab === "Summary" && "Detailed category breakdown"}
                 {activeTab !== "All" &&
@@ -89,23 +89,23 @@ export function SidebarSection({
             {activeTab === "All" && (
               <>
                 <div className="text-center">
-                  <div className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                  <div className="text-4xl font-bold text-brand-ink">
                     {currentUserStats.percentage.toFixed(1)}%
                   </div>
-                  <div className="text-sm text-blue-700 font-medium mt-1">
+                  <div className="text-sm text-brand-ink font-medium mt-1">
                     Completion Rate
                   </div>
                 </div>
-                <div className="bg-white rounded-xl p-4 border border-blue-200 shadow-sm">
+                <div className="bg-white rounded-xl p-4 border border-primary/30 shadow-sm">
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-sm font-semibold text-gray-800">
                       Overall Progress
                     </span>
-                    <span className="text-sm font-medium text-blue-600">
+                    <span className="text-sm font-medium text-brand-ink">
                       {currentUserStats.percentage.toFixed(0)}%
                     </span>
                   </div>
-                  <Progress value={currentUserStats.percentage} className="h-3 bg-blue-100" />
+                  <Progress value={currentUserStats.percentage} className="h-3 bg-accent" />
                 </div>
               </>
             )}
@@ -155,7 +155,7 @@ export function SidebarSection({
                               <span className="text-sm text-gray-600">
                                 {completed}/{categoryTests.length}
                               </span>
-                              <span className="text-xs font-medium text-blue-600">
+                              <span className="text-xs font-medium text-brand-ink">
                                 {percentage}%
                               </span>
                             </div>
@@ -170,9 +170,9 @@ export function SidebarSection({
 
             {activeTab !== "All" && activeTab !== "Summary" && (
               <div className="space-y-4">
-                <div className="bg-white rounded-xl p-6 border border-blue-200 shadow-sm">
+                <div className="bg-white rounded-xl p-6 border border-primary/30 shadow-sm">
                   <div className="text-center">
-                    <div className="text-4xl font-bold text-blue-600">
+                    <div className="text-4xl font-bold text-brand-ink">
                       {filteredTests.filter((t) => t.completed).length}
                     </div>
                     <div className="text-sm text-gray-700 font-medium">Completed</div>

@@ -170,7 +170,7 @@ export function TestCasesClient() {
           <p className="text-muted-foreground">
             {filteredTests.length} of {tests.length} tests
             {hasActiveFilters && (
-              <span className="ml-2 text-sm text-blue-600">
+              <span className="ml-2 text-sm text-brand-ink">
                 (filtered)
               </span>
             )}
@@ -347,7 +347,7 @@ export function TestCasesClient() {
                       </Badge>
                     )}
                     {test.assignedTo ? (
-                      <Badge variant="default" className="bg-blue-100 text-blue-800">
+                      <Badge variant="default" className="bg-accent text-brand-ink">
                         <User className="h-3 w-3 mr-1" />
                         Assigned
                       </Badge>

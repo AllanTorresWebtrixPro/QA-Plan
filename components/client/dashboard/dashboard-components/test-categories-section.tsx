@@ -51,7 +51,7 @@ export function TestCategoriesSection({
       <CardContent>
         {activeTab === "All" && (
           <div className="text-center py-8">
-            <div className="text-2xl font-bold text-blue-600">
+            <div className="text-2xl font-bold text-brand-ink">
               {filteredTests.filter((t) => t.completed).length}
             </div>
             <div className="text-sm text-gray-600">Completed</div>
@@ -127,7 +127,7 @@ export function TestCategoriesSection({
 
         {activeTab !== "All" && activeTab !== "Summary" && (
           <div className="text-center py-8">
-            <div className="text-2xl font-bold text-blue-600">
+            <div className="text-2xl font-bold text-brand-ink">
               {filteredTests.filter((t) => t.completed).length}
             </div>
             <div className="text-sm text-gray-600">Completed</div>

@@ -291,10 +291,10 @@ export function ReportsClient() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Team Average</CardTitle>
-            <Users className="h-4 w-4 text-blue-600" />
+            <Users className="h-4 w-4 text-brand-ink" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">
+            <div className="text-2xl font-bold text-brand-ink">
               {Math.round(averageProgress)}%
             </div>
             <div className="flex items-center text-xs text-muted-foreground">

@@ -130,18 +130,18 @@ export function SettingsSecondaryTabs({
                 className={cn(
                   "relative px-3 py-2 text-sm font-medium transition-all duration-200 ease-in-out",
                   "hover:bg-white rounded-md",
-                  "focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:ring-offset-1",
+                  "focus:outline-none focus:ring-2 focus:ring-ring/20 focus:ring-offset-1",
                   "flex items-center gap-2 min-w-fit",
                   "whitespace-nowrap",
                   activeSubsection === name
-                    ? "text-blue-700 bg-white border border-blue-200 shadow-sm"
+                    ? "text-brand-ink bg-white border border-primary/30 shadow-sm"
                     : "text-gray-600 hover:text-gray-900"
                 )}
               >
                 <Icon
                   className={cn(
                     "h-4 w-4 transition-colors duration-200",
-                    activeSubsection === name ? "text-blue-600" : "text-gray-500"
+                    activeSubsection === name ? "text-brand-ink" : "text-gray-500"
                   )}
                 />
                 <span className="font-medium">
@@ -149,7 +149,7 @@ export function SettingsSecondaryTabs({
                 </span>
               </Button>
               {activeSubsection === name && (
-                <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-6 h-0.5 bg-blue-600 rounded-full" />
+                <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-6 h-0.5 bg-primary rounded-full" />
               )}
             </div>
           ))}

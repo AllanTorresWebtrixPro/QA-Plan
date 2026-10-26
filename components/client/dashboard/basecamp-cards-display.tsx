@@ -125,13 +125,13 @@ export const BasecampCardsDisplay = React.forwardRef<
     const statusLower = status.toLowerCase();
     
     if (statusLower.includes('to do') || statusLower.includes('todo')) {
-      return 'bg-purple-100 text-purple-800 border-purple-200';
+      return 'bg-secondary text-foreground border-foreground/20';
     } else if (statusLower.includes('in progress') || statusLower.includes('progress')) {
       return 'bg-orange-100 text-orange-800 border-orange-200';
     } else if (statusLower.includes('qa dev') || statusLower.includes('qadev')) {
       return 'bg-yellow-100 text-yellow-800 border-yellow-200';
     } else if (statusLower.includes('ut') || statusLower.includes('user testing')) {
-      return 'bg-blue-100 text-blue-800 border-blue-200';
+      return 'bg-accent text-brand-ink border-primary/30';
     } else if (statusLower.includes('done') || statusLower.includes('complete')) {
       return 'bg-green-100 text-green-800 border-green-200';
     }
@@ -358,7 +358,7 @@ export const BasecampCardsDisplay = React.forwardRef<
       <h4 className="text-sm font-medium mb-2">Basecamp Cards:</h4>
       <div className="space-y-2">
         {cards.map((card) => (
-          <Card key={card.id} className="border-l-4 border-l-blue-500">
+          <Card key={card.id} className="border-l-4 border-l-primary">
             <CardContent className="p-3">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
@@ -392,7 +392,7 @@ export const BasecampCardsDisplay = React.forwardRef<
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-6 w-6 p-0 text-gray-600 hover:text-blue-600 hover:bg-blue-50"
+                        className="h-6 w-6 p-0 text-gray-600 hover:text-brand-ink hover:bg-accent"
                         title="View Details"
                       >
                         <Eye className="h-3 w-3" />
@@ -526,7 +526,7 @@ export const BasecampCardsDisplay = React.forwardRef<
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-6 w-6 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                        className="h-6 w-6 p-0 text-brand-ink hover:text-brand-ink hover:bg-accent"
                         title="View in Basecamp"
                       >
                         <ExternalLink className="h-3 w-3" />
@@ -543,7 +543,7 @@ export const BasecampCardsDisplay = React.forwardRef<
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
                         <AlertDialogAction
                           onClick={() => window.open(card.url, '_blank')}
-                          className="bg-blue-600 hover:bg-blue-700"
+                          className="bg-primary hover:bg-primary"
                         >
                           Open in Basecamp
                         </AlertDialogAction>

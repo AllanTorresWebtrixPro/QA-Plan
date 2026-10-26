@@ -143,7 +143,7 @@ export function BasecampCards({ testId }: BasecampCardsProps) {
       </div>
       <div className="space-y-2">
         {cards.map((card) => (
-          <Card key={card.id} className="border-l-4 border-l-blue-500">
+          <Card key={card.id} className="border-l-4 border-l-primary">
             <CardHeader className="pb-2">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
@@ -154,10 +154,10 @@ export function BasecampCards({ testId }: BasecampCardsProps) {
                     <Badge 
                       variant="secondary" 
                       className={`text-xs ${
-                        card.column_name === "To Do" ? "bg-purple-100 text-purple-800 border-purple-200" :
+                        card.column_name === "To Do" ? "bg-secondary text-foreground border-foreground/20" :
                         card.column_name === "In Progress" ? "bg-yellow-100 text-yellow-800 border-yellow-200" :
                         card.column_name === "QA Dev" ? "bg-red-100 text-red-800 border-red-200" :
-                        card.column_name === "UT - User Testing" ? "bg-blue-100 text-blue-800 border-blue-200" :
+                        card.column_name === "UT - User Testing" ? "bg-accent text-brand-ink border-primary/30" :
                         "bg-gray-100 text-gray-800 border-gray-200"
                       }`}
                     >
