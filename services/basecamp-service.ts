@@ -6,7 +6,7 @@
  */
 
 import { getValidBasecampToken } from "./basecamp-token-service";
-import { getUserById } from "./qa-service";
+import { getUserById } from "./qa-server";
 
 interface BasecampConfig {
   accountId: string;

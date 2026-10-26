@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { createClient } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -41,101 +40,23 @@ export function DatabaseConnectionTest() {
   const [loading, setLoading] = useState(false);
   const [lastTested, setLastTested] = useState<Date | null>(null);
 
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-
   const testDatabaseConnection = async () => {
     setLoading(true);
-    const errors: string[] = [];
-    const status: DatabaseStatus = {
-      connection: false,
-      tables: {
-        user_profiles: { exists: false, count: 0 },
-        qa_tests: { exists: false, count: 0 },
-        qa_user_test_progress: { exists: false, count: 0 },
-      },
-      environment: {
-        supabaseUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
-        supabaseKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-      },
-      errors: [],
-    };
-
     try {
-      // Test 1: Check environment variables
-      if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
-        errors.push("NEXT_PUBLIC_SUPABASE_URL is not configured");
-      }
-      if (!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-        errors.push("NEXT_PUBLIC_SUPABASE_ANON_KEY is not configured");
-      }
-
-      // Test 2: Test basic connection
-      const { data: connectionTest, error: connectionError } = await supabase
-        .from("user_profiles")
-        .select("count", { count: "exact", head: true });
-
-      if (connectionError) {
-        errors.push(`Connection failed: ${connectionError.message}`);
-      } else {
-        status.connection = true;
-      }
-
-      // Test 3: Check each table
-      const tables = ["user_profiles", "qa_tests", "qa_user_test_progress"] as const;
-
-      for (const table of tables) {
-        try {
-          const { data, error } = await supabase
-            .from(table)
-            .select("count", { count: "exact", head: true });
-
-          if (error) {
-            errors.push(`Table ${table} error: ${error.message}`);
-            status.tables[table] = { exists: false, count: 0 };
-          } else {
-            status.tables[table] = {
-              exists: true,
-              count: data?.[0]?.count || 0,
-            };
-          }
-        } catch (err) {
-          errors.push(
-            `Table ${table} failed: ${
-              err instanceof Error ? err.message : "Unknown error"
-            }`
-          );
-          status.tables[table] = { exists: false, count: 0 };
-        }
-      }
-
-      // Test 4: Try to fetch some sample data
-      try {
-        const { data: users, error: usersError } = await supabase
-          .from("user_profiles")
-          .select("*")
-          .limit(5);
-
-        if (usersError) {
-          errors.push(`Sample data fetch failed: ${usersError.message}`);
-        }
-      } catch (err) {
-        errors.push(
-          `Sample data fetch error: ${
-            err instanceof Error ? err.message : "Unknown error"
-          }`
-        );
-      }
+      const res = await fetch("/api/database-test", { cache: "no-store" });
+      setStatus((await res.json()) as DatabaseStatus);
     } catch (err) {
-      errors.push(
-        `General error: ${err instanceof Error ? err.message : "Unknown error"}`
-      );
+      setStatus({
+        connection: false,
+        tables: {
+          user_profiles: { exists: false, count: 0 },
+          qa_tests: { exists: false, count: 0 },
+          qa_user_test_progress: { exists: false, count: 0 },
+        },
+        environment: { supabaseUrl: false, supabaseKey: false },
+        errors: [err instanceof Error ? err.message : "Request failed"],
+      });
     }
-
-    status.errors = errors;
-    setStatus(status);
     setLastTested(new Date());
     setLoading(false);
   };

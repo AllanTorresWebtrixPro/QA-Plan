@@ -1,9 +1,6 @@
-import { createClient } from "@supabase/supabase-js";
+import { dbClient } from "@/lib/db/query";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+const supabase = dbClient;
 
 export interface BasecampToken {
   id: number;

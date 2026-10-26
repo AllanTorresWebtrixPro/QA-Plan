@@ -1,18 +1,15 @@
-import { createClient } from "@supabase/supabase-js";
+import { dbClient } from "@/lib/db/query";
 import { NextResponse } from "next/server";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+const supabase = dbClient;
 
 export async function GET() {
   const startTime = Date.now();
   const results = {
     timestamp: new Date().toISOString(),
     environment: {
-      supabaseUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
-      supabaseKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      supabaseUrl: !!(process.env.NEON_DATABASE_URL ?? process.env.DATABASE_URL),
+      supabaseKey: !!process.env.BETTER_AUTH_SECRET,
     },
     connection: false,
     tables: {

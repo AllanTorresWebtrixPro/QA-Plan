@@ -12,15 +12,10 @@ import { Separator } from "@/components/ui/separator"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Loader2, Eye, EyeOff, User, Mail, Lock, Save, CheckCircle } from "lucide-react"
-import { createClient } from "@supabase/supabase-js"
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+import { authClient } from "@/lib/auth-client"
 
 export default function ProfilePage() {
-  const { user, profile, signOut } = useAuth()
+  const { user, profile, signOut, refreshProfile } = useAuth()
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState("")
@@ -66,39 +61,23 @@ export default function ProfilePage() {
     setSuccess("")
 
     try {
-      // Update user metadata
-      const { error: updateError } = await supabase.auth.updateUser({
-        data: {
-          name,
-          avatar: avatar || name.split(' ').map(n => n[0]).join('').toUpperCase()
-        }
-      })
-
-      if (updateError) {
-        setError(updateError.message)
-        return
-      }
-
-      // Update user profile in database
-      const { error: profileError } = await supabase
-        .from('user_profiles')
-        .update({
+      const res = await fetch("/api/me", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           name,
           avatar: avatar || name.split(' ').map(n => n[0]).join('').toUpperCase(),
-        })
-        .eq('id', user.id)
+        }),
+      })
 
-      if (profileError) {
-        setError(profileError.message)
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        setError(body.error || "Failed to update profile")
         return
       }
 
+      await refreshProfile()
       setSuccess("Profile updated successfully!")
-      
-      // Refresh the page to update the auth context
-      setTimeout(() => {
-        window.location.reload()
-      }, 1500)
     } catch (err) {
       setError("An unexpected error occurred")
     } finally {
@@ -125,8 +104,10 @@ export default function ProfilePage() {
     }
 
     try {
-      const { error: passwordError } = await supabase.auth.updateUser({
-        password: newPassword
+      const { error: passwordError } = await authClient.changePassword({
+        currentPassword,
+        newPassword,
+        revokeOtherSessions: true,
       })
 
       if (passwordError) {
